@@ -190,4 +190,47 @@
   .blend-multiply {
     mix-blend-mode: multiply;
   }
+
+  /* Founders orbit illustration */
+  @keyframes spin-cw {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spin-ccw {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+
+  .orbit-ring {
+    position: absolute;
+    inset: 0;
+  }
+
+  .orbit-ring-cw {
+    animation: spin-cw linear infinite;
+  }
+
+  .orbit-ring-ccw {
+    animation: spin-ccw linear infinite;
+  }
+
+  .orbit-avatar-cw {
+    animation: spin-cw linear infinite;
+  }
+
+  .orbit-avatar-ccw {
+    animation: spin-ccw linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit-ring-cw,
+    .orbit-ring-ccw,
+    .orbit-avatar-cw,
+    .orbit-avatar-ccw {
+      animation: none;
+    }
+  }
 }
