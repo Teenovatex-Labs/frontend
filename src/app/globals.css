@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #fff9eb;
+  --ink: #262822;
+  --yellow: #f5e89e;
+  --pink: #f3aac7;
+  --line: #d9d6c9;
+  --muted: #5c6055;
+  --rose: #8d355b;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+
+  body {
+    background-color: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-poppins), sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 3px solid var(--rose);
+    outline-offset: 6px;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@layer utilities {
+  .wrap {
+    width: min(1280px, calc(100% - 112px));
+    margin-inline: auto;
+  }
+
+  .highlight {
+    background: linear-gradient(
+      transparent 58%,
+      var(--yellow) 58%,
+      var(--yellow) 92%,
+      transparent 92%
+    );
+    padding-right: 4px;
+  }
+
+  .pink-underline {
+    background: linear-gradient(
+      transparent 78%,
+      var(--pink) 78%,
+      var(--pink) 94%,
+      transparent 94%
+    );
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+}
