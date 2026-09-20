@@ -56,6 +56,7 @@ export default function FounderModal({
               width={160}
               height={160}
               className="h-full w-full object-cover"
+              style={{ objectPosition: "50% 18%" }}
             />
           ) : (
             <span className="text-2xl font-medium">{founder.initials}</span>

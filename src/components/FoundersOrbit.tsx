@@ -1,3 +1,6 @@
+import Image from "next/image";
+import type { Founder } from "./People";
+
 function PersonGlyph({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
@@ -13,42 +16,58 @@ function PersonGlyph({ className }: { className?: string }) {
   );
 }
 
-type Avatar = {
+type FillerNode = {
+  kind: "filler";
   angle: number;
   bg: string;
   fg: string;
   border?: boolean;
 };
 
-const RING_A: Avatar[] = [
-  { angle: 15, bg: "bg-yellow", fg: "text-ink" },
-  { angle: 105, bg: "bg-pink", fg: "text-ink" },
-  { angle: 195, bg: "bg-ink", fg: "text-cream" },
-  { angle: 285, bg: "bg-rose", fg: "text-cream" },
+type FounderNode = {
+  kind: "founder";
+  angle: number;
+  founder: Founder;
+};
+
+type OrbitNode = FillerNode | FounderNode;
+
+type FounderSlot = { kind: "founder"; angle: number };
+
+const RING_A_SLOTS: (FounderSlot | FillerNode)[] = [
+  { kind: "founder", angle: 15 },
+  { kind: "founder", angle: 135 },
+  { kind: "founder", angle: 255 },
+  { kind: "filler", angle: 195, bg: "bg-ink", fg: "text-cream" },
 ];
 
-const RING_B: Avatar[] = [
-  { angle: 55, bg: "bg-cream", fg: "text-ink", border: true },
-  { angle: 175, bg: "bg-muted", fg: "text-cream" },
-  { angle: 295, bg: "bg-line", fg: "text-ink" },
+const RING_B: FillerNode[] = [
+  { kind: "filler", angle: 55, bg: "bg-cream", fg: "text-ink", border: true },
+  { kind: "filler", angle: 175, bg: "bg-muted", fg: "text-cream" },
+  { kind: "filler", angle: 295, bg: "bg-line", fg: "text-ink" },
 ];
 
-function OrbitAvatar({
-  avatar,
+function OrbitNodeView({
+  node,
   radius,
   size,
   counterClass,
   duration,
+  onSelect,
 }: {
-  avatar: Avatar;
+  node: OrbitNode;
   radius: number;
   size: number;
   counterClass: string;
   duration: string;
+  onSelect?: (founder: Founder) => void;
 }) {
-  const rad = (avatar.angle * Math.PI) / 180;
+  const rad = (node.angle * Math.PI) / 180;
   const top = 50 + radius * Math.sin(rad);
   const left = 50 + radius * Math.cos(rad);
+
+  const isFounder = node.kind === "founder";
+  const founder = isFounder ? node.founder : null;
 
   return (
     <div
@@ -56,18 +75,64 @@ function OrbitAvatar({
       style={{ top: `${top}%`, left: `${left}%`, transform: "translate(-50%, -50%)" }}
     >
       <div
-        className={`${counterClass} flex items-center justify-center rounded-full ${avatar.bg} ${avatar.fg} ${
-          avatar.border ? "border border-ink" : ""
-        }`}
+        className={`${counterClass} flex items-center justify-center rounded-full`}
         style={{ width: size, height: size, animationDuration: duration }}
       >
-        <PersonGlyph className="h-1/2 w-1/2" />
+        {isFounder && founder ? (
+          <button
+            type="button"
+            onClick={() => onSelect?.(founder)}
+            aria-label={`View ${founder.name}'s bio`}
+            className={`flex h-full w-full items-center justify-center overflow-hidden rounded-full border border-ink transition-transform hover:scale-105 ${
+              founder.photo ? "" : founder.bg
+            }`}
+          >
+            {founder.photo ? (
+              <Image
+                src={founder.photo}
+                alt={founder.name}
+                width={size * 2}
+                height={size * 2}
+                className="h-full w-full object-cover"
+                style={{ objectPosition: "50% 18%" }}
+              />
+            ) : (
+              <span className="text-sm font-medium">{founder.initials}</span>
+            )}
+          </button>
+        ) : (
+          <div
+            className={`flex h-full w-full items-center justify-center rounded-full ${
+              (node as FillerNode).bg
+            } ${(node as FillerNode).fg} ${(node as FillerNode).border ? "border border-ink" : ""}`}
+          >
+            <PersonGlyph className="h-1/2 w-1/2" />
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-export default function FoundersOrbit() {
+export default function FoundersOrbit({
+  founders,
+  onSelect,
+}: {
+  founders: Founder[];
+  onSelect: (founder: Founder) => void;
+}) {
+  let founderIndex = 0;
+  const ringA: OrbitNode[] = [];
+  for (const slot of RING_A_SLOTS) {
+    if (slot.kind === "filler") {
+      ringA.push(slot);
+      continue;
+    }
+    const founder = founders[founderIndex];
+    founderIndex += 1;
+    if (founder) ringA.push({ kind: "founder", angle: slot.angle, founder });
+  }
+
   return (
     <div className="relative mx-auto aspect-square w-full max-w-[420px]">
       <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full" aria-hidden="true">
@@ -97,23 +162,24 @@ export default function FoundersOrbit() {
       </svg>
 
       <div className="orbit-ring orbit-ring-cw" style={{ animationDuration: "42s" }}>
-        {RING_A.map((avatar) => (
-          <OrbitAvatar
-            key={avatar.angle}
-            avatar={avatar}
+        {ringA.map((node) => (
+          <OrbitNodeView
+            key={node.angle}
+            node={node}
             radius={31}
-            size={52}
+            size={node.kind === "founder" ? 68 : 48}
             counterClass="orbit-avatar-ccw"
             duration="42s"
+            onSelect={onSelect}
           />
         ))}
       </div>
 
       <div className="orbit-ring orbit-ring-ccw" style={{ animationDuration: "58s" }}>
-        {RING_B.map((avatar) => (
-          <OrbitAvatar
-            key={avatar.angle}
-            avatar={avatar}
+        {RING_B.map((node) => (
+          <OrbitNodeView
+            key={node.angle}
+            node={node}
             radius={42}
             size={44}
             counterClass="orbit-avatar-cw"

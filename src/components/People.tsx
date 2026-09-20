@@ -61,7 +61,7 @@ export default function People() {
             connected the way good ideas actually spread.
           </p>
         </div>
-        <FoundersOrbit />
+        <FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
       </div>
 
       <p className="mt-12 text-muted md:text-right">Tap a founder to read their story.</p>
@@ -86,6 +86,7 @@ export default function People() {
                   width={200}
                   height={200}
                   className="h-full w-full object-cover"
+                  style={{ objectPosition: "50% 18%" }}
                 />
               ) : (
                 <span className="text-3xl font-medium">{founder.initials}</span>
