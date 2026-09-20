@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   title: "TeenovateX Labs | What if you actually built it?",
   description:
     "A youth-led tech community for teenagers to connect, explore technology and build ideas together. Find your people at TeenovateX Labs.",
+};
+
+export const viewport: Viewport = {
   themeColor: "#fff9eb",
 };
 

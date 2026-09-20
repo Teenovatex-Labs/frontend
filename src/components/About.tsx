@@ -1,25 +1,28 @@
 export default function About() {
   return (
-    <section id="about" className="wrap grid gap-10 py-24 md:grid-cols-2 md:gap-16 md:py-32">
+    <section id="about" className="wrap grid gap-8 py-16 md:grid-cols-2 md:gap-[70px] md:py-24">
       <div>
         <p className="eyebrow text-rose">01 / Why we exist</p>
-        <h2 className="mt-4 text-4xl md:text-5xl">
-          Talent is{" "}
-          <span className="highlight">everywhere</span>. Access should be
-          too.
+        <h2 className="mt-6 text-[39px] leading-[1.12] tracking-[-0.03em] md:text-[54px]">
+          Talent is everywhere.
+          <br />
+          <span className="pink-underline">Access should be too.</span>
         </h2>
       </div>
 
-      <div className="flex flex-col gap-6 text-lg text-muted">
-        <p>
-          Most teenagers with the drive to build something never get the
-          room to try — no mentors, no peers who get it, no place to ship a
-          first project without judgment.
+      <div className="flex flex-col gap-[22px] pt-0 md:pt-[70px]">
+        <p className="text-[22px] leading-[1.5] tracking-[-0.01em] md:text-[23px]">
+          Age shouldn&rsquo;t decide who gets to work on meaningful technology.
         </p>
-        <p>
-          TeenovateX Labs is a free, youth-led community where teenagers
-          learn by building alongside each other — in software, AI, robotics,
-          and whatever they're curious about next.
+        <p className="text-muted">
+          TeenovateX Labs exists to make tech education and mentorship more
+          accessible to teenagers. We&rsquo;re building a space where young
+          people can develop their skills and take on projects with support.
+        </p>
+        <p className="text-muted">
+          Our focus spans software, creative technology and youth-led
+          research, with a community that reaches beyond any one classroom or
+          country.
         </p>
       </div>
     </section>

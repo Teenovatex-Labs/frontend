@@ -6,15 +6,17 @@ const INTERESTS = [
 ];
 
 export default function InterestStrip() {
-  const items = [...INTERESTS, ...INTERESTS];
-
   return (
-    <div className="overflow-hidden border-y border-line bg-yellow py-4">
-      <div className="flex w-max animate-[marquee_28s_linear_infinite] gap-8 whitespace-nowrap">
-        {[...items, ...items].map((item, i) => (
-          <span key={i} className="flex items-center gap-8 text-sm font-semibold">
-            {item}
-            <span aria-hidden="true">✳</span>
+    <div className="bg-ink py-4 text-cream" aria-label="Community interests">
+      <div className="wrap grid grid-cols-2 gap-3 text-center text-sm font-medium md:flex md:items-center md:justify-between md:text-left">
+        {INTERESTS.map((interest, i) => (
+          <span key={interest} className="flex items-center gap-5">
+            {interest}
+            {i < INTERESTS.length - 1 && (
+              <b aria-hidden="true" className="hidden font-normal text-pink md:inline text-2xl">
+                ✳
+              </b>
+            )}
           </span>
         ))}
       </div>

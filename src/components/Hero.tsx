@@ -1,45 +1,69 @@
 const STATS = [
-  { value: "1000+", label: "members" },
-  { value: "50+", label: "countries" },
-  { value: "100%", label: "free" },
+  { value: "1,000", suffix: "+", label: "Active members" },
+  { value: "50", suffix: "+", label: "Countries" },
+  { value: "100", suffix: "%", label: "Free for teens" },
 ];
 
 export default function Hero() {
   return (
-    <section
-      className="relative overflow-hidden bg-cover bg-center bg-no-repeat py-28 md:py-36"
-      style={{
-        backgroundImage:
-          "linear-gradient(180deg, rgba(255,249,235,0.4) 0%, rgba(255,249,235,0.9) 100%), radial-gradient(circle at 50% 0%, var(--yellow) 0%, var(--cream) 60%)",
-      }}
-    >
-      <div className="wrap flex flex-col items-center text-center">
-        <p className="eyebrow mb-6 text-rose">A youth-led tech community</p>
+    <section className="w-full">
+      <div className="hero-canvas">
+        <div className="mx-auto max-w-[820px] text-center">
+          <p className="eyebrow mx-auto mb-8 max-w-[440px] text-[11px] font-medium normal-case tracking-[0.11em]">
+            TeenovateX Labs · A community for young makers
+          </p>
 
-        <h1 className="max-w-4xl text-5xl tracking-tight md:text-7xl">
-          What if you actually{" "}
-          <span className="font-serif italic text-rose">built it?</span>
-        </h1>
+          <h1 className="text-[52px] leading-[1.13] tracking-[-0.05em] md:text-[91px]">
+            What if you
+            <br />
+            actually{" "}
+            <span className="whitespace-nowrap font-serif italic font-medium text-rose">
+              built it?
+            </span>
+          </h1>
 
-        <p className="mt-6 max-w-xl text-lg text-muted">
-          Teenagers building software, AI, and hardware together — with the
-          people, tools, and community to actually ship it.
-        </p>
+          <p className="mx-auto mt-7 max-w-[485px] text-[15px] leading-[1.85] text-muted md:text-[17px]">
+            A global, youth-led tech community for teenagers exploring
+            coding, robotics, AI and more.
+          </p>
 
-        <a
-          href="#join"
-          className="mt-10 rounded-full bg-rose px-8 py-4 text-sm font-semibold text-cream transition-transform hover:scale-105"
-        >
-          Join the community
-        </a>
+          <div className="mt-8 flex flex-col items-center justify-center gap-2.5 md:flex-row md:gap-7">
+            <a
+              href="https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn"
+            >
+              Join the community <span>↗︎</span>
+            </a>
+            <a
+              href="#explore"
+              className="inline-flex items-center gap-3 border-0 py-3 text-[13px] hover:underline hover:underline-offset-4"
+            >
+              Explore the features <span>↓</span>
+            </a>
+          </div>
 
-        <div className="mt-16 flex flex-wrap items-center justify-center gap-10 md:gap-16">
-          {STATS.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-3xl font-semibold tracking-tight md:text-4xl">
+          <p className="mx-auto mt-5 max-w-[270px] text-[10px] text-muted md:max-w-none">
+            Your questions. Your experiments. Your next step.
+          </p>
+        </div>
+      </div>
+
+      <div className="wrap">
+        <div className="grid grid-cols-3 gap-0 border-t border-line py-6 text-center md:py-9">
+          {STATS.map((stat, i) => (
+            <div
+              key={stat.label}
+              className={`px-2 ${i > 0 ? "border-l border-line" : ""}`}
+            >
+              <strong className="text-[27px] tracking-[-0.03em] md:text-[42px]">
                 {stat.value}
-              </div>
-              <div className="eyebrow mt-1 text-muted">{stat.label}</div>
+                <span className="text-rose">{stat.suffix}</span>
+              </strong>
+              <span className="mt-2 block text-[10px] text-muted md:text-xs">
+                {stat.label}
+              </span>
             </div>
           ))}
         </div>
