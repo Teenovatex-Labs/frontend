@@ -63,8 +63,8 @@ function OrbitNodeView({
   onSelect?: (founder: Founder) => void;
 }) {
   const rad = (node.angle * Math.PI) / 180;
-  const top = 50 + radius * Math.sin(rad);
-  const left = 50 + radius * Math.cos(rad);
+  const top = (50 + radius * Math.sin(rad)).toFixed(4);
+  const left = (50 + radius * Math.cos(rad)).toFixed(4);
 
   const isFounder = node.kind === "founder";
   const founder = isFounder ? node.founder : null;
