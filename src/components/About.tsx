@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import CrowdCanvas from "@/components/about/CrowdCanvas";
 
 const ACTION_WORDS = [
   { word: "Explore", rotate: "-rotate-3", bg: "bg-cream" },
@@ -26,6 +27,17 @@ export default function About() {
         alt=""
         aria-hidden="true"
         className="pointer-events-none absolute -right-[18%] top-0 w-[70%] max-w-none opacity-[0.06] md:-right-[8%] md:w-[46%]"
+      />
+
+      {/* A crowd of tiny figures walking behind the "Why" chapter, near the
+          section's bottom edge — a literal "community" texture under the
+          closing line about people, not just a decorative flourish. The
+          mask fades it to nothing by the time it reaches the paragraph
+          text above, so it reads as ambient motion in the margin rather
+          than something you have to read around. */}
+      <CrowdCanvas
+        src="/assets/crowd-sprite.png"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[300px] opacity-[0.16] [filter:invert(1)] [mask-image:linear-gradient(to_top,black_15%,transparent_88%)] md:h-[420px]"
       />
 
       {/* Intro — the three questions this whole section answers. */}
