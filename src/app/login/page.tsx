@@ -12,7 +12,9 @@ import { useAuth } from "@/context/AuthContext";
 import FormField from "@/components/FormField";
 import StepRail, { type Step } from "@/components/auth/StepRail";
 import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
+import AuthSplit from "@/components/auth/AuthSplit";
 import useIconHover from "@/lib/useIconHover";
+import useViewTransitionNav from "@/lib/useViewTransitionNav";
 import { loginFormSchema, fieldErrors } from "@/lib/validation";
 import { z } from "zod";
 
@@ -41,6 +43,7 @@ export default function LoginPage() {
   const backIcon = useIconHover();
   const nextIcon = useIconHover();
   const loginIcon = useIconHover();
+  const navigate = useViewTransitionNav();
 
   useEffect(() => {
     if (!loading && user) router.replace("/dashboard");
@@ -92,8 +95,7 @@ export default function LoginPage() {
   const panelClass = direction === "back" ? "step-panel-back" : "step-panel-forward";
 
   return (
-    <main className="flex h-screen items-center justify-center overflow-hidden px-5 py-6">
-      <div className="w-full max-w-[400px]">
+    <AuthSplit image={{ src: "/assets/logo2.svg" }} imageSide="left">
         <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
           <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
         </Link>
@@ -224,11 +226,17 @@ export default function LoginPage() {
 
         <p className="mt-5 text-center text-sm text-muted">
           New here?{" "}
-          <Link href="/signup" className="font-semibold text-ink underline underline-offset-4">
+          <Link
+            href="/signup"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/signup");
+            }}
+            className="font-semibold text-ink underline underline-offset-4"
+          >
             Create an account
           </Link>
         </p>
-      </div>
-    </main>
+    </AuthSplit>
   );
 }
