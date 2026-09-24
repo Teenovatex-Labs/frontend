@@ -5,8 +5,8 @@ import type { ComponentType, RefAttributes } from "react";
 import { InstagramIcon } from "@animateicons/react/lucide/instagram-icon";
 import { TwitterIcon } from "@animateicons/react/lucide/twitter-icon";
 import { LinkedinIcon } from "@animateicons/react/lucide/linkedin-icon";
+import { MessageCircleIcon } from "@animateicons/react/lucide/message-circle-icon";
 import type { IconHandle } from "@animateicons/react";
-import WhatsappIcon from "./icons/WhatsappIcon";
 import useIconHover from "@/lib/useIconHover";
 
 type AnimatedIconProps = { size?: number; className?: string };
@@ -18,6 +18,7 @@ const SOCIALS: {
 }[] = [
   { href: "https://www.instagram.com/teenovatexlabs/", label: "Instagram", Icon: InstagramIcon },
   { href: "https://x.com/teenovatex40605", label: "X", Icon: TwitterIcon },
+  { href: "https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW", label: "WhatsApp", Icon: MessageCircleIcon },
   { href: "https://www.linkedin.com/company/teenovatex-labs/", label: "LinkedIn", Icon: LinkedinIcon },
 ];
 
@@ -42,15 +43,6 @@ export default function Footer() {
           {SOCIALS.map(({ href, label, Icon }) => (
             <SocialLink key={label} href={href} label={label} icon={Icon} />
           ))}
-          <a
-            href="https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="WhatsApp"
-            className="text-ink transition-transform hover:scale-110 hover:text-rose"
-          >
-            <WhatsappIcon size={20} />
-          </a>
         </div>
       </div>
 
