@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 const NAV_LINKS = [
   { href: "#about", label: "The community" },
@@ -13,17 +14,9 @@ export default function Header() {
 
   return (
     <header className="wrap flex items-center justify-between border-b border-line py-7">
-      <a href="#" aria-label="TeenovateX home" className="flex items-center gap-2.5">
-        <span className="text-[42px] leading-none tracking-[-0.19em] pr-2">
-          t<span className="text-[38px] text-rose">×</span>
-        </span>
-        <span className="font-bold text-2xl tracking-tight">
-          teenovate<span className="text-rose">x</span>
-          <small className="mt-0.5 block text-[10px] font-semibold tracking-[0.3em]">
-            LABS
-          </small>
-        </span>
-      </a>
+      <Link href="/" aria-label="TeenovateX home" className="flex items-center">
+        <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-8 w-auto md:h-9" />
+      </Link>
 
       <button
         type="button"
@@ -52,9 +45,20 @@ export default function Header() {
             {link.label}
           </a>
         ))}
-        <a href="#join" onClick={() => setOpen(false)} className="btn mt-2 gap-5 !px-[18px] !py-3 text-sm md:mt-0">
-          Join us <span>↗︎</span>
-        </a>
+        <Link
+          href="/login"
+          onClick={() => setOpen(false)}
+          className="py-2 text-sm font-semibold hover:underline hover:underline-offset-8 md:py-0"
+        >
+          Log in
+        </Link>
+        <Link
+          href="/signup"
+          onClick={() => setOpen(false)}
+          className="btn mt-2 gap-5 !px-[18px] !py-3 text-sm md:mt-0"
+        >
+          Sign up <span>↗︎</span>
+        </Link>
       </nav>
     </header>
   );
