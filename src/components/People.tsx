@@ -163,9 +163,12 @@ export default function People() {
             A growing network of builders, mentors and collaborators &mdash;
             connected the way good ideas actually spread.
           </p>
-          <div className="mt-10 w-full max-w-[520px] overflow-hidden rounded-2xl border border-ink bg-pink shadow-[6px_6px_0_var(--ink)] md:mt-auto">
-            <img src="/assets/logo-long-1.svg" alt="" aria-hidden="true" className="block w-full" />
-          </div>
+          <img
+            src="/assets/logo-long-1.svg"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none mt-10 block w-full max-w-[560px] md:mt-auto"
+          />
         </div>
         <div className="md:self-center">
           <FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
