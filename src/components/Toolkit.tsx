@@ -184,11 +184,11 @@ export default function Toolkit() {
             />
             <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="eyebrow text-rose">02 / The toolkit for your next thing</p>
+                <p className="eyebrow text-rose">02 / From curious to creating</p>
                 <h2 className="mt-6 text-[38px] leading-[1.04] md:text-[54px]">
-                  Meet your
+                  Everything you need to
                   <br />
-                  next <span className="font-serif italic font-normal">toolkit.</span>
+                  <span className="font-serif italic font-normal">start your next thing.</span>
                 </h2>
               </div>
 
