@@ -20,9 +20,16 @@ const PEOPLE_MARKS: { bg: string; fg: string; photo?: string }[] = [
 
 export default function About() {
   return (
-    <section id="about" className="wrap py-16 md:py-24">
+    <section id="about" className="relative overflow-hidden py-16 md:py-24">
+      <img
+        src="/assets/illustration-nobg.svg"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-[18%] top-0 w-[70%] max-w-none opacity-[0.06] md:-right-[8%] md:w-[46%]"
+      />
+
       {/* Intro — the three questions this whole section answers. */}
-      <div className="mx-auto max-w-[680px] text-center">
+      <div className="wrap mx-auto max-w-[680px] text-center">
         <p className="eyebrow text-rose">01 / Who. What. Why.</p>
         <h2 className="mt-6 text-[35px] leading-[1.12] tracking-[-0.03em] md:text-[52px]">
           Three simple questions.
@@ -36,7 +43,7 @@ export default function About() {
       </div>
 
       {/* Who → What → Why: one connected story, not three identical cards. */}
-      <div className="mx-auto mt-16 max-w-[760px] md:mt-20">
+      <div className="wrap mx-auto mt-16 max-w-[760px] md:mt-20">
         {/* 01 — Who. Alive and communal: a handwritten-style mark on
             "Teenovators" plus a scatter of member initials. */}
         <Chapter number="01">
