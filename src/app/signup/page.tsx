@@ -61,13 +61,8 @@ export default function SignupPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-16">
       <div className="w-full max-w-[420px]">
-        <Link href="/" className="mb-10 flex items-center gap-2.5">
-          <span className="text-[32px] leading-none tracking-[-0.19em] pr-1">
-            t<span className="text-rose">×</span>
-          </span>
-          <span className="font-bold text-lg tracking-tight">
-            teenovate<span className="text-rose">x</span>
-          </span>
+        <Link href="/" aria-label="TeenovateX home" className="mb-10 flex items-center">
+          <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-8 w-auto" />
         </Link>
 
         <p className="eyebrow text-rose">Join the community</p>
