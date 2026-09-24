@@ -31,14 +31,15 @@ export default function About() {
 
       {/* A crowd of tiny figures walking behind the "Why" chapter, near the
           section's bottom edge — a literal "community" texture under the
-          closing line about people, not just a decorative flourish. The
-          mask fades it to nothing by the time it reaches the paragraph
-          text above, so it reads as ambient motion in the margin rather
-          than something you have to read around. */}
+          closing line about people, not just a decorative flourish. Kept
+          centered and narrower than the section rather than full-bleed,
+          so it reads as a little stage rather than a banner. The mask
+          fades it to nothing by the time it reaches the paragraph text
+          above, so it reads as ambient motion in the margin rather than
+          something you have to read around. */}
       <CrowdCanvas
         src="/assets/crowd-sprite.png"
-        tint="#8d355b"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[300px] w-full opacity-[0.22] [mask-image:linear-gradient(to_top,black_15%,transparent_88%)] md:h-[420px]"
+        className="pointer-events-none absolute bottom-0 left-1/2 h-[300px] w-full max-w-[820px] -translate-x-1/2 opacity-[0.16] [filter:invert(1)] [mask-image:linear-gradient(to_top,black_15%,transparent_88%)] md:h-[420px] md:max-w-[960px]"
       />
 
       {/* Intro — the three questions this whole section answers. */}
