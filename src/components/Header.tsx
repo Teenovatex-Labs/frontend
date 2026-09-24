@@ -46,14 +46,14 @@ export default function Header() {
           </a>
         ))}
         <Link
-          href="/login"
+          href="/auth?mode=login"
           onClick={() => setOpen(false)}
           className="py-2 text-sm font-semibold hover:underline hover:underline-offset-8 md:py-0"
         >
           Log in
         </Link>
         <Link
-          href="/signup"
+          href="/auth?mode=signup"
           onClick={() => setOpen(false)}
           className="btn mt-2 gap-5 !px-[18px] !py-3 text-sm md:mt-0"
         >

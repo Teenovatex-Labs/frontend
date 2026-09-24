@@ -10,7 +10,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) router.replace("/login");
+    if (!loading && !user) router.replace("/auth?mode=login");
   }, [loading, user, router]);
 
   if (loading || !user) {
