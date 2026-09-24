@@ -1,9 +1,15 @@
 export default function About() {
   return (
     <section id="about" className="wrap grid gap-8 py-16 md:grid-cols-2 md:gap-[70px] md:py-24">
-      <div>
-        <p className="eyebrow text-rose">01 / Why we exist</p>
-        <h2 className="mt-6 text-[39px] leading-[1.12] tracking-[-0.03em] md:text-[54px]">
+      <div className="relative">
+        <img
+          src="/assets/illustration2-nobg.svg"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-6 -top-14 -z-10 w-[260px] opacity-90 md:-top-20 md:w-[340px]"
+        />
+        <p className="eyebrow relative text-rose">01 / Why we exist</p>
+        <h2 className="relative mt-6 text-[39px] leading-[1.12] tracking-[-0.03em] md:text-[54px]">
           Talent is everywhere.
           <br />
           <span className="pink-underline">Access should be too.</span>
