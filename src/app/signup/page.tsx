@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
-import { GoogleLogin } from "@react-oauth/google";
 import { UserIcon } from "@animateicons/react/lucide/user-icon";
 import { LockIcon } from "@animateicons/react/lucide/lock-icon";
 import { RocketIcon } from "@animateicons/react/lucide/rocket-icon";
@@ -13,12 +12,14 @@ import { PencilIcon } from "@animateicons/react/lucide/pencil-icon";
 import { useAuth } from "@/context/AuthContext";
 import FormField from "@/components/FormField";
 import StepRail, { type Step } from "@/components/auth/StepRail";
+import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
+import useIconHover from "@/lib/useIconHover";
 import { registerBaseSchema, fieldErrors } from "@/lib/validation";
 
 const STEPS: Step[] = [
   { id: "you", label: "You", icon: UserIcon },
   { id: "secure", label: "Secure", icon: LockIcon },
-  { id: "launch", label: "Launch", icon: RocketIcon },
+  { id: "teenovate", label: "Teenovate!", icon: RocketIcon },
 ];
 
 export default function SignupPage() {
@@ -38,6 +39,10 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const backIcon = useIconHover();
+  const nextIcon = useIconHover();
+  const rocketIcon = useIconHover();
 
   useEffect(() => {
     if (!loading && user) router.replace("/dashboard");
@@ -119,18 +124,15 @@ export default function SignupPage() {
   const panelClass = direction === "back" ? "step-panel-back" : "step-panel-forward";
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-5 py-16">
-      <div className="w-full max-w-[460px]">
-        <Link href="/" aria-label="TeenovateX home" className="mb-10 flex items-center">
-          <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-8 w-auto" />
+    <main className="flex h-screen items-center justify-center overflow-hidden px-5 py-6">
+      <div className="w-full max-w-[440px]">
+        <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
+          <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
         </Link>
 
         <StepRail steps={STEPS} current={step} />
 
-        <p className="eyebrow text-rose">
-          Step {String(step + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}
-        </p>
-        <h1 className="mt-3 text-[32px] leading-[1.1] tracking-[-0.03em] md:text-[34px]">
+        <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">
           {step === 0 && (
             <>
               Tell us <span className="font-serif italic font-medium text-rose">who you are.</span>
@@ -143,13 +145,40 @@ export default function SignupPage() {
           )}
           {step === 2 && (
             <>
-              Ready to <span className="font-serif italic font-medium text-rose">launch?</span>
+              Time to <span className="font-serif italic font-medium text-rose">teenovate!</span>
             </>
           )}
         </h1>
 
-        <form onSubmit={handleSubmit} noValidate className="mt-8">
-          <div key={`panel-${step}`} className={`flex flex-col gap-5 ${panelClass}`}>
+        {step === 0 && (
+          <div className="mt-4">
+            <GoogleAuthCard
+              text="signup_with"
+              onSuccess={async (credentialResponse) => {
+                if (!credentialResponse.credential) return;
+                setFormError(null);
+                try {
+                  await loginWithGoogle(credentialResponse.credential);
+                  router.push("/dashboard");
+                } catch (err) {
+                  setFormError(err instanceof Error ? err.message : "Google sign-in failed");
+                }
+              }}
+              onError={() => setFormError("Google sign-in failed")}
+            />
+          </div>
+        )}
+
+        {step === 0 && (
+          <div className="my-4 flex items-center gap-4 text-xs text-muted">
+            <span className="h-px flex-1 bg-line" />
+            or fill it in yourself
+            <span className="h-px flex-1 bg-line" />
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} noValidate className={step === 0 ? "" : "mt-5"}>
+          <div key={`panel-${step}`} className={`flex flex-col gap-3.5 ${panelClass}`}>
             {step === 0 && (
               <>
                 <FormField
@@ -206,7 +235,7 @@ export default function SignupPage() {
             )}
 
             {step === 2 && (
-              <div className="flex flex-col gap-3 rounded-md border border-ink bg-pink/30 p-4">
+              <div className="flex flex-col gap-2.5 rounded-md border border-ink bg-pink/30 p-3.5">
                 <ReviewRow label="Name" value={fullName} onEdit={() => goTo(0, "back")} />
                 <ReviewRow label="Username" value={`@${username}`} onEdit={() => goTo(0, "back")} />
                 <ReviewRow label="Email" value={email} onEdit={() => goTo(1, "back")} />
@@ -220,10 +249,12 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={goBack}
+                  onMouseEnter={backIcon.onMouseEnter}
+                  onMouseLeave={backIcon.onMouseLeave}
                   aria-label="Back"
                   className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-md border border-ink transition-colors hover:bg-pink"
                 >
-                  <ArrowLeftIcon size={18} />
+                  <ArrowLeftIcon ref={backIcon.ref} size={18} />
                 </button>
               )}
 
@@ -231,48 +262,30 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={goNext}
+                  onMouseEnter={nextIcon.onMouseEnter}
+                  onMouseLeave={nextIcon.onMouseLeave}
                   key={attempt}
                   className={`btn flex-1 justify-center ${stepFailed ? "step-shake" : ""}`}
                 >
-                  Continue <ArrowRightIcon size={16} />
+                  Continue <ArrowRightIcon ref={nextIcon.ref} size={16} />
                 </button>
               ) : (
-                <button type="submit" disabled={submitting} className="btn flex-1 justify-center disabled:opacity-60">
-                  {submitting ? "Launching…" : "Launch your account"} <RocketIcon size={16} isAnimated={!submitting} />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  onMouseEnter={rocketIcon.onMouseEnter}
+                  onMouseLeave={rocketIcon.onMouseLeave}
+                  className="btn flex-1 justify-center disabled:opacity-60"
+                >
+                  {submitting ? "Launching…" : "Become a Teenovator!"} <RocketIcon ref={rocketIcon.ref} size={16} />
                 </button>
               )}
             </div>
           </div>
         </form>
 
-        {step === 0 && (
-          <>
-            <div className="my-6 flex items-center gap-4 text-xs text-muted">
-              <span className="h-px flex-1 bg-line" />
-              or sign up with Google
-              <span className="h-px flex-1 bg-line" />
-            </div>
-
-            <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={async (credentialResponse) => {
-                  if (!credentialResponse.credential) return;
-                  setFormError(null);
-                  try {
-                    await loginWithGoogle(credentialResponse.credential);
-                    router.push("/dashboard");
-                  } catch (err) {
-                    setFormError(err instanceof Error ? err.message : "Google sign-in failed");
-                  }
-                }}
-                onError={() => setFormError("Google sign-in failed")}
-              />
-            </div>
-          </>
-        )}
-
-        <p className="mt-8 text-center text-sm text-muted">
-          Already have an account?{" "}
+        <p className="mt-5 text-center text-sm text-muted">
+          Already a Teenovator?{" "}
           <Link href="/login" className="font-semibold text-ink underline underline-offset-4">
             Log in
           </Link>
@@ -283,6 +296,7 @@ export default function SignupPage() {
 }
 
 function ReviewRow({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
+  const pencil = useIconHover();
   return (
     <div className="flex items-center justify-between gap-3">
       <div>
@@ -292,10 +306,12 @@ function ReviewRow({ label, value, onEdit }: { label: string; value: string; onE
       <button
         type="button"
         onClick={onEdit}
+        onMouseEnter={pencil.onMouseEnter}
+        onMouseLeave={pencil.onMouseLeave}
         aria-label={`Edit ${label.toLowerCase()}`}
         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-ink bg-cream transition-colors hover:bg-yellow"
       >
-        <PencilIcon size={14} />
+        <PencilIcon ref={pencil.ref} size={14} />
       </button>
     </div>
   );
