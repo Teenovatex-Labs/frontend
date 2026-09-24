@@ -238,11 +238,11 @@ export default function People() {
         {/* Bottom padding reserves the height of the corner logo (54vw wide,
             1632x1109 aspect) so the text never runs into it. */}
         <div className="md:pb-[calc(min(37vw,585px)+32px)]">
-          <p className="eyebrow text-rose">Meet the core team</p>
+          <p className="eyebrow text-rose">03 / The humans behind it</p>
           <h2 className="mt-6 max-w-2xl text-4xl md:text-5xl">
-            The people
+            Meet the people
             <br />
-            behind the plans.
+            making the comeback real.
           </h2>
           <p className="mt-5 max-w-md text-muted">
             A focused team of builders, operators and researchers. Each person owns a different part of the same comeback.
