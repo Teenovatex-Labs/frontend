@@ -239,6 +239,11 @@ export default function SignupPage() {
                 <ReviewRow label="Name" value={fullName} onEdit={() => goTo(0, "back")} />
                 <ReviewRow label="Username" value={`@${username}`} onEdit={() => goTo(0, "back")} />
                 <ReviewRow label="Email" value={email} onEdit={() => goTo(1, "back")} />
+                <ReviewRow
+                  label="Password"
+                  value={password ? "You know what you wrote, right? 👀" : ""}
+                  onEdit={() => goTo(1, "back")}
+                />
               </div>
             )}
 
