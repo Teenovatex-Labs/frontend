@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import type { Founder } from "./People";
 
@@ -22,6 +25,7 @@ function OrbitNodeView({
   counterClass,
   duration,
   onSelect,
+  onPreview,
 }: {
   node: OrbitNode;
   radius: number;
@@ -30,6 +34,7 @@ function OrbitNodeView({
   counterClass: string;
   duration: string;
   onSelect: (founder: Founder) => void;
+  onPreview: (founder: Founder | null) => void;
 }) {
   const rad = (node.angle * Math.PI) / 180;
   const top = (50 + radius * Math.sin(rad)).toFixed(4);
@@ -43,28 +48,38 @@ function OrbitNodeView({
     >
       <div
         className={`${counterClass} flex items-center justify-center rounded-full`}
-        style={{ width: size, height: size, animationDuration: duration }}
+        style={{ width: Math.max(size, 44), height: Math.max(size, 44), animationDuration: duration }}
       >
         <button
           type="button"
           onClick={() => onSelect(founder)}
-          aria-label={`View ${founder.name}'s bio`}
-          className={`flex h-full w-full items-center justify-center overflow-hidden rounded-full border border-ink transition-transform hover:scale-105 hover:z-10 ${
-            founder.photo ? "" : `${founder.bg} ${founder.fg ?? ""}`
-          }`}
+          onPointerEnter={() => onPreview(founder)}
+          onPointerLeave={() => onPreview(null)}
+          onFocus={() => onPreview(founder)}
+          onBlur={() => onPreview(null)}
+          aria-label={`Open ${founder.name}, ${founder.role}`}
+          className="group pointer-events-auto flex shrink-0 items-center justify-center rounded-full transition-transform hover:z-10 hover:scale-110 active:scale-95"
+          style={{ width: Math.max(size, 44), height: Math.max(size, 44) }}
         >
-          {founder.photo ? (
-            <Image
-              src={founder.photo}
-              alt={founder.name}
-              width={size * 2}
-              height={size * 2}
-              className="h-full w-full object-cover"
-              style={{ objectPosition: "50% 18%" }}
-            />
-          ) : (
-            <span className={`${textClass} font-medium leading-none tracking-tight`}>{founder.initials}</span>
-          )}
+          <span
+            className={`flex aspect-square shrink-0 items-center justify-center overflow-hidden rounded-full border border-ink shadow-[2px_2px_0_var(--cream)] ${
+              founder.photo ? "" : `${founder.bg} ${founder.fg ?? ""}`
+            }`}
+            style={{ width: size, height: size }}
+          >
+            {founder.photo ? (
+              <Image
+                src={founder.photo}
+                alt=""
+                width={size * 2}
+                height={size * 2}
+                className="h-full w-full object-cover"
+                style={{ objectPosition: "50% 18%" }}
+              />
+            ) : (
+              <span className={`${textClass} font-medium leading-none tracking-tight`}>{founder.initials}</span>
+            )}
+          </span>
         </button>
       </div>
     </div>
@@ -87,12 +102,13 @@ export default function FoundersOrbit({
   founders: Founder[];
   onSelect: (founder: Founder) => void;
 }) {
+  const [preview, setPreview] = useState<Founder | null>(null);
   const ringA = zip(founders.slice(0, 3), RING_A_ANGLES);
   const ringB = zip(founders.slice(3, 8), RING_B_ANGLES);
   const ringC = zip(founders.slice(8, 13), RING_C_ANGLES);
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[640px] overflow-hidden">
+    <div className="founders-orbit relative mx-auto aspect-square w-full max-w-[640px] overflow-hidden">
       {/* The rotating rings are square divs; a rotated square's axis-aligned
           bounding box grows up to ~1.41x at 45 degrees, which — without this
           overflow-hidden — periodically pushed past the viewport edge and
@@ -105,7 +121,16 @@ export default function FoundersOrbit({
         <circle cx="200" cy="200" r="3" fill="var(--ink)" fillOpacity="0.4" />
       </svg>
 
-      <div className="orbit-ring orbit-ring-cw" style={{ animationDuration: "42s" }}>
+      <div className="pointer-events-none absolute left-1/2 top-1/2 z-[2] flex h-[62px] w-[100px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-ink bg-cream/95 px-2 text-center shadow-[3px_3px_0_var(--pink)] backdrop-blur-sm md:h-[82px] md:w-[142px] md:px-3">
+        <strong className="max-w-full truncate text-[10px] leading-tight md:text-xs">
+          {preview?.name ?? `${founders.length} people`}
+        </strong>
+        <span className="mt-1 max-w-full truncate text-[8px] leading-tight text-muted md:text-[10px]">
+          {preview?.role ?? "One connected team"}
+        </span>
+      </div>
+
+      <div className="orbit-ring orbit-ring-cw pointer-events-none" style={{ animationDuration: "42s" }}>
         {ringA.map((node) => (
           <OrbitNodeView
             key={node.founder.name}
@@ -116,11 +141,12 @@ export default function FoundersOrbit({
             counterClass="orbit-avatar-ccw"
             duration="42s"
             onSelect={onSelect}
+            onPreview={setPreview}
           />
         ))}
       </div>
 
-      <div className="orbit-ring orbit-ring-ccw" style={{ animationDuration: "58s" }}>
+      <div className="orbit-ring orbit-ring-ccw pointer-events-none" style={{ animationDuration: "58s" }}>
         {ringB.map((node) => (
           <OrbitNodeView
             key={node.founder.name}
@@ -131,11 +157,12 @@ export default function FoundersOrbit({
             counterClass="orbit-avatar-cw"
             duration="58s"
             onSelect={onSelect}
+            onPreview={setPreview}
           />
         ))}
       </div>
 
-      <div className="orbit-ring orbit-ring-cw" style={{ animationDuration: "74s" }}>
+      <div className="orbit-ring orbit-ring-cw pointer-events-none" style={{ animationDuration: "74s" }}>
         {ringC.map((node) => (
           <OrbitNodeView
             key={node.founder.name}
@@ -146,6 +173,7 @@ export default function FoundersOrbit({
             counterClass="orbit-avatar-ccw"
             duration="74s"
             onSelect={onSelect}
+            onPreview={setPreview}
           />
         ))}
       </div>

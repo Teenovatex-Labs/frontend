@@ -207,6 +207,15 @@
     animation: spin-ccw linear infinite;
   }
 
+  .founders-orbit:hover .orbit-ring,
+  .founders-orbit:focus-within .orbit-ring,
+  .founders-orbit:hover .orbit-avatar-cw,
+  .founders-orbit:hover .orbit-avatar-ccw,
+  .founders-orbit:focus-within .orbit-avatar-cw,
+  .founders-orbit:focus-within .orbit-avatar-ccw {
+    animation-play-state: paused;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .orbit-ring-cw,
     .orbit-ring-ccw,

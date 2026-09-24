@@ -1,98 +1,184 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import type { Founder } from "./People";
 
 export default function FounderModal({
   founder,
+  founders,
+  onSelect,
   onClose,
 }: {
   founder: Founder;
+  founders: Founder[];
+  onSelect: (founder: Founder) => void;
   onClose: () => void;
 }) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const activeIndex = founders.findIndex((member) => member.name === founder.name);
+  const previous = founders[(activeIndex - 1 + founders.length) % founders.length];
+  const next = founders[(activeIndex + 1) % founders.length];
+
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowLeft") onSelect(previous);
+      if (event.key === "ArrowRight") onSelect(next);
     };
+
+    const previousOverflow = document.body.style.overflow;
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
-  }, [onClose]);
+  }, [next, onClose, onSelect, previous]);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-5"
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/70 p-3 backdrop-blur-[2px] sm:items-center sm:p-6"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="founder-modal-name"
+      aria-labelledby="team-profile-name"
+      aria-describedby="team-profile-summary"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-sm rounded-2xl border border-ink bg-cream p-8 shadow-[6px_6px_0_var(--ink)]"
-      >
+      <div className="relative grid max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto rounded-2xl border border-ink bg-cream shadow-[7px_7px_0_var(--pink)] md:grid-cols-[280px_minmax(0,1fr)]">
         <button
+          ref={closeButtonRef}
           type="button"
           onClick={onClose}
-          aria-label="Close"
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-ink text-sm hover:bg-pink"
+          className="absolute right-3 top-3 z-10 rounded-lg border border-ink bg-cream px-3 py-2 text-xs font-bold transition-colors hover:bg-pink active:translate-y-px md:right-5 md:top-5"
         >
-          ✕
+          Close
         </button>
 
-        <div
-          className={`mx-auto flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-ink ${
-            founder.photo ? "" : `${founder.bg} ${founder.fg ?? ""}`
-          }`}
-        >
-          {founder.photo ? (
-            <Image
-              src={founder.photo}
-              alt={founder.name}
-              width={160}
-              height={160}
-              className="h-full w-full object-cover"
-              style={{ objectPosition: "50% 18%" }}
-            />
-          ) : (
-            <span className="text-2xl font-medium">{founder.initials}</span>
-          )}
-        </div>
-
-        <h3 id="founder-modal-name" className="mt-5 text-center text-2xl tracking-tight">
-          {founder.name}
-        </h3>
-        <p className="mt-1 text-center text-sm text-muted">{founder.role}</p>
-
-        <p className="mt-5 text-center text-[15px] leading-relaxed text-muted">
-          &ldquo;{founder.bio}&rdquo;
-        </p>
-
-        <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5 text-left text-sm">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-rose">Speciality</p>
-            <p className="mt-1 text-muted">{founder.speciality}</p>
-          </div>
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-rose">Contribution</p>
-            <p className="mt-1 text-muted">{founder.contribution}</p>
-          </div>
-        </div>
-
-        {founder.href && (
-          <a
-            href={founder.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn mt-6 w-full !gap-3 text-sm"
+        <aside className="bg-ink p-6 pr-20 text-cream md:p-8 md:pr-8">
+          <div
+            className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-cream/50 ${
+              founder.photo ? "" : `${founder.bg} ${founder.fg ?? "text-ink"}`
+            }`}
           >
-            Connect on LinkedIn <span>↗︎</span>
-          </a>
-        )}
+            {founder.photo ? (
+              <Image
+                src={founder.photo}
+                alt={founder.name}
+                width={180}
+                height={180}
+                className="h-full w-full object-cover"
+                style={{ objectPosition: "50% 18%" }}
+              />
+            ) : (
+              <span className="text-2xl font-semibold tracking-tight">{founder.initials}</span>
+            )}
+          </div>
+
+          <p className="mt-6 text-xs font-bold text-pink">{founder.unit}</p>
+          <h3 id="team-profile-name" className="mt-2 max-w-[12ch] text-3xl tracking-tight">
+            {founder.name}
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-cream/70">{founder.role}</p>
+
+          <div className="mt-7 flex flex-wrap gap-2" aria-label="Core strengths">
+            {founder.strengths.map((strength) => (
+              <span key={strength} className="rounded-full border border-cream/25 px-3 py-1.5 text-[11px] leading-tight text-cream/85">
+                {strength}
+              </span>
+            ))}
+          </div>
+
+          {founder.href && (
+            <a
+              href={founder.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-7 inline-flex items-center gap-3 border-b border-pink pb-1 text-sm font-bold text-cream transition-colors hover:text-pink"
+            >
+              View public profile <span aria-hidden="true">↗</span>
+            </a>
+          )}
+        </aside>
+
+        <article className="min-w-0 p-6 sm:p-8 md:p-10 md:pt-16">
+          <p id="team-profile-summary" className="max-w-2xl text-xl font-medium leading-snug tracking-tight sm:text-2xl">
+            {founder.bio}
+          </p>
+
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
+            <section className="rounded-2xl border border-line bg-white/45 p-5">
+              <h4 className="text-sm font-bold text-rose">Mandate</h4>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{founder.mandate}</p>
+            </section>
+            <section className="rounded-2xl border border-line bg-white/45 p-5">
+              <h4 className="text-sm font-bold text-rose">Success looks like</h4>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{founder.success}</p>
+            </section>
+          </div>
+
+          <section className="mt-8">
+            <h4 className="text-sm font-bold">Immediate focus</h4>
+            <ul className="mt-3 grid gap-3 sm:grid-cols-3">
+              {founder.focus.map((item) => (
+                <li key={item} className="border-l-2 border-rose pl-3 text-sm leading-relaxed text-muted">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="mt-8 rounded-2xl border border-ink bg-yellow p-5">
+            <h4 className="text-sm font-bold">What changes because they are here</h4>
+            <p className="mt-2 text-sm leading-relaxed">{founder.contribution}</p>
+            <p className="mt-3 border-t border-ink/15 pt-3 text-xs leading-relaxed text-muted">
+              <strong className="text-ink">Working territory:</strong> {founder.speciality}
+            </p>
+          </section>
+
+          <section className="mt-8">
+            <h4 className="text-sm font-bold">Works closely with</h4>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {founder.worksWith.map((name) => {
+                const collaborator = founders.find((member) => member.name === name);
+                if (!collaborator) return null;
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => onSelect(collaborator)}
+                    className="rounded-lg border border-line bg-cream px-3 py-2 text-left text-xs font-semibold transition-colors hover:border-ink hover:bg-pink active:translate-y-px"
+                  >
+                    {name}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <nav className="mt-8 grid grid-cols-2 gap-3 border-t border-line pt-5" aria-label="Browse team profiles">
+            <button
+              type="button"
+              onClick={() => onSelect(previous)}
+              className="rounded-lg border border-line px-4 py-3 text-left text-xs transition-colors hover:border-ink hover:bg-white/50 active:translate-y-px"
+            >
+              <span className="block text-muted">Previous</span>
+              <strong className="mt-1 block leading-tight">{previous.name}</strong>
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelect(next)}
+              className="rounded-lg border border-line px-4 py-3 text-right text-xs transition-colors hover:border-ink hover:bg-white/50 active:translate-y-px"
+            >
+              <span className="block text-muted">Next</span>
+              <strong className="mt-1 block leading-tight">{next.name}</strong>
+            </button>
+          </nav>
+        </article>
       </div>
     </div>
   );
