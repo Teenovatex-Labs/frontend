@@ -1,18 +1,18 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="wrap">
       <div className="grid gap-8 py-10 md:grid-cols-3 md:items-start md:gap-10">
-        <a href="#" className="flex items-center gap-2.5">
-          <span className="text-[42px] leading-none tracking-[-0.19em] pr-2">
-            t<span className="text-[38px] text-rose">×</span>
-          </span>
+        <Link href="/" className="flex items-center gap-2.5">
+          <img src="/assets/logo-nobg.svg" alt="" aria-hidden="true" className="h-9 w-auto" />
           <span className="font-bold text-2xl tracking-tight">
             teenovate<span className="text-rose">x</span>
             <small className="mt-0.5 block text-[10px] font-semibold tracking-[0.3em]">
               LABS
             </small>
           </span>
-        </a>
+        </Link>
 
         <p className="text-sm text-muted">
           A global tech community.
