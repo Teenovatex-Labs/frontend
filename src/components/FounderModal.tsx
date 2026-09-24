@@ -46,7 +46,7 @@ export default function FounderModal({
 
         <div
           className={`mx-auto flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border border-ink ${
-            founder.photo ? "" : founder.bg
+            founder.photo ? "" : `${founder.bg} ${founder.fg ?? ""}`
           }`}
         >
           {founder.photo ? (
@@ -72,14 +72,27 @@ export default function FounderModal({
           &ldquo;{founder.bio}&rdquo;
         </p>
 
-        <a
-          href={founder.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn mt-6 w-full !gap-3 text-sm"
-        >
-          Connect on LinkedIn <span>↗︎</span>
-        </a>
+        <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5 text-left text-sm">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-rose">Speciality</p>
+            <p className="mt-1 text-muted">{founder.speciality}</p>
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-rose">Contribution</p>
+            <p className="mt-1 text-muted">{founder.contribution}</p>
+          </div>
+        </div>
+
+        {founder.href && (
+          <a
+            href={founder.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn mt-6 w-full !gap-3 text-sm"
+          >
+            Connect on LinkedIn <span>↗︎</span>
+          </a>
+        )}
       </div>
     </div>
   );
