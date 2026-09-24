@@ -122,26 +122,10 @@
     padding: 85px 24px 75px;
   }
 
-  .hero-canvas::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    background: url("/hero-background.webp") center/cover no-repeat;
-    opacity: 0.65;
-    pointer-events: none;
-  }
-
   @media (max-width: 800px) {
     .hero-canvas {
       min-height: 0;
       padding: 57px 24px 50px;
-    }
-
-    .hero-canvas::before {
-      background-size: 100% auto;
-      background-position: center bottom;
-      opacity: 0.4;
     }
   }
 
@@ -161,9 +145,11 @@
     font-weight: 600;
   }
 
-  /* Feature track scroll-snap */
+  /* Feature track — horizontal position is driven by page scroll (see
+     Toolkit.tsx), so no scroll-snap here: snapping would fight the
+     continuous scroll-linked positioning and jump back to the nearest
+     card on every update. */
   .feature-track {
-    scroll-snap-type: x mandatory;
     scrollbar-width: thin;
     scrollbar-color: var(--ink) transparent;
     overscroll-behavior-x: contain;
@@ -176,10 +162,6 @@
   .feature-track::-webkit-scrollbar-thumb {
     background: var(--ink);
     border-radius: 4px;
-  }
-
-  .feature-card {
-    scroll-snap-align: start;
   }
 
   /* Founder avatar shape */
