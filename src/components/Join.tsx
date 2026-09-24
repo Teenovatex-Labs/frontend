@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Join() {
   return (
     <section id="join" className="border-y border-ink bg-yellow py-14 md:py-[75px]">
@@ -8,28 +10,26 @@ export default function Join() {
             See you
             <br />
             <span className="-ml-3 inline-block -rotate-2 bg-pink px-3 pb-2 pt-0.5">
-              in the group.
+              on the inside.
             </span>
           </h2>
         </div>
 
         <div>
           <p className="max-w-[380px] text-lg">
-            Your first step is simple: join the TeenovateX WhatsApp group.
-            It&rsquo;s free for teens.
+            Your first step is simple: create your free account. It only
+            takes a minute.
           </p>
 
-          <a
-            href="https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn mt-6"
-          >
-            Join us on WhatsApp <span>↗︎</span>
-          </a>
+          <Link href="/signup" className="btn mt-6">
+            Create your free account <span>↗︎</span>
+          </Link>
 
           <small className="mt-3.5 block text-xs text-muted">
-            Opens the TeenovateX WhatsApp group.
+            Already a member?{" "}
+            <Link href="/login" className="font-semibold text-ink underline underline-offset-4">
+              Log in
+            </Link>
           </small>
         </div>
       </div>
