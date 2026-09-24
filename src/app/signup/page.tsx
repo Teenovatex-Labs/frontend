@@ -13,7 +13,9 @@ import { useAuth } from "@/context/AuthContext";
 import FormField from "@/components/FormField";
 import StepRail, { type Step } from "@/components/auth/StepRail";
 import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
+import AuthSplit from "@/components/auth/AuthSplit";
 import useIconHover from "@/lib/useIconHover";
+import useViewTransitionNav from "@/lib/useViewTransitionNav";
 import { registerBaseSchema, fieldErrors } from "@/lib/validation";
 
 const STEPS: Step[] = [
@@ -43,6 +45,7 @@ export default function SignupPage() {
   const backIcon = useIconHover();
   const nextIcon = useIconHover();
   const rocketIcon = useIconHover();
+  const navigate = useViewTransitionNav();
 
   useEffect(() => {
     if (!loading && user) router.replace("/dashboard");
@@ -124,8 +127,7 @@ export default function SignupPage() {
   const panelClass = direction === "back" ? "step-panel-back" : "step-panel-forward";
 
   return (
-    <main className="flex h-screen items-center justify-center overflow-hidden px-5 py-6">
-      <div className="w-full max-w-[440px]">
+    <AuthSplit image={{ src: "/assets/Logo1.svg", flip: true }} imageSide="right">
         <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
           <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
         </Link>
@@ -291,12 +293,18 @@ export default function SignupPage() {
 
         <p className="mt-5 text-center text-sm text-muted">
           Already a Teenovator?{" "}
-          <Link href="/login" className="font-semibold text-ink underline underline-offset-4">
+          <Link
+            href="/login"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/login");
+            }}
+            className="font-semibold text-ink underline underline-offset-4"
+          >
             Log in
           </Link>
         </p>
-      </div>
-    </main>
+    </AuthSplit>
   );
 }
 
