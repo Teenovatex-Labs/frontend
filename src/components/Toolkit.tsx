@@ -56,12 +56,19 @@ const FEATURES = [
   },
 ];
 
+// Vertical pixels scrolled per horizontal pixel the cards travel. Higher =
+// slower, calmer carousel.
+const SCROLL_RATIO = 2.2;
+// Fraction of the remaining distance covered each frame; lower = smoother.
+const EASE = 0.08;
+
 export default function Toolkit() {
   const trackRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [pinHeight, setPinHeight] = useState<number | undefined>(undefined);
+  const [stickyTop, setStickyTop] = useState(0);
 
   const scrollToIndex = (next: number) => {
     const track = trackRef.current;
@@ -72,17 +79,19 @@ export default function Toolkit() {
     setIndex(clamped);
   };
 
-  // Size the pin zone's extra height to match the horizontal distance the
-  // track needs to travel, so one viewport-height of vertical scroll maps
-  // to exactly one full pass through the cards.
+  // Size the pin zone so the cards' horizontal travel is spread over
+  // SCROLL_RATIO times as much vertical scroll. When the pinned content is
+  // taller than the viewport (short laptops, phones), stick it with a
+  // negative top so its bottom — where the cards are — stays on screen.
   useEffect(() => {
     const track = trackRef.current;
     const sticky = stickyRef.current;
     if (!track || !sticky) return;
 
     const recompute = () => {
-      const horizontal = track.scrollWidth - track.clientWidth;
-      setPinHeight(sticky.offsetHeight + Math.max(0, horizontal));
+      const horizontal = Math.max(0, track.scrollWidth - track.clientWidth);
+      setStickyTop(Math.min(0, window.innerHeight - sticky.offsetHeight));
+      setPinHeight(sticky.offsetHeight + horizontal * SCROLL_RATIO);
     };
     recompute();
 
@@ -109,40 +118,70 @@ export default function Toolkit() {
     const track = trackRef.current;
     if (!pin || !sticky || !track) return;
 
-    let ticking = false;
-    const update = () => {
-      ticking = false;
-      const maxScroll = pin.offsetHeight - sticky.offsetHeight;
-      if (maxScroll <= 0) return;
-      const rect = pin.getBoundingClientRect();
-      const progress = Math.min(1, Math.max(0, -rect.top / maxScroll));
-      const maxTrackScroll = track.scrollWidth - track.clientWidth;
-      track.scrollLeft = progress * maxTrackScroll;
-      setIndex(Math.round(progress * (FEATURES.length - 1)));
-    };
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
-      }
+    const targetFor = () => {
+      const range = pin.offsetHeight - sticky.offsetHeight;
+      if (range <= 0) return null;
+      const progress = Math.min(1, Math.max(0, (stickyTop - pin.getBoundingClientRect().top) / range));
+      return progress * (track.scrollWidth - track.clientWidth);
     };
 
+    // The track eases toward the scroll-derived target instead of jumping
+    // to it, so a mouse-wheel notch glides rather than lurches.
+    let target = track.scrollLeft;
+    let current = track.scrollLeft;
+    let raf = 0;
+
+    const tick = () => {
+      current += (target - current) * EASE;
+      if (Math.abs(target - current) < 0.5) current = target;
+      track.scrollLeft = current;
+      const max = track.scrollWidth - track.clientWidth;
+      setIndex(max > 0 ? Math.round((current / max) * (FEATURES.length - 1)) : 0);
+      raf = current === target ? 0 : requestAnimationFrame(tick);
+    };
+
+    const onScroll = () => {
+      const next = targetFor();
+      if (next === null) return;
+      if (!raf) current = track.scrollLeft;
+      target = next;
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+
+    const initial = targetFor();
+    if (initial !== null) {
+      track.scrollLeft = initial;
+      target = current = initial;
+    }
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    update();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [pinHeight]);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [pinHeight, stickyTop]);
 
   return (
     <section id="explore" className="border-y border-ink bg-yellow">
       <div ref={pinRef} style={{ height: pinHeight }}>
-        <div ref={stickyRef} className="sticky top-0 relative py-16 md:py-24">
+        <div ref={stickyRef} className="sticky py-16 md:py-24" style={{ top: stickyTop }}>
+          {/* Desktop: pinned to the top-centre, between the heading and the
+              blurb, tucked behind the cards. */}
           <img
             src="/assets/illustration-nobg.svg"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute right-2 top-2 hidden w-[130px] rotate-6 opacity-70 md:block lg:w-[160px]"
+            className="pointer-events-none absolute left-1/2 top-0 -z-10 hidden w-[340px] -translate-x-1/2 lg:block xl:w-[400px]"
           />
           <div className="wrap relative">
+            {/* Below lg there's no room between heading and blurb, so it
+                sits centred above them instead. */}
+            <img
+              src="/assets/illustration-nobg.svg"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none mx-auto -mt-16 mb-8 block w-[240px] md:-mt-24 md:w-[300px] lg:hidden"
+            />
             <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="eyebrow text-rose">02 / The toolkit for your next thing</p>
