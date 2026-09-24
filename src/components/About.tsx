@@ -37,7 +37,8 @@ export default function About() {
           than something you have to read around. */}
       <CrowdCanvas
         src="/assets/crowd-sprite.png"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[300px] opacity-[0.16] [filter:invert(1)] [mask-image:linear-gradient(to_top,black_15%,transparent_88%)] md:h-[420px]"
+        tint="#8d355b"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[300px] w-full opacity-[0.22] [mask-image:linear-gradient(to_top,black_15%,transparent_88%)] md:h-[420px]"
       />
 
       {/* Intro — the three questions this whole section answers. */}

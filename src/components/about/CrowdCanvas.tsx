@@ -20,7 +20,6 @@ const randomRange = (min: number, max: number) => min + Math.random() * (max - m
 const randomIndex = (array: unknown[]) => (randomRange(0, array.length) | 0);
 const removeFromArray = <T,>(array: T[], i: number) => array.splice(i, 1)[0];
 const removeRandomFromArray = <T,>(array: T[]) => removeFromArray(array, randomIndex(array));
-const getRandomFromArray = <T,>(array: T[]) => array[randomIndex(array)];
 
 /** A parade of tiny line-art figures walking across a canvas — self-paced,
  * looping forever, each on its own random timing so the crowd never
@@ -31,12 +30,16 @@ export default function CrowdCanvas({
   src,
   cols = 15,
   rows = 7,
+  tint,
   className,
 }: {
   src: string;
   /** Sprite sheet grid — characters across (cols) by characters down (rows). */
   cols?: number;
   rows?: number;
+  /** Recolors every drawn (opaque) pixel to this CSS color, so the crowd
+   * reads as a brand tint instead of the sprite sheet's native white. */
+  tint?: string;
   className?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -161,6 +164,16 @@ export default function CrowdCanvas({
       ctx.scale(devicePixelRatio, devicePixelRatio);
       crowd.forEach((peep) => peep.render(ctx));
       ctx.restore();
+
+      // Recolor every opaque pixel just drawn to the tint color, keeping
+      // each pixel's original alpha (anti-aliased edges stay smooth).
+      if (tint) {
+        ctx.save();
+        ctx.globalCompositeOperation = "source-in";
+        ctx.fillStyle = tint;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+      }
     };
 
     const resize = () => {
