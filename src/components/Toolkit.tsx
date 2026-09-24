@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const FEATURES = [
   {
@@ -58,7 +58,10 @@ const FEATURES = [
 
 export default function Toolkit() {
   const trackRef = useRef<HTMLDivElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
+  const [pinHeight, setPinHeight] = useState<number | undefined>(undefined);
 
   const scrollToIndex = (next: number) => {
     const track = trackRef.current;
@@ -69,89 +72,159 @@ export default function Toolkit() {
     setIndex(clamped);
   };
 
+  // Size the pin zone's extra height to match the horizontal distance the
+  // track needs to travel, so one viewport-height of vertical scroll maps
+  // to exactly one full pass through the cards.
+  useEffect(() => {
+    const track = trackRef.current;
+    const sticky = stickyRef.current;
+    if (!track || !sticky) return;
+
+    const recompute = () => {
+      const horizontal = track.scrollWidth - track.clientWidth;
+      setPinHeight(sticky.offsetHeight + Math.max(0, horizontal));
+    };
+    recompute();
+
+    const ro = new ResizeObserver(recompute);
+    ro.observe(track);
+    ro.observe(sticky);
+    window.addEventListener("resize", recompute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", recompute);
+    };
+  }, []);
+
+  // Drive the track's horizontal position from page vertical scroll while
+  // the pin zone is in view — advances on the way down, reverses on the
+  // way back up. Skipped entirely for prefers-reduced-motion, where the
+  // track falls back to manual swipe/arrow-button scrolling only.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const pin = pinRef.current;
+    const sticky = stickyRef.current;
+    const track = trackRef.current;
+    if (!pin || !sticky || !track) return;
+
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const maxScroll = pin.offsetHeight - sticky.offsetHeight;
+      if (maxScroll <= 0) return;
+      const rect = pin.getBoundingClientRect();
+      const progress = Math.min(1, Math.max(0, -rect.top / maxScroll));
+      const maxTrackScroll = track.scrollWidth - track.clientWidth;
+      track.scrollLeft = progress * maxTrackScroll;
+      setIndex(Math.round(progress * (FEATURES.length - 1)));
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [pinHeight]);
+
   return (
-    <section id="explore" className="border-y border-ink bg-yellow py-16 md:py-24">
-      <div className="wrap">
-        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="eyebrow text-rose">02 / The toolkit for your next thing</p>
-            <h2 className="mt-6 text-[38px] leading-[1.04] md:text-[54px]">
-              Meet your
-              <br />
-              next <span className="font-serif italic font-normal">toolkit.</span>
-            </h2>
+    <section id="explore" className="border-y border-ink bg-yellow">
+      <div ref={pinRef} style={{ height: pinHeight }}>
+        <div ref={stickyRef} className="sticky top-0 relative py-16 md:py-24">
+          <img
+            src="/assets/illustration-nobg.svg"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute right-2 top-2 hidden w-[130px] rotate-6 opacity-70 md:block lg:w-[160px]"
+          />
+          <div className="wrap relative">
+            <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="eyebrow text-rose">02 / The toolkit for your next thing</p>
+                <h2 className="mt-6 text-[38px] leading-[1.04] md:text-[54px]">
+                  Meet your
+                  <br />
+                  next <span className="font-serif italic font-normal">toolkit.</span>
+                </h2>
+              </div>
+
+              <div className="max-w-[310px]">
+                <p>From finding a collaborator to getting feedback on your work.</p>
+                <p className="mt-3 text-xs leading-relaxed text-muted">
+                  Some platform features are still coming soon. You can join the
+                  WhatsApp community today.
+                </p>
+
+                <div className="mt-4 flex items-center gap-5">
+                  <button
+                    type="button"
+                    onClick={() => scrollToIndex(index - 1)}
+                    disabled={index === 0}
+                    aria-label="Previous features"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-ink text-xl transition-colors hover:enabled:bg-pink disabled:opacity-35"
+                  >
+                    ←
+                  </button>
+                  <span className="text-sm font-medium">
+                    {String(index + 1).padStart(2, "0")} / {String(FEATURES.length).padStart(2, "0")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => scrollToIndex(index + 1)}
+                    disabled={index === FEATURES.length - 1}
+                    aria-label="Next features"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-ink text-xl transition-colors hover:enabled:bg-pink disabled:opacity-35"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="max-w-[310px]">
-            <p>From finding a collaborator to getting feedback on your work.</p>
-            <p className="mt-3 text-xs leading-relaxed text-muted">
-              Some platform features are still coming soon. You can join the
-              WhatsApp community today.
-            </p>
+          <div
+            ref={trackRef}
+            className="feature-track mt-8 flex gap-5 overflow-x-auto px-5 pb-6 md:px-[max(56px,calc((100vw-1280px)/2))]"
+            role="region"
+            aria-label="TeenovateX features, scroll horizontally"
+          >
+            {FEATURES.map((feature) => (
+              <article
+                key={feature.name}
+                className={`feature-card flex min-h-[450px] w-[82vw] max-w-[365px] shrink-0 flex-col overflow-hidden rounded-md border border-ink ${feature.cardClass}`}
+              >
+                <div className="flex justify-between px-6 py-5 text-[10px] font-medium tracking-wider">
+                  <span>{feature.tag}</span>
+                  <span>{feature.kind}</span>
+                </div>
 
-            <div className="mt-4 flex items-center gap-5">
-              <button
-                type="button"
-                onClick={() => scrollToIndex(index - 1)}
-                disabled={index === 0}
-                aria-label="Previous features"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-ink text-xl transition-colors hover:enabled:bg-pink disabled:opacity-35"
-              >
-                ←
-              </button>
-              <span className="text-sm font-medium">
-                {String(index + 1).padStart(2, "0")} / {String(FEATURES.length).padStart(2, "0")}
-              </span>
-              <button
-                type="button"
-                onClick={() => scrollToIndex(index + 1)}
-                disabled={index === FEATURES.length - 1}
-                aria-label="Next features"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-ink text-xl transition-colors hover:enabled:bg-pink disabled:opacity-35"
-              >
-                →
-              </button>
-            </div>
+                <div
+                  className={`flex min-h-[150px] flex-1 items-center justify-center px-5 text-center ${feature.typeClass}`}
+                  aria-hidden="true"
+                >
+                  {feature.type}
+                </div>
+
+                <div className="border-t border-current p-6">
+                  <p className="mb-4 text-[11px] font-bold uppercase tracking-wider">
+                    {feature.name}
+                  </p>
+                  <h3 className="text-2xl leading-tight tracking-tight">{feature.title}</h3>
+                  <p className="mt-4 text-sm leading-relaxed opacity-85">{feature.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="wrap flex items-center justify-between gap-5">
+            <span className="text-xs">← Swipe, scroll or use the arrows →</span>
           </div>
         </div>
-      </div>
-
-      <div
-        ref={trackRef}
-        className="feature-track mt-8 flex gap-5 overflow-x-auto px-5 pb-6 md:px-[max(56px,calc((100vw-1280px)/2))]"
-        role="region"
-        aria-label="TeenovateX features, scroll horizontally"
-      >
-        {FEATURES.map((feature) => (
-          <article
-            key={feature.name}
-            className={`feature-card flex min-h-[450px] w-[82vw] max-w-[365px] shrink-0 flex-col overflow-hidden rounded-md border border-ink ${feature.cardClass}`}
-          >
-            <div className="flex justify-between px-6 py-5 text-[10px] font-medium tracking-wider">
-              <span>{feature.tag}</span>
-              <span>{feature.kind}</span>
-            </div>
-
-            <div
-              className={`flex min-h-[150px] flex-1 items-center justify-center px-5 text-center ${feature.typeClass}`}
-              aria-hidden="true"
-            >
-              {feature.type}
-            </div>
-
-            <div className="border-t border-current p-6">
-              <p className="mb-4 text-[11px] font-bold uppercase tracking-wider">
-                {feature.name}
-              </p>
-              <h3 className="text-2xl leading-tight tracking-tight">{feature.title}</h3>
-              <p className="mt-4 text-sm leading-relaxed opacity-85">{feature.body}</p>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div className="wrap flex items-center justify-between gap-5">
-        <span className="text-xs">← Swipe, scroll or use the arrows →</span>
       </div>
     </section>
   );
