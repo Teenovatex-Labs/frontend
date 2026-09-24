@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
-import { GoogleLogin } from "@react-oauth/google";
 import { MailIcon } from "@animateicons/react/lucide/mail-icon";
 import { LockIcon } from "@animateicons/react/lucide/lock-icon";
 import { LogInIcon } from "@animateicons/react/lucide/log-in-icon";
@@ -12,6 +11,8 @@ import { ArrowRightIcon } from "@animateicons/react/lucide/arrow-right-icon";
 import { useAuth } from "@/context/AuthContext";
 import FormField from "@/components/FormField";
 import StepRail, { type Step } from "@/components/auth/StepRail";
+import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
+import useIconHover from "@/lib/useIconHover";
 import { loginFormSchema, fieldErrors } from "@/lib/validation";
 import { z } from "zod";
 
@@ -36,6 +37,10 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const backIcon = useIconHover();
+  const nextIcon = useIconHover();
+  const loginIcon = useIconHover();
 
   useEffect(() => {
     if (!loading && user) router.replace("/dashboard");
@@ -87,18 +92,15 @@ export default function LoginPage() {
   const panelClass = direction === "back" ? "step-panel-back" : "step-panel-forward";
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-5 py-16">
-      <div className="w-full max-w-[420px]">
-        <Link href="/" aria-label="TeenovateX home" className="mb-10 flex items-center">
-          <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-8 w-auto" />
+    <main className="flex h-screen items-center justify-center overflow-hidden px-5 py-6">
+      <div className="w-full max-w-[400px]">
+        <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
+          <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
         </Link>
 
         <StepRail steps={STEPS} current={step} />
 
-        <p className="eyebrow text-rose">
-          Step {step + 1} / {STEPS.length}
-        </p>
-        <h1 className="mt-3 text-[32px] leading-[1.1] tracking-[-0.03em] md:text-[34px]">
+        <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">
           {step === 0 ? (
             <>
               Welcome <span className="font-serif italic font-medium text-rose">back.</span>
@@ -110,8 +112,35 @@ export default function LoginPage() {
           )}
         </h1>
 
-        <form onSubmit={handleSubmit} noValidate className="mt-8">
-          <div key={`panel-${step}`} className={`flex flex-col gap-5 ${panelClass}`}>
+        {step === 0 && (
+          <div className="mt-4">
+            <GoogleAuthCard
+              text="signin_with"
+              onSuccess={async (credentialResponse) => {
+                if (!credentialResponse.credential) return;
+                setFormError(null);
+                try {
+                  await loginWithGoogle(credentialResponse.credential);
+                  router.push("/dashboard");
+                } catch (err) {
+                  setFormError(err instanceof Error ? err.message : "Google sign-in failed");
+                }
+              }}
+              onError={() => setFormError("Google sign-in failed")}
+            />
+          </div>
+        )}
+
+        {step === 0 && (
+          <div className="my-4 flex items-center gap-4 text-xs text-muted">
+            <span className="h-px flex-1 bg-line" />
+            or fill it in yourself
+            <span className="h-px flex-1 bg-line" />
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} noValidate className={step === 0 ? "" : "mt-5"}>
+          <div key={`panel-${step}`} className={`flex flex-col gap-3.5 ${panelClass}`}>
             {step === 0 ? (
               <FormField
                 label="Email"
@@ -158,10 +187,12 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={goBack}
+                  onMouseEnter={backIcon.onMouseEnter}
+                  onMouseLeave={backIcon.onMouseLeave}
                   aria-label="Back"
                   className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-md border border-ink transition-colors hover:bg-pink"
                 >
-                  <ArrowLeftIcon size={18} />
+                  <ArrowLeftIcon ref={backIcon.ref} size={18} />
                 </button>
               )}
 
@@ -169,47 +200,29 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={goNext}
+                  onMouseEnter={nextIcon.onMouseEnter}
+                  onMouseLeave={nextIcon.onMouseLeave}
                   key={attempt}
                   className={`btn flex-1 justify-center ${stepFailed ? "step-shake" : ""}`}
                 >
-                  Continue <ArrowRightIcon size={16} />
+                  Continue <ArrowRightIcon ref={nextIcon.ref} size={16} />
                 </button>
               ) : (
-                <button type="submit" disabled={submitting} className="btn flex-1 justify-center disabled:opacity-60">
-                  {submitting ? "Logging in…" : "Log in"} <LogInIcon size={16} isAnimated={!submitting} />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  onMouseEnter={loginIcon.onMouseEnter}
+                  onMouseLeave={loginIcon.onMouseLeave}
+                  className="btn flex-1 justify-center disabled:opacity-60"
+                >
+                  {submitting ? "Logging in…" : "Log in"} <LogInIcon ref={loginIcon.ref} size={16} />
                 </button>
               )}
             </div>
           </div>
         </form>
 
-        {step === 0 && (
-          <>
-            <div className="my-6 flex items-center gap-4 text-xs text-muted">
-              <span className="h-px flex-1 bg-line" />
-              or
-              <span className="h-px flex-1 bg-line" />
-            </div>
-
-            <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={async (credentialResponse) => {
-                  if (!credentialResponse.credential) return;
-                  setFormError(null);
-                  try {
-                    await loginWithGoogle(credentialResponse.credential);
-                    router.push("/dashboard");
-                  } catch (err) {
-                    setFormError(err instanceof Error ? err.message : "Google sign-in failed");
-                  }
-                }}
-                onError={() => setFormError("Google sign-in failed")}
-              />
-            </div>
-          </>
-        )}
-
-        <p className="mt-8 text-center text-sm text-muted">
+        <p className="mt-5 text-center text-sm text-muted">
           New here?{" "}
           <Link href="/signup" className="font-semibold text-ink underline underline-offset-4">
             Create an account
