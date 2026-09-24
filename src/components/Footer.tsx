@@ -1,13 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import type { ComponentType, RefAttributes } from "react";
 import { InstagramIcon } from "@animateicons/react/lucide/instagram-icon";
 import { XIcon } from "@animateicons/react/lucide/x-icon";
 import { LinkedinIcon } from "@animateicons/react/lucide/linkedin-icon";
+import type { IconHandle } from "@animateicons/react";
 import WhatsappIcon from "./icons/WhatsappIcon";
+import useIconHover from "@/lib/useIconHover";
 
-const SOCIALS = [
+type AnimatedIconProps = { size?: number; className?: string };
+
+const SOCIALS: {
+  href: string;
+  label: string;
+  Icon: ComponentType<AnimatedIconProps & RefAttributes<IconHandle>>;
+}[] = [
   { href: "https://www.instagram.com/teenovatexlabs/", label: "Instagram", Icon: InstagramIcon },
   { href: "https://x.com/teenovatex40605", label: "X", Icon: XIcon },
-  { href: "https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW", label: "WhatsApp", Icon: WhatsappIcon },
   { href: "https://www.linkedin.com/company/teenovatex-labs/", label: "LinkedIn", Icon: LinkedinIcon },
 ];
 
@@ -30,17 +40,17 @@ export default function Footer() {
             Say hello ↗︎
           </a>
           {SOCIALS.map(({ href, label, Icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={label}
-              className="text-ink transition-colors hover:text-rose"
-            >
-              <Icon size={20} />
-            </a>
+            <SocialLink key={label} href={href} label={label} icon={Icon} />
           ))}
+          <a
+            href="https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+            className="text-ink transition-transform hover:scale-110 hover:text-rose"
+          >
+            <WhatsappIcon size={20} />
+          </a>
         </div>
       </div>
 
@@ -51,5 +61,30 @@ export default function Footer() {
         </a>
       </div>
     </footer>
+  );
+}
+
+function SocialLink({
+  href,
+  label,
+  icon: Icon,
+}: {
+  href: string;
+  label: string;
+  icon: ComponentType<AnimatedIconProps & RefAttributes<IconHandle>>;
+}) {
+  const { ref, onMouseEnter, onMouseLeave } = useIconHover();
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className="text-ink transition-colors hover:text-rose"
+    >
+      <Icon ref={ref} size={20} />
+    </a>
   );
 }
