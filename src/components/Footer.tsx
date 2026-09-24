@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ComponentType, RefAttributes } from "react";
 import { InstagramIcon } from "@animateicons/react/lucide/instagram-icon";
-import { XIcon } from "@animateicons/react/lucide/x-icon";
+import { TwitterIcon } from "@animateicons/react/lucide/twitter-icon";
 import { LinkedinIcon } from "@animateicons/react/lucide/linkedin-icon";
 import type { IconHandle } from "@animateicons/react";
 import WhatsappIcon from "./icons/WhatsappIcon";
@@ -17,7 +17,7 @@ const SOCIALS: {
   Icon: ComponentType<AnimatedIconProps & RefAttributes<IconHandle>>;
 }[] = [
   { href: "https://www.instagram.com/teenovatexlabs/", label: "Instagram", Icon: InstagramIcon },
-  { href: "https://x.com/teenovatex40605", label: "X", Icon: XIcon },
+  { href: "https://x.com/teenovatex40605", label: "X", Icon: TwitterIcon },
   { href: "https://www.linkedin.com/company/teenovatex-labs/", label: "LinkedIn", Icon: LinkedinIcon },
 ];
 
