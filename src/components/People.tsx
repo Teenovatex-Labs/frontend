@@ -149,8 +149,10 @@ export default function People() {
 
   return (
     <section id="people" className="wrap py-16 md:py-24">
-      <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-16">
-        <div>
+      <div className="grid gap-10 md:grid-cols-2 md:gap-16">
+        {/* Text pinned to the top, logo card pushed to the bottom-left, so the
+            column spans the orbit's full height. */}
+        <div className="flex flex-col">
           <p className="eyebrow text-rose">03 / The people behind it</p>
           <h2 className="mt-6 max-w-2xl text-4xl md:text-5xl">
             The people
@@ -161,11 +163,13 @@ export default function People() {
             A growing network of builders, mentors and collaborators &mdash;
             connected the way good ideas actually spread.
           </p>
-          <div className="mt-6 inline-block overflow-hidden rounded-2xl border border-ink bg-pink shadow-[6px_6px_0_var(--ink)]">
-            <img src="/assets/logo-long-1.svg" alt="" aria-hidden="true" className="block w-[220px]" />
+          <div className="mt-10 w-full max-w-[520px] overflow-hidden rounded-2xl border border-ink bg-pink shadow-[6px_6px_0_var(--ink)] md:mt-auto">
+            <img src="/assets/logo-long-1.svg" alt="" aria-hidden="true" className="block w-full" />
           </div>
         </div>
-        <FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
+        <div className="md:self-center">
+          <FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
+        </div>
       </div>
 
       <p className="mt-12 text-muted md:text-right">Tap anyone in the orbit to read their story.</p>
