@@ -56,8 +56,9 @@ export default function Hero() {
             </h1>
 
             <p className="mt-7 max-w-[485px] text-left text-[15px] leading-[1.85] text-muted md:text-[17px]">
-              A global, youth-led tech community for teenagers exploring
-              coding, robotics, AI and more.
+              A youth-led home for teenagers turning curiosity into code,
+              research, technology, stories, and things the world hasn&rsquo;t
+              seen yet.
             </p>
           </div>
 
@@ -69,7 +70,7 @@ export default function Hero() {
               href="#explore"
               className="inline-flex items-center gap-3 border-0 py-3 text-[13px] hover:underline hover:underline-offset-4"
             >
-              Explore the features <span>↓</span>
+              See what happens here <span>↓</span>
             </a>
           </div>
 
