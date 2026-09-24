@@ -32,7 +32,7 @@ export default function Join() {
           </Link>
 
           <small className="mt-3.5 block text-xs text-muted">
-            Already a member?{" "}
+            Already a Teenovator?{" "}
             <Link href="/login" className="font-semibold text-ink underline underline-offset-4">
               Log in
             </Link>
