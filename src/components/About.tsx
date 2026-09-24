@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 const ACTION_WORDS = [
@@ -8,9 +9,10 @@ const ACTION_WORDS = [
   { word: "Share", rotate: "-rotate-1", bg: "bg-pink" },
 ];
 
-// Placeholders for member photos, not identified people — just a texture
-// suggesting "the community", so no initials or names here.
-const PEOPLE_MARKS = [
+// A texture suggesting "the community" rather than named people, so no
+// initials here — just circles waiting for real member photos. Drop a
+// `photo` path into any entry once one is ready and it swaps in automatically.
+const PEOPLE_MARKS: { bg: string; fg: string; photo?: string }[] = [
   { bg: "bg-yellow", fg: "text-ink/40" },
   { bg: "bg-pink", fg: "text-ink/40" },
   { bg: "bg-ink", fg: "text-cream/50" },
@@ -64,12 +66,16 @@ export default function About() {
               {PEOPLE_MARKS.map((m, i) => (
                 <span
                   key={i}
-                  className={`flex h-11 w-11 items-center justify-center rounded-full border border-ink ${m.bg} ${m.fg}`}
+                  className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-ink ${m.bg} ${m.fg}`}
                 >
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" />
-                  </svg>
+                  {m.photo ? (
+                    <Image src={m.photo} alt="" width={44} height={44} className="h-full w-full object-cover" />
+                  ) : (
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                      <circle cx="12" cy="8" r="4" />
+                      <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+                    </svg>
+                  )}
                 </span>
               ))}
             </div>
