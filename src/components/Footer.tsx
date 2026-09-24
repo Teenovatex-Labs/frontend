@@ -1,17 +1,22 @@
 import Link from "next/link";
+import { InstagramIcon } from "@animateicons/react/lucide/instagram-icon";
+import { XIcon } from "@animateicons/react/lucide/x-icon";
+import { LinkedinIcon } from "@animateicons/react/lucide/linkedin-icon";
+import WhatsappIcon from "./icons/WhatsappIcon";
+
+const SOCIALS = [
+  { href: "https://www.instagram.com/teenovatexlabs/", label: "Instagram", Icon: InstagramIcon },
+  { href: "https://x.com/teenovatex40605", label: "X", Icon: XIcon },
+  { href: "https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW", label: "WhatsApp", Icon: WhatsappIcon },
+  { href: "https://www.linkedin.com/company/teenovatex-labs/", label: "LinkedIn", Icon: LinkedinIcon },
+];
 
 export default function Footer() {
   return (
     <footer className="wrap">
       <div className="grid gap-8 py-10 md:grid-cols-3 md:items-start md:gap-10">
-        <Link href="/" className="flex items-center gap-2.5">
-          <img src="/assets/logo-nobg.svg" alt="" aria-hidden="true" className="h-9 w-auto" />
-          <span className="font-bold text-2xl tracking-tight">
-            teenovate<span className="text-rose">x</span>
-            <small className="mt-0.5 block text-[10px] font-semibold tracking-[0.3em]">
-              LABS
-            </small>
-          </span>
+        <Link href="/" aria-label="TeenovateX home" className="flex items-center">
+          <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-9 w-auto" />
         </Link>
 
         <p className="text-sm text-muted">
@@ -20,18 +25,22 @@ export default function Footer() {
           Built for teenagers.
         </p>
 
-        <div className="flex gap-6 text-sm md:justify-end">
-          <a href="mailto:hello@teenovatex.com" className="hover:text-rose">
+        <div className="flex items-center gap-5 md:justify-end">
+          <a href="mailto:hello@teenovatex.com" className="text-sm hover:text-rose">
             Say hello ↗︎
           </a>
-          <a
-            href="https://www.instagram.com/teenovatexlabs/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-rose"
-          >
-            Instagram ↗︎
-          </a>
+          {SOCIALS.map(({ href, label, Icon }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={label}
+              className="text-ink transition-colors hover:text-rose"
+            >
+              <Icon size={20} />
+            </a>
+          ))}
         </div>
       </div>
 
