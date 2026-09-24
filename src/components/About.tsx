@@ -8,11 +8,12 @@ const ACTION_WORDS = [
   { word: "Share", rotate: "-rotate-1", bg: "bg-pink" },
 ];
 
+// Placeholders for member photos, not identified people — just a texture
+// suggesting "the community", so no initials or names here.
 const PEOPLE_MARKS = [
-  { initials: "AM", bg: "bg-yellow" },
-  { initials: "SS", bg: "bg-pink" },
-  { initials: "YL", bg: "bg-ink", fg: "text-cream" },
-  { initials: "QL", bg: "bg-line" },
+  { bg: "bg-yellow", fg: "text-ink/40" },
+  { bg: "bg-pink", fg: "text-ink/40" },
+  { bg: "bg-ink", fg: "text-cream/50" },
 ];
 
 export default function About() {
@@ -60,12 +61,15 @@ export default function About() {
               </p>
             </div>
             <div className="flex shrink-0 -space-x-3 self-center md:mt-1 md:self-start" aria-hidden="true">
-              {PEOPLE_MARKS.map((m) => (
+              {PEOPLE_MARKS.map((m, i) => (
                 <span
-                  key={m.initials}
-                  className={`flex h-11 w-11 items-center justify-center rounded-full border border-ink text-xs font-semibold ${m.bg} ${m.fg ?? ""}`}
+                  key={i}
+                  className={`flex h-11 w-11 items-center justify-center rounded-full border border-ink ${m.bg} ${m.fg}`}
                 >
-                  {m.initials}
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+                  </svg>
                 </span>
               ))}
             </div>
