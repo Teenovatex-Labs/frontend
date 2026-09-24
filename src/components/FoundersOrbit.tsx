@@ -92,7 +92,12 @@ export default function FoundersOrbit({
   const ringC = zip(founders.slice(8, 13), RING_C_ANGLES);
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[640px]">
+    <div className="relative mx-auto aspect-square w-full max-w-[640px] overflow-hidden">
+      {/* The rotating rings are square divs; a rotated square's axis-aligned
+          bounding box grows up to ~1.41x at 45 degrees, which — without this
+          overflow-hidden — periodically pushed past the viewport edge and
+          caused the whole page to scroll horizontally, even though the
+          visible avatar content itself always stays within these bounds. */}
       <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full" aria-hidden="true">
         <circle cx="200" cy="200" r={RING_A.radius * 4} fill="none" stroke="var(--ink)" strokeOpacity="0.18" strokeDasharray="3 8" />
         <circle cx="200" cy="200" r={RING_B.radius * 4} fill="none" stroke="var(--ink)" strokeOpacity="0.16" strokeDasharray="3 8" />
