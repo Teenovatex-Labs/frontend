@@ -302,20 +302,4 @@
     }
   }
 
-  /* Auth split (login/signup) — the browser interpolates the form and
-     image panels' own position/size between the two pages by default;
-     this just slows that down from the 250ms default to something that
-     reads as a deliberate slide rather than a blink. */
-  ::view-transition-group(auth-panel),
-  ::view-transition-group(auth-form) {
-    animation-duration: 0.45s;
-    animation-timing-function: cubic-bezier(0.22, 0.68, 0, 1.01);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    ::view-transition-group(auth-panel),
-    ::view-transition-group(auth-form) {
-      animation: none !important;
-    }
-  }
 }

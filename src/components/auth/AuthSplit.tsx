@@ -29,6 +29,7 @@ export default function AuthSplit({
 
   useLayoutEffect(() => {
     if (window.innerWidth < 1024) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     (
       [
@@ -48,7 +49,7 @@ export default function AuthSplit({
           // transition back to identity — otherwise it just skips straight
           // to the end state.
           el.getBoundingClientRect();
-          el.style.transition = "transform 0.6s cubic-bezier(0.22, 0.68, 0, 1.01)";
+          el.style.transition = "transform 1s cubic-bezier(0.22, 0.68, 0, 1.01)";
           el.style.transform = "translateX(0)";
         }
       }
