@@ -63,7 +63,7 @@ export default function Hero() {
 
           <div className="mx-auto mt-8 flex max-w-[820px] flex-col items-center justify-center gap-2.5 text-center md:flex-row md:gap-7">
             <Link href="/signup" className="btn">
-              Join us <span>↗︎</span>
+              Become a Teenovator <span>↗︎</span>
             </Link>
             <a
               href="#explore"
