@@ -4,9 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 
 const NAV_LINKS = [
-  { href: "#about", label: "The community" },
-  { href: "#explore", label: "The features" },
-  { href: "#people", label: "Our people" },
+  { href: "#about", label: "About us" },
+  { href: "#explore", label: "What we do" },
+  { href: "#people", label: "Meet the team" },
 ];
 
 export default function Header() {
