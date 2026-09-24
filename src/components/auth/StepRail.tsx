@@ -24,12 +24,12 @@ type NodeState = "done" | "active" | "upcoming";
  * its built-in animation so the rail itself feels alive, not just a bar. */
 export default function StepRail({ steps, current }: { steps: Step[]; current: number }) {
   return (
-    <div className="mb-9 flex items-start" role="list" aria-label="Signup progress">
+    <div className="mb-5 flex items-center" role="list" aria-label="Signup progress">
       {steps.map((step, i) => {
         const state: NodeState = i < current ? "done" : i === current ? "active" : "upcoming";
         return (
           <div key={step.id} className="flex flex-1 items-center last:flex-none" role="listitem">
-            <StepNode step={step} state={state} index={i} />
+            <StepNode step={step} state={state} />
             {i < steps.length - 1 && (
               <div className="relative mx-1.5 h-0.5 flex-1 self-center bg-line sm:mx-2.5">
                 <div
@@ -45,21 +45,25 @@ export default function StepRail({ steps, current }: { steps: Step[]; current: n
   );
 }
 
-function StepNode({ step, state, index }: { step: Step; state: NodeState; index: number }) {
+function StepNode({ step, state }: { step: Step; state: NodeState }) {
   const ref = useRef<IconHandle>(null);
   const Icon = step.icon;
 
   // Give the active node's icon a little life beyond the slide-in — it
-  // plays its own hover animation the moment it becomes current.
+  // plays its own animation the moment it becomes current, and every node
+  // (done or upcoming) can still be replayed on hover.
   useEffect(() => {
     if (state === "active") ref.current?.startAnimation();
   }, [state]);
 
   return (
-    <div className="flex flex-col items-center gap-1.5" aria-current={state === "active" ? "step" : undefined}>
+    <div aria-current={state === "active" ? "step" : undefined}>
       <div
         key={state}
-        className={`step-node-pop flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
+        onMouseEnter={() => ref.current?.startAnimation()}
+        onMouseLeave={() => ref.current?.stopAnimation()}
+        aria-label={step.label}
+        className={`step-node-pop flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
           state === "active"
             ? "border-rose bg-rose text-cream"
             : state === "done"
@@ -67,19 +71,8 @@ function StepNode({ step, state, index }: { step: Step; state: NodeState; index:
               : "border-line bg-cream text-muted"
         }`}
       >
-        {state === "done" ? (
-          <CheckIcon size={17} isAnimated={false} />
-        ) : (
-          <Icon ref={ref} size={17} isAnimated={state === "active"} />
-        )}
+        {state === "done" ? <CheckIcon ref={ref} size={16} /> : <Icon ref={ref} size={16} />}
       </div>
-      <span
-        className={`hidden text-[9px] font-bold uppercase tracking-[0.08em] sm:block ${
-          state === "upcoming" ? "text-muted" : "text-ink"
-        }`}
-      >
-        {index + 1}. {step.label}
-      </span>
     </div>
   );
 }
