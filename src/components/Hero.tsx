@@ -1,4 +1,5 @@
 import Link from "next/link";
+import TrueFocus from "./TrueFocus";
 
 const STATS = [
   { value: "1,000", suffix: "+", label: "Active members" },
@@ -47,12 +48,13 @@ export default function Hero() {
         <div className="wrap">
           <div className="max-w-[560px]">
             <h1 className="text-left text-[52px] leading-[1.13] tracking-[-0.05em] md:text-[91px]">
-              What if you
-              <br />
-              actually{" "}
-              <span className="whitespace-nowrap font-serif italic font-medium text-rose">
-                built it?
-              </span>
+              <TrueFocus
+                phrases={[
+                  { text: "What if" },
+                  { text: "you actually" },
+                  { text: "built it?", className: "whitespace-nowrap font-serif italic font-medium text-rose" },
+                ]}
+              />
             </h1>
 
             <p className="mt-7 max-w-[485px] text-left text-[15px] leading-[1.85] text-muted md:text-[17px]">
