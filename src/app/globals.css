@@ -4,6 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* @ogtirth/liquid-glass-oss ships its own hardcoded accent colors (an iOS
+   green toggle switch, a blue selected-tab indicator) with no themeable
+   variable for either — override its own classes directly so every
+   instance across the site picks up our brand color instead. !important
+   guards against a future release of the library reordering its own
+   rules relative to this file. */
+.lg-button.is-checked .lg-button__switch {
+  background: linear-gradient(180deg, var(--rose) 0%, #6f2646 100%) !important;
+}
+.lg-dock__item.is-selected,
+.lg-tabbar__item.is-selected,
+.lg-breadcrumb__item.is-selected {
+  color: var(--pink) !important;
+}
+
 :root {
   --cream: #fff9eb;
   --ink: #262822;
