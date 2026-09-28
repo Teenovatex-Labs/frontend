@@ -1,11 +1,18 @@
 import { z } from "zod";
 
 // Mirrors backend/src/schemas/auth.ts exactly so client and server agree on the rules.
-const strongPassword = z
+export const strongPassword = z
   .string()
   .min(8, "Password must be at least 8 characters")
   .regex(/[A-Z]/, "Password must contain an uppercase letter")
   .regex(/[0-9]/, "Password must contain a number");
+
+export const emailOnlySchema = z.object({ email: z.string().email("Enter a valid email") });
+
+export const newPasswordSchema = z.object({
+  password: strongPassword,
+  confirm_password: z.string(),
+});
 
 export const loginFormSchema = z.object({
   email: z.string().email("Enter a valid email"),
