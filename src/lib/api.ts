@@ -136,6 +136,24 @@ export const authApi = {
     }
   },
 
+  forgotPassword: (email: string) =>
+    request<{ message: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  verifyResetCode: (data: { email: string; code: string }) =>
+    request<{ token: string }>("/auth/verify-reset-code", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  resetPassword: (data: { token: string; new_password: string }) =>
+    request<{ message: string }>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
   me: () => request<UserProfile>("/users/me", {}, { auth: true }),
 
   // Restores a session on page load from the persisted refresh token
