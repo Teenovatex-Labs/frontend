@@ -9,9 +9,12 @@ import { LogInIcon } from "@animateicons/react/lucide/log-in-icon";
 import { ArrowLeftIcon } from "@animateicons/react/lucide/arrow-left-icon";
 import { ArrowRightIcon } from "@animateicons/react/lucide/arrow-right-icon";
 import { useAuth } from "@/context/AuthContext";
+import { ApiError } from "@/lib/api";
 import FormField from "@/components/FormField";
 import StepRail, { type Step } from "@/components/auth/StepRail";
 import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
+import VerifyCodeScreen from "@/components/auth/VerifyCodeScreen";
+import ForgotPasswordFlow from "@/components/auth/ForgotPasswordFlow";
 import useIconHover from "@/lib/useIconHover";
 import { loginFormSchema, fieldErrors } from "@/lib/validation";
 import { z } from "zod";
@@ -24,7 +27,7 @@ const STEPS: Step[] = [
 const emailSchema = loginFormSchema.pick({ email: true });
 
 export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () => void }) {
-  const { login, loginWithGoogle, user, loading } = useAuth();
+  const { login, verifyEmail, resendVerification, loginWithGoogle, user, loading } = useAuth();
   const router = useRouter();
 
   const [step, setStep] = useState(0);
@@ -37,6 +40,8 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false);
 
   const backIcon = useIconHover();
   const nextIcon = useIconHover();
@@ -83,13 +88,41 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
       await login(result.data.email, result.data.password);
       router.push("/dashboard");
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Login failed");
+      if (err instanceof ApiError && err.code === "EMAIL_NOT_VERIFIED") {
+        setNeedsVerification(true);
+      } else {
+        setFormError(err instanceof Error ? err.message : "Login failed");
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
   const panelClass = direction === "back" ? "step-panel-back" : "step-panel-forward";
+
+  if (needsVerification) {
+    return (
+      <VerifyCodeScreen
+        email={email}
+        heading={
+          <>
+            One quick <span className="font-serif italic font-medium text-rose">check.</span>
+          </>
+        }
+        description="Your email isn't verified yet — we sent a 6-digit code to"
+        onSubmit={async (code) => {
+          await verifyEmail(email, code);
+          router.push("/dashboard");
+        }}
+        onResend={() => resendVerification(email)}
+        onBack={() => setNeedsVerification(false)}
+      />
+    );
+  }
+
+  if (forgotPassword) {
+    return <ForgotPasswordFlow initialEmail={email} onBack={() => setForgotPassword(false)} />;
+  }
 
   return (
     <>
@@ -176,6 +209,13 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
                 error={errors.password}
                 autoFocus
               />
+              <button
+                type="button"
+                onClick={() => setForgotPassword(true)}
+                className="self-start text-xs font-semibold text-muted underline underline-offset-4 hover:text-ink"
+              >
+                Forgot password?
+              </button>
             </>
           )}
 
