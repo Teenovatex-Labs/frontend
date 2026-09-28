@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins, Playfair_Display } from "next/font/google";
+import "@ogtirth/liquid-glass-oss/styles.css";
 import "./globals.css";
 import Providers from "./providers";
 
