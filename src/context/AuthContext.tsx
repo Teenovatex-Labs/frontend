@@ -8,7 +8,14 @@ type AuthContextValue = {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: { full_name: string; username: string; email: string; password: string }) => Promise<void>;
+  register: (data: {
+    full_name: string;
+    username: string;
+    email: string;
+    password: string;
+  }) => Promise<{ email: string; require_verification: boolean }>;
+  verifyEmail: (email: string, code: string) => Promise<void>;
+  resendVerification: (email: string) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -52,10 +59,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register: AuthContextValue["register"] = async (data) => {
     setError(null);
     try {
-      await authApi.register(data);
-      await afterAuth();
+      const result = await authApi.register(data);
+      return { email: result.email, require_verification: result.require_verification };
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Registration failed");
+      throw err;
+    }
+  };
+
+  const verifyEmail: AuthContextValue["verifyEmail"] = async (email, code) => {
+    setError(null);
+    try {
+      await authApi.verifyEmail({ email, code });
+      await afterAuth();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Verification failed");
+      throw err;
+    }
+  };
+
+  const resendVerification: AuthContextValue["resendVerification"] = async (email) => {
+    setError(null);
+    try {
+      await authApi.resendVerification(email);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't resend the code");
       throw err;
     }
   };
@@ -77,7 +105,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, loginWithGoogle, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, error, login, register, verifyEmail, resendVerification, loginWithGoogle, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

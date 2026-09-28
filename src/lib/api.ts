@@ -86,14 +86,28 @@ async function request<T>(
 }
 
 export const authApi = {
-  register: async (data: { full_name: string; username: string; email: string; password: string }) => {
-    const result = await request<AuthResponse & { message: string }>("/auth/register", {
+  // No tokens yet — the account exists but is unverified until the code
+  // from verifyEmail() is confirmed.
+  register: (data: { full_name: string; username: string; email: string; password: string }) =>
+    request<{ message: string; email: string; require_verification: boolean }>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  verifyEmail: async (data: { email: string; code: string }) => {
+    const result = await request<AuthResponse>("/auth/verify-email", {
       method: "POST",
       body: JSON.stringify(data),
     });
     setTokens(result);
     return result;
   },
+
+  resendVerification: (email: string) =>
+    request<{ message: string }>("/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
 
   login: async (data: { email: string; password: string }) => {
     const result = await request<AuthResponse>("/auth/login", {
