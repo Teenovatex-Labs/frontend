@@ -13,7 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import FormField from "@/components/FormField";
 import StepRail, { type Step } from "@/components/auth/StepRail";
 import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
-import CodeSlots, { type CodeSlotsStatus } from "@/components/ui/CodeSlots";
+import VerifyCodeScreen from "@/components/auth/VerifyCodeScreen";
 import useIconHover from "@/lib/useIconHover";
 import { registerBaseSchema, fieldErrors } from "@/lib/validation";
 
@@ -42,12 +42,6 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
   const [submitting, setSubmitting] = useState(false);
 
   const [verifying, setVerifying] = useState(false);
-  const [code, setCode] = useState("");
-  const [verifyStatus, setVerifyStatus] = useState<CodeSlotsStatus>("idle");
-  const [verifyError, setVerifyError] = useState<string | null>(null);
-  const [resending, setResending] = useState(false);
-  const [resendMessage, setResendMessage] = useState<string | null>(null);
-  const [resendCooldown, setResendCooldown] = useState(0);
 
   const backIcon = useIconHover();
   const nextIcon = useIconHover();
@@ -56,42 +50,6 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
   useEffect(() => {
     if (!loading && user) router.replace("/dashboard");
   }, [loading, user, router]);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const t = setTimeout(() => setResendCooldown((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [resendCooldown]);
-
-  const handleVerifyComplete = async (submittedCode: string) => {
-    setVerifyError(null);
-    try {
-      await verifyEmail(email, submittedCode);
-      setVerifyStatus("success");
-      setTimeout(() => router.push("/dashboard"), 700);
-    } catch (err) {
-      setVerifyStatus("error");
-      setVerifyError(err instanceof Error ? err.message : "Verification failed");
-      setTimeout(() => {
-        setVerifyStatus("idle");
-        setCode("");
-      }, 900);
-    }
-  };
-
-  const handleResend = async () => {
-    setResending(true);
-    setResendMessage(null);
-    try {
-      await resendVerification(email);
-      setResendMessage("New code sent — check your inbox.");
-      setResendCooldown(30);
-    } catch (err) {
-      setResendMessage(err instanceof Error ? err.message : "Couldn't resend the code");
-    } finally {
-      setResending(false);
-    }
-  };
 
   const goTo = (index: number, dir: "forward" | "back") => {
     setDirection(dir);
@@ -170,69 +128,24 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
 
   if (verifying) {
     return (
-      <>
-        <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
-          <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
-        </Link>
-
-        <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">
-          Check your <span className="font-serif italic font-medium text-rose">inbox.</span>
-        </h1>
-        <p className="mt-3 text-sm text-muted">
-          We sent a 6-digit code to <span className="font-medium text-ink">{email}</span>. Enter it below to finish
-          becoming a Teenovator.
-        </p>
-
-        <div className="mt-8 flex justify-center">
-          <CodeSlots
-            length={6}
-            value={code}
-            onChange={setCode}
-            onComplete={handleVerifyComplete}
-            status={verifyStatus}
-            autoFocus
-            accentColor="var(--ink)"
-            inkColor="var(--rose)"
-            slotColor="var(--line)"
-            digitColor="var(--cream)"
-            dangerColor="#c0463f"
-            slotSize={48}
-          />
-        </div>
-
-        {verifyStatus === "error" && verifyError && (
-          <p className="mt-4 text-center text-sm text-rose">{verifyError}</p>
-        )}
-
-        <div className="mt-8 text-center text-sm text-muted">
-          Didn&rsquo;t get it?{" "}
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={resending || resendCooldown > 0}
-            className="font-semibold text-ink underline underline-offset-4 disabled:opacity-50 disabled:no-underline"
-          >
-            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : resending ? "Sending…" : "Resend code"}
-          </button>
-        </div>
-        {resendMessage && <p className="mt-2 text-center text-xs text-muted">{resendMessage}</p>}
-
-        <p className="mt-5 text-center text-sm text-muted">
-          Wrong email?{" "}
-          <button
-            type="button"
-            onClick={() => {
-              setVerifying(false);
-              setVerifyStatus("idle");
-              setCode("");
-              goTo(1, "back");
-            }}
-            className="font-semibold text-ink underline underline-offset-4"
-          >
-            Go back
-          </button>
-        </p>
-      </>
+      <VerifyCodeScreen
+        email={email}
+        heading={
+          <>
+            Check your <span className="font-serif italic font-medium text-rose">inbox.</span>
+          </>
+        }
+        description="We sent a 6-digit code to finish becoming a Teenovator to"
+        onSubmit={async (code) => {
+          await verifyEmail(email, code);
+          setTimeout(() => router.push("/dashboard"), 700);
+        }}
+        onResend={() => resendVerification(email)}
+        onBack={() => {
+          setVerifying(false);
+          goTo(1, "back");
+        }}
+      />
     );
   }
 
