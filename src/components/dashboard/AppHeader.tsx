@@ -3,21 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Home09Icon, BubbleChatIcon } from "@hugeicons/core-free-icons";
+import {
+  Home09Icon,
+  Rocket01Icon,
+  UserMultiple02Icon,
+  BubbleChatIcon,
+  UserIcon,
+  Search01Icon,
+  Setting07Icon,
+} from "@hugeicons/core-free-icons";
 
-// Ported from the Figma "MacBook Air - 1" home-screen design
-// (node 19:3, https://www.figma.com/design/rStY9cqyzgvCBG2HfnrOfx). The
-// rocket/community/profile/search/settings glyphs are the exact vector
-// assets from that file (public/assets/nav/*.svg); the design's "AI"
-// glyph (a small robot) is intentionally swapped for a chat icon here per
-// request, and the home glyph — a bare SF Symbol placeholder in the
-// source file with no real asset — uses a hugeicons house instead.
+// Layout ported from the Figma "MacBook Air - 1" home-screen design
+// (node 19:3, https://www.figma.com/design/rStY9cqyzgvCBG2HfnrOfx), but the
+// icon glyphs themselves are our own hugeicons set (matching every other
+// icon in the app) rather than the one-off vectors from that file. The
+// design's "AI" glyph (a small robot) is swapped for a chat icon per request.
 const NAV_ITEMS = [
-  { id: "home", href: "/dashboard", label: "Home", render: () => <HugeiconsIcon icon={Home09Icon} size={18} strokeWidth={2} /> },
-  { id: "projects", href: "/dashboard/projects", label: "Projects", render: () => <img src="/assets/nav/rocket.svg" alt="" className="h-[18px] w-[18px]" /> },
-  { id: "community", href: "/dashboard/community", label: "Community", render: () => <img src="/assets/nav/community.svg" alt="" className="h-[17px] w-[21px]" /> },
-  { id: "chat", href: "/dashboard/chat", label: "Chat", render: () => <HugeiconsIcon icon={BubbleChatIcon} size={18} strokeWidth={2} /> },
-  { id: "profile", href: "/dashboard/profile", label: "Profile", render: () => <img src="/assets/nav/profile.svg" alt="" className="h-[17px] w-[16px]" /> },
+  { id: "home", href: "/dashboard", label: "Home", icon: Home09Icon },
+  { id: "projects", href: "/dashboard/projects", label: "Projects", icon: Rocket01Icon },
+  { id: "community", href: "/dashboard/community", label: "Community", icon: UserMultiple02Icon },
+  { id: "chat", href: "/dashboard/chat", label: "Chat", icon: BubbleChatIcon },
+  { id: "profile", href: "/dashboard/profile", label: "Profile", icon: UserIcon },
 ] as const;
 
 const glassPill =
@@ -46,7 +52,7 @@ export default function AppHeader() {
                 active ? glassPill : "hover:bg-white/[0.06]"
               }`}
             >
-              {item.render()}
+              <HugeiconsIcon icon={item.icon} size={18} strokeWidth={2} />
             </Link>
           );
         })}
@@ -54,14 +60,14 @@ export default function AppHeader() {
 
       <div className={`flex items-center gap-1 rounded-full p-1 ${glassPill}`}>
         <button type="button" aria-label="Search" className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/[0.06]">
-          <img src="/assets/nav/search.svg" alt="" className="h-[18px] w-[18px]" />
+          <HugeiconsIcon icon={Search01Icon} size={18} strokeWidth={2} />
         </button>
         <Link
           href="/dashboard/settings"
           aria-label="Settings"
           className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/[0.06]"
         >
-          <img src="/assets/nav/settings.svg" alt="" className="h-5 w-5" />
+          <HugeiconsIcon icon={Setting07Icon} size={18} strokeWidth={2} />
         </Link>
       </div>
     </header>
