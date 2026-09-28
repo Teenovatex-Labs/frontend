@@ -81,7 +81,13 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
       if (result.error.issues.some((i) => i.path[0] === "email")) goTo(0, "back");
       return;
     }
-    setErrors({});
+    // Clear first (a separate render from the one that re-sets it below) so
+    // failing with the exact same message twice in a row still re-triggers
+    // the field's shake instead of silently no-op'ing on an unchanged error.
+    setErrors((prev) => {
+      const { password: _password, ...rest } = prev;
+      return rest;
+    });
 
     setSubmitting(true);
     try {
@@ -91,7 +97,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
       if (err instanceof ApiError && err.code === "EMAIL_NOT_VERIFIED") {
         setNeedsVerification(true);
       } else {
-        setFormError(err instanceof Error ? err.message : "Login failed");
+        setErrors((prev) => ({ ...prev, password: err instanceof Error ? err.message : "Login failed" }));
       }
     } finally {
       setSubmitting(false);
