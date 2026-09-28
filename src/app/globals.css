@@ -285,6 +285,25 @@
     animation: step-shake 0.45s;
   }
 
+  /* Field validation callout — pops in pointing at the box it belongs to */
+  @keyframes error-pop {
+    0% {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.9);
+    }
+    60% {
+      opacity: 1;
+      transform: translateY(1px) scale(1.03);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .error-pop {
+    animation: error-pop 0.3s cubic-bezier(0.22, 0.68, 0, 1.01);
+  }
+
   .step-rail-fill {
     transition: width 0.5s cubic-bezier(0.22, 0.68, 0, 1.01);
   }
@@ -293,7 +312,8 @@
     .step-panel-forward,
     .step-panel-back,
     .step-node-pop,
-    .step-shake {
+    .step-shake,
+    .error-pop {
       animation: none;
     }
 
