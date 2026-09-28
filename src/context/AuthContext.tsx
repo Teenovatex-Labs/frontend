@@ -16,6 +16,9 @@ type AuthContextValue = {
   }) => Promise<{ email: string; require_verification: boolean }>;
   verifyEmail: (email: string, code: string) => Promise<void>;
   resendVerification: (email: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  verifyResetCode: (email: string, code: string) => Promise<string>;
+  resetPassword: (token: string, new_password: string) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -88,6 +91,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const forgotPassword: AuthContextValue["forgotPassword"] = async (email) => {
+    setError(null);
+    try {
+      await authApi.forgotPassword(email);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't send the reset code");
+      throw err;
+    }
+  };
+
+  const verifyResetCode: AuthContextValue["verifyResetCode"] = async (email, code) => {
+    setError(null);
+    try {
+      const { token } = await authApi.verifyResetCode({ email, code });
+      return token;
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Verification failed");
+      throw err;
+    }
+  };
+
+  const resetPassword: AuthContextValue["resetPassword"] = async (token, new_password) => {
+    setError(null);
+    try {
+      await authApi.resetPassword({ token, new_password });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't reset your password");
+      throw err;
+    }
+  };
+
   const loginWithGoogle: AuthContextValue["loginWithGoogle"] = async (idToken) => {
     setError(null);
     try {
@@ -106,7 +140,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, error, login, register, verifyEmail, resendVerification, loginWithGoogle, logout }}
+      value={{
+        user,
+        loading,
+        error,
+        login,
+        register,
+        verifyEmail,
+        resendVerification,
+        forgotPassword,
+        verifyResetCode,
+        resetPassword,
+        loginWithGoogle,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
