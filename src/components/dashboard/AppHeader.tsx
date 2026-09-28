@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, useReducedMotion } from "motion/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Home09Icon,
@@ -29,8 +30,16 @@ const NAV_ITEMS = [
 const glassPill =
   "border border-white/35 bg-white/[0.07] backdrop-blur-[8.3px] [mix-blend-mode:plus-lighter] shadow-[-15.764px_-12.949px_48px_-12px_rgba(0,0,0,0.15),-2.627px_-2.158px_12px_-8px_rgba(0,0,0,0.15)]";
 
+// Apple's fluid-interface defaults (WWDC 2018, "Designing Fluid Interfaces"):
+// critically damped (no overshoot) for a highlight that's just moving to
+// follow selection, not something the user flicked or dragged.
+const SPRING = { type: "spring" as const, bounce: 0, duration: 0.4 };
+const TAP_SCALE = 0.88;
+
 export default function AppHeader() {
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
+  const transition = reduceMotion ? { duration: 0 } : SPRING;
 
   return (
     <header className="sticky top-0 z-40 flex h-[60px] items-center justify-between bg-[#242821] px-6">
@@ -48,26 +57,52 @@ export default function AppHeader() {
               href={item.href}
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
-              className={`flex h-[30px] w-[50px] items-center justify-center rounded-full text-white transition-colors ${
-                active ? glassPill : "hover:bg-white/[0.06]"
-              }`}
+              className="relative flex h-[30px] w-[50px] items-center justify-center rounded-full text-white"
             >
-              <HugeiconsIcon icon={item.icon} size={18} strokeWidth={2} />
+              {active && (
+                // A single shared element that springs from wherever it was
+                // to the newly active item — the "segmented control" feel —
+                // instead of each pill just popping its own highlight on/off.
+                <motion.span
+                  layoutId="nav-active-pill"
+                  className={`absolute inset-0 rounded-full ${glassPill}`}
+                  transition={transition}
+                />
+              )}
+              <motion.span
+                className="relative z-10 flex items-center justify-center"
+                whileTap={reduceMotion ? undefined : { scale: TAP_SCALE }}
+                whileHover={active ? undefined : { backgroundColor: "rgba(255,255,255,0.06)" }}
+                style={{ width: "100%", height: "100%", borderRadius: 9999 }}
+                transition={{ type: "spring", bounce: 0, duration: 0.15 }}
+              >
+                <HugeiconsIcon icon={item.icon} size={18} strokeWidth={2} />
+              </motion.span>
             </Link>
           );
         })}
       </nav>
 
       <div className={`flex items-center gap-1 rounded-full p-1 ${glassPill}`}>
-        <button type="button" aria-label="Search" className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/[0.06]">
-          <HugeiconsIcon icon={Search01Icon} size={18} strokeWidth={2} />
-        </button>
-        <Link
-          href="/dashboard/settings"
-          aria-label="Settings"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/[0.06]"
+        <motion.button
+          type="button"
+          aria-label="Search"
+          whileTap={reduceMotion ? undefined : { scale: TAP_SCALE }}
+          whileHover={{ backgroundColor: "rgba(255,255,255,0.06)" }}
+          transition={{ type: "spring", bounce: 0, duration: 0.15 }}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-white"
         >
-          <HugeiconsIcon icon={Setting07Icon} size={18} strokeWidth={2} />
+          <HugeiconsIcon icon={Search01Icon} size={18} strokeWidth={2} />
+        </motion.button>
+        <Link href="/dashboard/settings" aria-label="Settings" className="flex h-8 w-8 items-center justify-center rounded-full">
+          <motion.span
+            className="flex h-full w-full items-center justify-center rounded-full text-white"
+            whileTap={reduceMotion ? undefined : { scale: TAP_SCALE }}
+            whileHover={{ backgroundColor: "rgba(255,255,255,0.06)" }}
+            transition={{ type: "spring", bounce: 0, duration: 0.15 }}
+          >
+            <HugeiconsIcon icon={Setting07Icon} size={18} strokeWidth={2} />
+          </motion.span>
         </Link>
       </div>
     </header>
