@@ -171,7 +171,7 @@ export default function Toolkit() {
             src="/assets/illustration-nobg.svg"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-0 -z-10 hidden w-[340px] -translate-x-1/2 lg:block xl:w-[400px]"
+            className="pointer-events-none absolute left-1/2 top-0 -z-10 hidden w-[340px] -translate-x-1/2 opacity-40 lg:block xl:w-[400px]"
           />
           <div className="wrap relative">
             {/* Below lg there's no room between heading and blurb, so it
@@ -180,7 +180,7 @@ export default function Toolkit() {
               src="/assets/illustration-nobg.svg"
               alt=""
               aria-hidden="true"
-              className="pointer-events-none mx-auto -mt-16 mb-8 block w-[240px] md:-mt-24 md:w-[300px] lg:hidden"
+              className="pointer-events-none mx-auto -mt-16 mb-8 block w-[240px] opacity-40 md:-mt-24 md:w-[300px] lg:hidden"
             />
             <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
               <div>
