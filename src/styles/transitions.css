@@ -1,0 +1,275 @@
+/* ==========================================================================
+   Reusable motion primitives (Transitions.dev), kept independent of any one
+   feature. Pull the matching one in whenever a new component fits its shape
+   — don't re-derive a bespoke version of any of these from scratch.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Number pop-in
+   For: any digit/character that should visibly land when it first appears
+   or changes — a stat ticking up, a step indicator, a single-character
+   swap. For a full numeric readout that rolls place-by-place (a counter, a
+   total, a price), prefer the `torph` package's <TextMorph> instead — this
+   is for simpler one-off digit/character pop-ins that don't need place-value
+   matching.
+
+  Usage:
+    <span class="t-digit-group is-animating">
+      <span class="t-digit">1</span>
+      <span class="t-digit">2</span>
+      <span class="t-digit" data-stagger="1">.</span>
+      <span class="t-digit" data-stagger="2">3</span>
+    </span>
+
+  Replay:
+    - Remove `.is-animating`, re-render digits (or swap text),
+      force a reflow, then re-add `.is-animating`.
+    - Use data-stagger="1", "2", … to delay individual
+      digits by `n * var(--digit-stagger)`.
+
+  Direction:
+    --digit-dir-x / --digit-dir-y are unit-less multipliers
+    (e.g. 1, -1, 0) applied to --digit-distance.
+-------------------------------------------------------------------------- */
+
+:root {
+  --digit-dur: 500ms;
+  --digit-distance: 8px;
+  --digit-stagger: 70ms;
+  --digit-blur: 2px;
+  --digit-ease: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --digit-dir-x: 0;
+  --digit-dir-y: 1;
+}
+
+@keyframes t-digit-pop-in {
+  0% {
+    transform: translate(
+      calc(var(--digit-distance) * var(--digit-dir-x)),
+      calc(var(--digit-distance) * var(--digit-dir-y))
+    );
+    opacity: 0;
+    filter: blur(var(--digit-blur));
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.t-digit-group {
+  display: inline-flex;
+  align-items: baseline;
+}
+.t-digit {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+.t-digit-group.is-animating .t-digit {
+  animation: t-digit-pop-in var(--digit-dur) var(--digit-ease) both;
+}
+.t-digit-group.is-animating .t-digit[data-stagger="1"] {
+  animation-delay: var(--digit-stagger);
+}
+.t-digit-group.is-animating .t-digit[data-stagger="2"] {
+  animation-delay: calc(var(--digit-stagger) * 2);
+}
+
+/* --------------------------------------------------------------------------
+   Notification badge
+   For: an unread-count / status dot anchored to a bell, avatar, or any
+   icon-button trigger — the classic "1" pill in the corner of an icon.
+
+  Usage:
+    <!-- Place .t-badge inside your trigger (bell icon, button, etc.). -->
+    <!-- The trigger must be position: relative so .t-badge can anchor to it. -->
+    <button class="your-trigger" style="position: relative">
+      <!-- your icon / trigger contents -->
+      <span class="t-badge" data-open="false">
+        <span class="t-badge-dot">1</span>
+      </span>
+    </button>
+
+  State: toggle data-open="true" / "false" on .t-badge.
+  Only the badge slides + pops — the trigger itself stays put.
+-------------------------------------------------------------------------- */
+
+:root {
+  --badge-slide-dur: 260ms;
+  --badge-pop-dur: 500ms;
+  --badge-pop-close-dur: 180ms;
+  --badge-fade-dur: 400ms;
+  --badge-fade-close-dur: 180ms;
+  --badge-blur: 2px;
+  --badge-offset-x: -8.2px;
+  --badge-offset-y: 12.4px;
+  --badge-slide-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --badge-pop-ease: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --badge-close-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes t-badge-slide-in {
+  from {
+    transform: translate(var(--badge-offset-x), var(--badge-offset-y));
+  }
+  to {
+    transform: translate(0, 0);
+  }
+}
+
+/* .t-badge is the absolutely-positioned wrapper for the dot.
+   Adjust top/right (or left/bottom) to anchor it on your trigger. */
+.t-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  pointer-events: none;
+  will-change: transform;
+}
+.t-badge[data-open="true"] {
+  animation: t-badge-slide-in var(--badge-slide-dur) var(--badge-slide-ease);
+}
+
+.t-badge-dot {
+  display: block;
+  transform-origin: center;
+  transform: scale(1);
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    transform var(--badge-pop-dur) var(--badge-pop-ease),
+    opacity var(--badge-fade-dur) var(--badge-pop-ease),
+    filter var(--badge-pop-dur) var(--badge-pop-ease);
+  will-change: transform, opacity, filter;
+}
+.t-badge[data-open="false"] .t-badge-dot {
+  transform: scale(0);
+  opacity: 0;
+  filter: blur(var(--badge-blur));
+  transition:
+    transform var(--badge-pop-close-dur) var(--badge-close-ease),
+    opacity var(--badge-fade-close-dur) var(--badge-close-ease),
+    filter var(--badge-pop-close-dur) var(--badge-close-ease);
+}
+
+/* --------------------------------------------------------------------------
+   Banner stacking (Sonner-style)
+   For: notifications, toasts, status banners — anything that queues up and
+   collapses into a peekable stack.
+
+  Usage:
+    <div class="t-stack">
+      <div class="t-stack-banner" data-depth="0">…</div>
+    </div>
+
+  Append a new banner with .is-enter + data-depth 0, step every older
+  banner's data-depth one back, force one reflow, then remove .is-enter in
+  the same task (a rAF hop is skipped when the frame clock is throttled). A
+  fourth banner gets .is-leaving; remove it after --stack-close. Hover
+  spread is geometry in JS: pointer inside the collapsed stack box adds
+  .is-spread, and it holds until the pointer leaves the taller spread column
+  ((stack height + gap) * 2 above).
+-------------------------------------------------------------------------- */
+
+:root {
+  --stack-open: 350ms;
+  --stack-close: 250ms;
+  --stack-rise: 60px;
+  --stack-blur: 2px;
+  --stack-scale: 0.97;
+  --stack-peek: 12px;
+  --stack-spread-gap: 8px;
+  --stack-depth-scale: 0.06;
+  --stack-depth-fade: 0.4;
+  --stack-depth1-blur: 1px;
+  --stack-depth2-blur: 2px;
+  --stack-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.t-stack {
+  position: relative;
+}
+.t-stack-banner {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  /* Centre origin so an arriving banner scales like a toast; the
+     push-back depths switch to the bottom edge, which they can do
+     freely because the swap happens at identity. */
+  transform-origin: 50% 50%;
+  /* Explicit blur(0) rather than an unset filter — blur → none is
+     not reliably interpolated, and the cross-blur would snap. */
+  filter: blur(0);
+  will-change: transform, opacity, filter;
+  transition:
+    transform var(--stack-open) var(--stack-ease),
+    opacity var(--stack-open) var(--stack-ease),
+    filter var(--stack-open) var(--stack-ease);
+}
+.t-stack-banner[data-depth="0"] {
+  z-index: 3;
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.t-stack-banner[data-depth="1"] {
+  z-index: 2;
+  transform-origin: 50% 100%;
+  transform: translateY(calc(var(--stack-peek) * -1)) scale(calc(1 - var(--stack-depth-scale)));
+  opacity: calc(1 - var(--stack-depth-fade));
+  filter: blur(var(--stack-depth1-blur));
+}
+.t-stack-banner[data-depth="2"] {
+  z-index: 1;
+  transform-origin: 50% 100%;
+  transform: translateY(calc(var(--stack-peek) * -2)) scale(calc(1 - var(--stack-depth-scale) * 2));
+  opacity: calc(1 - var(--stack-depth-fade) * 1.6);
+  filter: blur(var(--stack-depth2-blur));
+}
+/* Spread: newest stays put, older ones climb one banner height
+   each (100% = the banner's own height). Driven by a class, not
+   :hover — the gaps between spread banners belong to no element. */
+.t-stack.is-spread .t-stack-banner[data-depth="1"],
+.t-stack.is-spread .t-stack-banner[data-depth="2"] {
+  opacity: 1;
+  filter: blur(0);
+}
+.t-stack.is-spread .t-stack-banner[data-depth="1"] {
+  transform: translateY(calc((100% + var(--stack-spread-gap)) * -1)) scale(1);
+}
+.t-stack.is-spread .t-stack-banner[data-depth="2"] {
+  transform: translateY(calc((100% + var(--stack-spread-gap)) * -2)) scale(1);
+}
+.t-stack-banner.is-enter {
+  transition: none;
+  transform: translateY(var(--stack-rise)) scale(var(--stack-scale));
+  opacity: 0;
+  filter: blur(var(--stack-blur));
+}
+.t-stack-banner.is-leaving {
+  z-index: 0;
+  transform-origin: 50% 100%;
+  transform: translateY(calc(var(--stack-peek) * -3)) scale(calc(1 - var(--stack-depth-scale) * 3));
+  opacity: 0;
+  filter: blur(var(--stack-blur));
+  transition:
+    transform var(--stack-close) var(--stack-ease),
+    opacity var(--stack-close) var(--stack-ease),
+    filter var(--stack-close) var(--stack-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-digit-group .t-digit {
+    animation: none !important;
+  }
+  .t-badge,
+  .t-badge-dot {
+    animation: none !important;
+    transition: none !important;
+  }
+  .t-stack-banner {
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
