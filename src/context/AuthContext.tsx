@@ -21,6 +21,7 @@ type AuthContextValue = {
   resetPassword: (token: string, new_password: string) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -138,6 +139,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  // Re-fetches the current user — e.g. after adding/changing a password,
+  // so `has_password` reflects it without a full page reload.
+  const refreshUser: AuthContextValue["refreshUser"] = async () => {
+    setUser(await authApi.me());
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -153,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         resetPassword,
         loginWithGoogle,
         logout,
+        refreshUser,
       }}
     >
       {children}
