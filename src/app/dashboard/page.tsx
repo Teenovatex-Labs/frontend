@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import AppHeader from "@/components/dashboard/AppHeader";
+import AddPasswordPrompt from "@/components/dashboard/AddPasswordPrompt";
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   return (
     <>
       <AppHeader />
+      <AddPasswordPrompt />
       <main className="wrap flex min-h-[calc(100vh-60px)] flex-col justify-center gap-6 py-16">
         <p className="eyebrow text-rose">This is a placeholder</p>
         <h1 className="text-[38px] leading-[1.1] tracking-[-0.03em] md:text-[54px]">
