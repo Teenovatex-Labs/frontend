@@ -29,21 +29,31 @@ export type UserProfile = {
   created_at: string;
 };
 
+// "Remember me" decides *where* the refresh token lives: localStorage
+// survives closing the browser (a returning visit skips the login form
+// entirely), sessionStorage clears the moment the tab/browser closes. Both
+// are checked on read so a token written under either policy is honored.
 function getRefreshToken(): string | null {
   if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(REFRESH_TOKEN_KEY);
+  return window.localStorage.getItem(REFRESH_TOKEN_KEY) ?? window.sessionStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
-function setTokens(tokens: { access_token: string; refresh_token?: string }) {
+function setTokens(tokens: { access_token: string; refresh_token?: string }, remember = true) {
   accessToken = tokens.access_token;
   if (tokens.refresh_token && typeof window !== "undefined") {
-    window.localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
+    const store = remember ? window.localStorage : window.sessionStorage;
+    const other = remember ? window.sessionStorage : window.localStorage;
+    store.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
+    other.removeItem(REFRESH_TOKEN_KEY);
   }
 }
 
 function clearTokens() {
   accessToken = null;
-  if (typeof window !== "undefined") window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+    window.sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
 }
 
 async function tryRefresh(): Promise<boolean> {
@@ -109,12 +119,12 @@ export const authApi = {
       body: JSON.stringify({ email }),
     }),
 
-  login: async (data: { email: string; password: string }) => {
+  login: async (data: { email: string; password: string }, remember = true) => {
     const result = await request<AuthResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify(data),
     });
-    setTokens(result);
+    setTokens(result, remember);
     return result;
   },
 
