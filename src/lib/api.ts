@@ -146,6 +146,12 @@ export const authApi = {
     const refresh_token = getRefreshToken();
     try {
       await request("/auth/logout", { method: "POST", body: JSON.stringify({ refresh_token }) }, { auth: true });
+    } catch {
+      // Best-effort: the point of logging out is that the browser forgets
+      // the session. If the access token was already expired/invalid (or
+      // the server call fails for any other reason), there's nothing left
+      // worth doing server-side that should block clearing local state —
+      // an already-dead session doesn't need to be told it's dead.
     } finally {
       clearTokens();
     }
