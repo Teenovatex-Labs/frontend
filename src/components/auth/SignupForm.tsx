@@ -92,6 +92,13 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    // Every step's button is type="submit" so Enter always does the right
+    // thing from wherever the cursor is — advance on an earlier step,
+    // actually register only on the last one.
+    if (step < STEPS.length - 1) {
+      goNext();
+      return;
+    }
     setFormError(null);
 
     const result = registerBaseSchema.safeParse({
@@ -290,8 +297,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
 
             {step < STEPS.length - 1 ? (
               <button
-                type="button"
-                onClick={goNext}
+                type="submit"
                 onMouseEnter={nextIcon.onMouseEnter}
                 onMouseLeave={nextIcon.onMouseLeave}
                 key={attempt}

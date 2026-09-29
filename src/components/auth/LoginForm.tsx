@@ -74,6 +74,13 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    // Both steps' buttons are type="submit" so Enter always does the right
+    // thing from wherever the cursor is — advance past email, actually log
+    // in once password is on screen.
+    if (step === 0) {
+      goNext();
+      return;
+    }
     setFormError(null);
 
     const result = loginFormSchema.safeParse({ email, password });
@@ -266,8 +273,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
 
             {step === 0 ? (
               <button
-                type="button"
-                onClick={goNext}
+                type="submit"
                 onMouseEnter={nextIcon.onMouseEnter}
                 onMouseLeave={nextIcon.onMouseLeave}
                 key={attempt}
