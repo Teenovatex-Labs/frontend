@@ -7,7 +7,7 @@ type AuthContextValue = {
   user: UserProfile | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (data: {
     full_name: string;
     username: string;
@@ -48,10 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await authApi.me());
   };
 
-  const login: AuthContextValue["login"] = async (email, password) => {
+  const login: AuthContextValue["login"] = async (email, password, rememberMe = true) => {
     setError(null);
     try {
-      await authApi.login({ email, password });
+      await authApi.login({ email, password }, rememberMe);
       await afterAuth();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Login failed");
