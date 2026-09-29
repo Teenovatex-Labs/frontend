@@ -37,6 +37,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -91,7 +92,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
 
     setSubmitting(true);
     try {
-      await login(result.data.email, result.data.password);
+      await login(result.data.email, result.data.password, rememberMe);
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof ApiError && err.code === "EMAIL_NOT_VERIFIED") {
@@ -105,6 +106,17 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
   };
 
   const panelClass = direction === "back" ? "step-panel-back" : "step-panel-forward";
+
+  // Still checking a persisted session, or already have one — skip the form
+  // entirely instead of flashing it before the redirect effect above fires.
+  if (loading || user) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-16 text-sm text-muted">
+        <span className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-rose" />
+        Taking you in…
+      </div>
+    );
+  }
 
   if (needsVerification) {
     return (
@@ -215,13 +227,24 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
                 error={errors.password}
                 autoFocus
               />
-              <button
-                type="button"
-                onClick={() => setForgotPassword(true)}
-                className="self-start text-xs font-semibold text-muted underline underline-offset-4 hover:text-ink"
-              >
-                Forgot password?
-              </button>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-xs font-medium text-muted">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-ink accent-rose"
+                  />
+                  Remember me
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setForgotPassword(true)}
+                  className="text-xs font-semibold text-muted underline underline-offset-4 hover:text-ink"
+                >
+                  Forgot password?
+                </button>
+              </div>
             </>
           )}
 
