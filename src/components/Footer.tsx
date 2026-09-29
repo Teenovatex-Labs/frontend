@@ -48,9 +48,17 @@ export default function Footer() {
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line py-5 text-xs text-muted">
         <span>© 2026 TeenovateX Labs</span>
-        <a href="#" className="ml-auto">
-          Back to top ↑
-        </a>
+        <div className="ml-auto flex items-center gap-4">
+          <Link href="/privacy-policy" className="hover:text-rose">
+            Privacy Policy
+          </Link>
+          <Link href="/terms-of-service" className="hover:text-rose">
+            Terms of Service
+          </Link>
+          <a href="#" className="hover:text-rose">
+            Back to top ↑
+          </a>
+        </div>
       </div>
     </footer>
   );
