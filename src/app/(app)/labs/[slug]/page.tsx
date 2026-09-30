@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
-import { labsApi } from "@/lib/services";
+import { labsApi, labsDeepApi } from "@/lib/services";
 import { categoryLabel, keys, timeAgo } from "@/lib/labs";
 import Avatar from "@/components/ui/Avatar";
 import Dialog from "@/components/ui/Dialog";
@@ -16,6 +16,13 @@ import { useToast } from "@/components/ui/Toast";
 import { LabCover } from "@/components/labs/LabCard";
 import VoteButton from "@/components/labs/VoteButton";
 import ReportButton from "@/components/safety/ReportDialog";
+import Tabs from "@/components/ui/Tabs";
+import Milestones from "@/components/labs/Milestones";
+import UpdatesTab from "@/components/labs/UpdatesTab";
+import BoardTab from "@/components/labs/BoardTab";
+import TeamTab from "@/components/labs/TeamTab";
+
+type Tab = "overview" | "updates" | "board" | "team";
 
 export default function LabPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -26,6 +33,13 @@ export default function LabPage() {
   const [confirming, setConfirming] = useState(false);
 
   const lab = useQuery({ queryKey: keys.lab(slug), queryFn: () => labsApi.get(slug) });
+  const team = useQuery({ queryKey: keys.team(slug), queryFn: () => labsDeepApi.team(slug) });
+  const [tab, setTab] = useState<Tab>("overview");
+  // Notifications deep-link with ?tab=board, so honour it once the page is on screen.
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("tab");
+    if (wanted === "updates" || wanted === "board" || wanted === "team") setTab(wanted);
+  }, []);
 
   const remove = useMutation({
     mutationFn: (id: string) => labsApi.remove(id),
@@ -63,6 +77,7 @@ export default function LabPage() {
 
   const data = lab.data;
   const isOwner = user?.username === data.user.username;
+  const isTeam = team.data?.my_role != null;
   const links = [
     { label: "Try the demo", href: data.demo_url },
     { label: "See the code", href: data.github_url },
@@ -94,7 +109,24 @@ export default function LabPage() {
         <span>Started {timeAgo(data.created_at)}</span>
       </div>
 
-      <p className="mt-6 text-lg">{data.short_description}</p>
+      <div className="mt-8">
+        <Tabs
+          label="Sections"
+          value={tab}
+          onChange={setTab}
+          options={[
+            { id: "overview", label: "Overview" },
+            { id: "updates", label: "Updates" },
+            ...(isTeam ? [{ id: "board" as const, label: "Board" }] : []),
+            { id: "team", label: `Team${team.data ? ` (${team.data.members.length})` : ""}` },
+          ]}
+        />
+      </div>
+
+      <div className="mt-6">
+        {tab === "overview" && (
+          <div>
+      <p className="text-lg">{data.short_description}</p>
       <p className="mt-4 whitespace-pre-line text-muted">{data.description}</p>
 
       {data.tags.length > 0 && (
@@ -116,6 +148,14 @@ export default function LabPage() {
           ))}
         </div>
       )}
+
+            <Milestones lab={data.id} isTeam={isTeam} />
+          </div>
+        )}
+        {tab === "updates" && <UpdatesTab lab={data.id} isTeam={isTeam} isOwner={isOwner} me={user?.username} />}
+        {tab === "board" && isTeam && team.data && <BoardTab lab={data.id} team={team.data.members} />}
+        {tab === "team" && <TeamTab lab={data.id} me={user?.username} />}
+      </div>
 
       {!isOwner && (
         <div className="mt-12 border-t border-line pt-6">
