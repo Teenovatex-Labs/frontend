@@ -364,6 +364,30 @@
 
 }
 
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* A photo that hasn't arrived yet: a slow sheen sweeping across, like a
+   polaroid still developing. */
+@keyframes photo-dev {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.photo-dev {
+  background-image: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: photo-dev 3s linear infinite;
+}
+
 /* Air-mail edge for the contact postcard. */
 .airmail {
   background: repeating-linear-gradient(
@@ -373,4 +397,27 @@
     var(--rose) 28px 42px,
     var(--cream) 42px 56px
   );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-dev {
+    animation: none;
+  }
+}
+
+/* Lines a full-bleed scroller's first item up with .wrap's left edge. */
+.reel-gutter {
+  --g: 20px;
+  padding-inline: var(--g);
+  scroll-padding-inline: var(--g);
+}
+@media (min-width: 801px) {
+  .reel-gutter {
+    --g: 32px;
+  }
+}
+@media (min-width: 1101px) {
+  .reel-gutter {
+    --g: max(56px, calc((100% - 1280px) / 2));
+  }
 }
