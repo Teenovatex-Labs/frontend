@@ -70,7 +70,7 @@ export const votesApi = {
 export type LeaderboardEntry = { rank: number; username: string; avatar_url: string | null; points: number; vote_count: number };
 export type PointsSummary = {
   total_points: number;
-  breakdown: { votes_received: number; posts_tagged: number; streak_bonus: number };
+  breakdown: { votes_received: number; posts_tagged: number; streak_bonus: number; lessons: number };
   activity: { description: string; points: number; timestamp: string }[];
 };
 
@@ -314,4 +314,53 @@ export const messagesApi = {
   send: (id: string, body: string) =>
     request<ChatMessage>(`/messages/conversations/${id}/messages`, { method: "POST", body: JSON.stringify({ body }) }, { auth: true, activity: false }),
   unsend: (messageId: string) => request<unknown>(`/messages/messages/${messageId}`, { method: "DELETE" }, authed),
+};
+
+// --- labs, deeper ---------------------------------------------------------------------------
+
+export type LabUpdateItem = { id: string; title: string; body: string; created_at: string; author: PostAuthor | null };
+export type TaskStatus = "backlog" | "in_progress" | "testing" | "done";
+export const TASK_COLUMNS: { id: TaskStatus; label: string }[] = [
+  { id: "backlog", label: "Backlog" },
+  { id: "in_progress", label: "In progress" },
+  { id: "testing", label: "Testing" },
+  { id: "done", label: "Done" },
+];
+export type TaskItem = { id: string; title: string; notes: string | null; status: TaskStatus; position: number; assignee: string | null; due_at: string | null; created_at: string; done_at: string | null };
+export type Milestone = { id: string; title: string; due_at: string | null; done: boolean; done_at: string | null };
+export type TeamInfo = {
+  members: { username: string; avatar_url: string | null; role: "owner" | "member" }[];
+  my_role: "owner" | "member" | null;
+  my_request: { status: "pending" | "accepted" | "declined" } | null;
+  requests: { id: string; message: string | null; created_at: string; user: PostAuthor }[];
+};
+export type MyTask = { id: string; title: string; status: TaskStatus; due_at: string | null; assigned_to_me: boolean; lab: { name: string; slug: string } };
+
+const json = (data: unknown) => JSON.stringify(data);
+const write = (activity: string | false = false) => ({ auth: true, activity }) as const;
+
+export const labsDeepApi = {
+  updates: (lab: string, page = 1) => request<{ updates: LabUpdateItem[]; total: number; page: number; pages: number }>(`/projects/${lab}/updates${qs({ page })}`, {}, authed),
+  postUpdate: (lab: string, data: { title: string; body: string }) => request<LabUpdateItem>(`/projects/${lab}/updates`, { method: "POST", body: json(data) }, write("Posting your update")),
+  deleteUpdate: (lab: string, id: string) => request<unknown>(`/projects/${lab}/updates/${id}`, { method: "DELETE" }, write()),
+
+  board: (lab: string) => request<{ columns: Record<TaskStatus, TaskItem[]> }>(`/projects/${lab}/board`, {}, authed),
+  addTask: (lab: string, data: { title: string; status?: TaskStatus; due_at?: string | null; assignee?: string | null; notes?: string }) =>
+    request<TaskItem>(`/projects/${lab}/tasks`, { method: "POST", body: json(data) }, write()),
+  updateTask: (lab: string, id: string, data: Partial<{ title: string; notes: string | null; status: TaskStatus; position: number; due_at: string | null; assignee: string | null }>) =>
+    request<TaskItem>(`/projects/${lab}/tasks/${id}`, { method: "PATCH", body: json(data) }, write()),
+  deleteTask: (lab: string, id: string) => request<unknown>(`/projects/${lab}/tasks/${id}`, { method: "DELETE" }, write()),
+  myTasks: () => request<{ tasks: MyTask[] }>("/projects/mine/tasks", {}, authed),
+
+  milestones: (lab: string) => request<{ milestones: Milestone[] }>(`/projects/${lab}/milestones`, {}, authed),
+  addMilestone: (lab: string, data: { title: string; due_at?: string | null }) => request<Milestone>(`/projects/${lab}/milestones`, { method: "POST", body: json(data) }, write()),
+  updateMilestone: (lab: string, id: string, data: Partial<{ title: string; due_at: string | null; done: boolean }>) =>
+    request<Milestone>(`/projects/${lab}/milestones/${id}`, { method: "PATCH", body: json(data) }, write()),
+  deleteMilestone: (lab: string, id: string) => request<unknown>(`/projects/${lab}/milestones/${id}`, { method: "DELETE" }, write()),
+
+  team: (lab: string) => request<TeamInfo>(`/projects/${lab}/team`, {}, authed),
+  join: (lab: string, message?: string) => request<{ message: string }>(`/projects/${lab}/join`, { method: "POST", body: json({ message }) }, write("Sending your request")),
+  answer: (lab: string, requestId: string, accept: boolean) =>
+    request<{ message: string }>(`/projects/${lab}/requests/${requestId}/${accept ? "accept" : "decline"}`, { method: "POST" }, write()),
+  removeMember: (lab: string, username: string) => request<{ message: string }>(`/projects/${lab}/members/${encodeURIComponent(username)}`, { method: "DELETE" }, write()),
 };
