@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError, settingsApi, uploadsApi } from "@/lib/api";
 import { accountApi, petApi, safetyApi } from "@/lib/services";
+import { alfredController } from "@/lib/alfred";
 import { keys, timeAgo } from "@/lib/labs";
 import { fieldErrors, newPasswordSchema } from "@/lib/validation";
 import PageHeader from "@/components/ui/PageHeader";
@@ -225,6 +226,93 @@ function AlfredSection() {
   );
 }
 
+// What Alfred has done for you, what he remembers, and which permissions you've given him.
+function AlfredDataSection() {
+  const qc = useQueryClient();
+  const toast = useToast();
+  const actions = useQuery({ queryKey: ["pet", "actions"], queryFn: petApi.actions });
+  const memories = useQuery({ queryKey: ["pet", "memories"], queryFn: petApi.memories });
+  const [always, setAlways] = useState<string[]>(() => alfredController.alwaysAllowed());
+
+  const undo = useMutation({
+    mutationFn: petApi.undo,
+    onSuccess: () => {
+      toast.success("Undone.");
+      void qc.invalidateQueries();
+    },
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : "Couldn't undo that."),
+  });
+  const forget = useMutation({ mutationFn: petApi.forget, onSuccess: () => qc.invalidateQueries({ queryKey: ["pet", "memories"] }) });
+  const forgetAll = useMutation({ mutationFn: petApi.forgetAll, onSuccess: () => qc.invalidateQueries({ queryKey: ["pet", "memories"] }) });
+
+  const when = (iso: string) => timeAgo(iso);
+  return (
+    <Section title="What Alfred did and remembers" hint="You're always in charge. Undo works for 15 minutes.">
+      <h3 className="text-sm font-semibold">Recent things Alfred did for you</h3>
+      {actions.isPending ? (
+        <Skeleton className="mt-2 h-10 w-full" />
+      ) : !actions.data || actions.data.actions.length === 0 ? (
+        <p className="mt-2 text-sm text-muted">Nothing yet. When you ask Alfred to follow, vote or clear notifications, it shows up here.</p>
+      ) : (
+        <ul className="mt-2 divide-y divide-line">
+          {actions.data.actions.slice(0, 8).map((a) => (
+            <li key={a.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+              <span className="min-w-0">
+                <span className={`block truncate ${a.undone ? "text-muted line-through" : ""}`}>{a.summary}</span>
+                <span className="block text-xs text-muted">{when(a.created_at)}{a.undone ? " · undone" : ""}</span>
+              </span>
+              {a.can_undo && (
+                <button type="button" className="shrink-0 text-rose underline underline-offset-4" disabled={undo.isPending} onClick={() => undo.mutate(a.id)}>
+                  Undo
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h3 className="mt-6 text-sm font-semibold">Things Alfred remembers</h3>
+      {memories.isPending ? (
+        <Skeleton className="mt-2 h-10 w-full" />
+      ) : !memories.data || memories.data.memories.length === 0 ? (
+        <p className="mt-2 text-sm text-muted">Nothing. Tell him “remember that I prefer dark mode” and it will show here.</p>
+      ) : (
+        <>
+          <ul className="mt-2 divide-y divide-line">
+            {memories.data.memories.map((m) => (
+              <li key={m.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                <span className="min-w-0 break-words">{m.text}</span>
+                <button type="button" className="shrink-0 text-rose underline underline-offset-4" onClick={() => forget.mutate(m.id)}>Forget</button>
+              </li>
+            ))}
+          </ul>
+          <button type="button" className="btn-secondary btn-sm mt-3" onClick={() => forgetAll.mutate()}>Forget everything</button>
+        </>
+      )}
+
+      <h3 className="mt-6 text-sm font-semibold">Permissions you've given him</h3>
+      {always.length === 0 ? (
+        <p className="mt-2 text-sm text-muted">None. Alfred asks you before he changes anything.</p>
+      ) : (
+        <>
+          <p className="mt-2 text-sm text-muted">You chose &ldquo;Always allow&rdquo; for {always.length === 1 ? "one thing" : `${always.length} things`} on this device, so he does {always.length === 1 ? "it" : "them"} without asking.</p>
+          <button
+            type="button"
+            className="btn-secondary btn-sm mt-3"
+            onClick={() => {
+              alfredController.revokeAlwaysAllowed();
+              setAlways([]);
+              toast.success("Alfred will ask first again.");
+            }}
+          >
+            Make him ask again
+          </button>
+        </>
+      )}
+    </Section>
+  );
+}
+
 function PasswordSection() {
   const { user, refreshUser } = useAuth();
   const toast = useToast();
@@ -410,6 +498,7 @@ export default function SettingsPage() {
         <ProfileSection />
         <PreferencesSection />
         <AlfredSection />
+        <AlfredDataSection />
         <PasswordSection />
         <DevicesSection />
         <BlockedSection />
