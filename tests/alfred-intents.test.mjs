@@ -71,3 +71,11 @@ test("nonsense and empty input are unknown", () => {
   assert.equal(kind("   "), "unknown");
   assert.equal(kind("banana submarine"), "unknown");
 });
+
+test("remembering and forgetting", () => {
+  assert.deepEqual(interpret("remember that I hate gradients"), { kind: "remember", text: "I hate gradients" });
+  assert.deepEqual(interpret("Remember my lab is called Study Buddy"), { kind: "remember", text: "my lab is called Study Buddy" });
+  assert.equal(kind("forget everything"), "forget");
+  assert.equal(kind("wipe your memory"), "forget");
+  assert.equal(kind("remember"), "unknown");
+});

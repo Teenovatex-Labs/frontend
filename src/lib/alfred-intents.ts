@@ -17,6 +17,8 @@ export type Intent =
   | { kind: "due" }
   | { kind: "level" }
   | { kind: "tour" }
+  | { kind: "remember"; text: string }
+  | { kind: "forget" }
   | { kind: "quest" }
   | { kind: "readall" }
   | { kind: "follow"; username: string; undo: boolean }
@@ -59,6 +61,9 @@ export function interpret(input: string): Intent {
   if (!t) return { kind: "unknown" };
 
   if (/^(hi|hey|hello|yo|sup|hiya|howdy|good (morning|afternoon|evening))\b/.test(t) && t.split(" ").length <= 3) return { kind: "greet" };
+  const remember = input.trim().match(/^(?:please\s+)?remember\s+(?:that\s+)?(.{3,120})$/i);
+  if (remember) return { kind: "remember", text: remember[1]!.trim() };
+  if (has(t, "forget everything", "forget all", "forget it all", "clear your memory", "wipe your memory")) return { kind: "forget" };
   if (has(t, "show me around", "give me a tour", "take a tour", "tour", "how does this work", "how do i use this")) return { kind: "tour" };
   if (has(t, "help", "what can you do", "commands", "what do you do")) return { kind: "help" };
 
