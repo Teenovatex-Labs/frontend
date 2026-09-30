@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
+import { ArrowLeftIcon } from "@animateicons/react/lucide/arrow-left-icon";
+import { ArrowRightIcon } from "@animateicons/react/lucide/arrow-right-icon";
+import { XIcon } from "@animateicons/react/lucide/x-icon";
+import useIconHover from "@/lib/useIconHover";
 import { KIND_LABEL, MOMENTS, type Moment, type StoryKind } from "@/lib/story";
 import { openContact } from "@/lib/contactBus";
 
@@ -52,6 +56,11 @@ export default function Teenovators() {
   const scroller = useRef<HTMLDivElement>(null);
   const drag = useRef({ down: false, startX: 0, startLeft: 0, moved: false });
   const lastFocus = useRef<HTMLElement | null>(null);
+  const prevIcon = useIconHover();
+  const nextIcon = useIconHover();
+  const modalPrevIcon = useIconHover();
+  const modalNextIcon = useIconHover();
+  const closeIcon = useIconHover();
 
   const items = filter === "all" ? MOMENTS : MOMENTS.filter((m) => m.kind === filter);
   const total = items.length + 1;
@@ -320,18 +329,22 @@ export default function Teenovators() {
             onClick={() => goTo(active - 1)}
             disabled={active === 0}
             aria-label="Previous photo"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-ink text-lg transition-all hover:bg-yellow disabled:opacity-30 disabled:hover:bg-transparent"
+            onMouseEnter={prevIcon.onMouseEnter}
+            onMouseLeave={prevIcon.onMouseLeave}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-ink transition-all hover:bg-yellow disabled:opacity-30 disabled:hover:bg-transparent"
           >
-            ←
+            <ArrowLeftIcon ref={prevIcon.ref} size={20} />
           </button>
           <button
             type="button"
             onClick={() => goTo(active + 1)}
             disabled={active >= total - 1}
             aria-label="Next photo"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-ink bg-ink text-lg text-cream transition-all hover:bg-rose disabled:opacity-30 disabled:hover:bg-ink"
+            onMouseEnter={nextIcon.onMouseEnter}
+            onMouseLeave={nextIcon.onMouseLeave}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-ink bg-ink text-cream transition-all hover:bg-rose disabled:opacity-30 disabled:hover:bg-ink"
           >
-            →
+            <ArrowRightIcon ref={nextIcon.ref} size={20} />
           </button>
         </div>
       </div>
@@ -384,17 +397,21 @@ export default function Teenovators() {
                     type="button"
                     onClick={() => step(-1)}
                     aria-label="Previous story"
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-ink text-lg hover:bg-yellow"
+                    onMouseEnter={modalPrevIcon.onMouseEnter}
+                    onMouseLeave={modalPrevIcon.onMouseLeave}
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-ink hover:bg-yellow"
                   >
-                    ←
+                    <ArrowLeftIcon ref={modalPrevIcon.ref} size={20} />
                   </button>
                   <button
                     type="button"
                     onClick={() => step(1)}
                     aria-label="Next story"
-                    className="flex h-11 w-11 items-center justify-center rounded-full border border-ink bg-ink text-lg text-cream hover:bg-rose"
+                    onMouseEnter={modalNextIcon.onMouseEnter}
+                    onMouseLeave={modalNextIcon.onMouseLeave}
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-ink bg-ink text-cream hover:bg-rose"
                   >
-                    →
+                    <ArrowRightIcon ref={modalNextIcon.ref} size={20} />
                   </button>
                   <span className="ml-auto text-xs text-muted">Esc to close</span>
                 </div>
@@ -405,9 +422,11 @@ export default function Teenovators() {
                 onClick={closeModal}
                 autoFocus
                 aria-label="Close story"
-                className="absolute -right-2 -top-2 flex h-10 w-10 items-center justify-center rounded-full border border-ink bg-yellow text-xl shadow-[3px_3px_0_var(--ink)] transition-transform hover:rotate-90"
+                onMouseEnter={closeIcon.onMouseEnter}
+                onMouseLeave={closeIcon.onMouseLeave}
+                className="absolute -right-2 -top-2 flex h-10 w-10 items-center justify-center rounded-full border border-ink bg-yellow shadow-[3px_3px_0_var(--ink)] transition-transform hover:rotate-90"
               >
-                ×
+                <XIcon ref={closeIcon.ref} size={18} />
               </button>
             </div>
           </motion.div>
