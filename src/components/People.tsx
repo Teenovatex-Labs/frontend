@@ -257,14 +257,14 @@ export default function People() {
           <div className="mt-10 flex flex-col items-start gap-4 border-t border-line pt-6 text-sm">
             <p>Want to help shape the community?</p>
             <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center">
-              <Link href="/#story" className="inline-flex items-center gap-4 border-b border-ink pb-1 font-bold hover:text-rose">
+              <Link href="/#story" className="btn-secondary btn-sm">
                 View the Teenovators and what they&rsquo;ve done <span aria-hidden="true">↗</span>
               </Link>
               <a
                 href="https://teenovatex.fillout.com/cftm"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-4 border-b border-ink pb-1 font-bold hover:text-rose"
+                className="btn btn-sm"
               >
                 Apply to the core team <span aria-hidden="true">↗</span>
               </a>
