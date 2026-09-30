@@ -11,7 +11,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   alfredController,
@@ -20,9 +20,10 @@ import {
   type AlfredTaskHandle,
   type AlfredTaskState,
 } from "@/lib/alfred";
-import { interpret } from "@/lib/alfred-intents";
+import { interpret, type Intent } from "@/lib/alfred-intents";
 import { run } from "@/lib/alfred-commands";
-import { inboxApi } from "@/lib/services";
+import { inboxApi, petApi } from "@/lib/services";
+import { ApiError } from "@/lib/api";
 import { keys } from "@/lib/labs";
 import { useAuth } from "@/context/AuthContext";
 
@@ -48,6 +49,7 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
   const snapshot = useSyncExternalStore(alfredController.subscribe, alfredController.getSnapshot, alfredController.getServerSnapshot);
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const sessionUser = useRef<string | null | undefined>(undefined);
@@ -117,16 +119,36 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
       setBusy(true);
       const task = alfredController.beginTask("Working on it", "thinking");
       try {
-        const reply = await run(interpret(clean), {
+        const ctx = {
           me: { username: user.username, points: user.points, streak: user.streak, rank: user.rank },
-          navigate: (path) => router.push(path),
-          ask: (input) => alfredController.requestConsent(input),
+          navigate: (path: string) => router.push(path),
+          ask: (input: { title: string; message: string; actionId?: string }) => alfredController.requestConsent(input),
           signOut: logout,
           changed: () => {
             void qc.invalidateQueries();
           },
-        });
-        alfredController.say(reply);
+        };
+        const intent = interpret(clean);
+
+        if (intent.kind !== "unknown") {
+          alfredController.say(await run(intent, ctx));
+        } else if (!user.settings?.ai_chat) {
+          alfredController.say("I didn't catch that one. Try “help” to see what I can do. If you'd like me to understand more, you can turn on Alfred's AI in Settings.");
+        } else {
+          // Not a command he knows: ask the AI brain what the member means. Whatever it suggests is
+          // one of a short fixed list, and anything that changes something still asks first.
+          try {
+            const thought = await petApi.brain(clean, pathname);
+            alfredController.say(thought.reply);
+            const suggested = thought.intent as Intent | null;
+            if (suggested) {
+              const done = await run(suggested, ctx);
+              if (suggested.kind !== "go") alfredController.say(done);
+            }
+          } catch (e) {
+            alfredController.say(e instanceof ApiError ? e.message : "I couldn't think that through just now. Try one of my quick commands.");
+          }
+        }
       } catch {
         alfredController.say("Something went wrong on my end. Try that again?");
       } finally {
@@ -135,7 +157,7 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
         setBusy(false);
       }
     },
-    [user, router, logout, qc]
+    [user, router, pathname, logout, qc]
   );
 
   const value = useMemo<AlfredContextValue>(
