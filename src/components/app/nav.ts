@@ -41,7 +41,7 @@ export const MAIN: NavItem[] = [
     label: "Community",
     icon: UsersIcon,
     children: [
-      { id: "forums", label: "Forums", soon: true },
+      { id: "forums", label: "Spaces", href: "/community" },
       { id: "mentorship", label: "Mentorship", soon: true },
       { id: "events", label: "Events", href: "/events" },
     ],
