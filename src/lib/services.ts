@@ -286,17 +286,18 @@ export const adminApi = {
 
 // --- messages ------------------------------------------------------------------------------
 
+export type ChatPartner = { username: string; avatar_url: string | null; group?: boolean; lab_slug?: string; member_count?: number };
 export type ConversationSummary = {
   id: string;
-  with: { username: string; avatar_url: string | null };
-  last_message: { body: string; from_me: boolean; created_at: string } | null;
+  with: ChatPartner;
+  last_message: { body: string; from_me: boolean; created_at: string; from_name?: string } | null;
   unread: number;
   updated_at: string;
   can_message: boolean;
 };
-export type ChatMessage = { id: string; body: string; created_at: string; from_me: boolean; support?: string };
+export type ChatMessage = { id: string; body: string; created_at: string; from_me: boolean; from_name?: string; support?: string };
 export type Thread = {
-  with: { username: string; avatar_url: string | null };
+  with: ChatPartner;
   can_message: boolean;
   other_last_read_at: string | null;
   has_more: boolean;
@@ -315,6 +316,7 @@ export const messagesApi = {
   thread: (id: string, params: { after?: string; before?: string } = {}) => request<Thread>(`/messages/conversations/${id}${qs(params)}`, {}, authed),
   send: (id: string, body: string) =>
     request<ChatMessage>(`/messages/conversations/${id}/messages`, { method: "POST", body: JSON.stringify({ body }) }, { auth: true, activity: false }),
+  openLabChat: (lab: string) => request<{ id: string }>(`/projects/${lab}/chat`, { method: "POST" }, { auth: true, activity: "Opening the team chat" }),
   unsend: (messageId: string) => request<unknown>(`/messages/messages/${messageId}`, { method: "DELETE" }, authed),
 };
 
@@ -423,3 +425,16 @@ export const rewardsApi = {
   quest: () => request<Quest>("/rewards/quest", {}, authed),
   claim: () => request<{ claimed: boolean; points_awarded: number }>("/rewards/quest/claim", { method: "POST" }, { auth: true, activity: false }),
 };
+
+// --- search ---------------------------------------------------------------------------------
+
+export type SearchResults = {
+  q: string;
+  labs: { id: string; name: string; slug: string; short_description: string; category: string; vote_count: number; user: { username: string } }[];
+  people: { username: string; full_name: string; avatar_url: string | null; points: number }[];
+  posts: { id: string; title: string; excerpt: string; created_at: string; space: { name: string; slug: string }; author: string }[];
+  lessons: { slug: string; title: string; summary: string; track: { slug: string; title: string } }[];
+  events: { id: string; title: string; starts_at: string; location: string | null }[];
+};
+
+export const searchApi = { find: (q: string) => request<SearchResults>(`/search${qs({ q })}`, {}, authed) };

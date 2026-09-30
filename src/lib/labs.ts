@@ -33,6 +33,7 @@ export const keys = {
   milestones: (id: string) => ["labs", "milestones", id] as const,
   team: (id: string) => ["labs", "team", id] as const,
   myTasks: ["labs", "my-tasks"] as const,
+  search: (q: string) => ["search", q] as const,
   announcements: ["announcements"] as const,
   quest: ["rewards", "quest"] as const,
   badges: ["rewards", "badges"] as const,
