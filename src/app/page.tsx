@@ -5,6 +5,9 @@ import About from "@/components/About";
 import Toolkit from "@/components/Toolkit";
 import FirstDay from "@/components/FirstDay";
 import People from "@/components/People";
+import Teenovators from "@/components/Teenovators";
+import Donate from "@/components/Donate";
+import Contact from "@/components/Contact";
 import Join from "@/components/Join";
 import Footer from "@/components/Footer";
 
@@ -19,6 +22,9 @@ export default function Home() {
         <Toolkit />
         <FirstDay />
         <People />
+        <Teenovators />
+        <Donate />
+        <Contact />
         <Join />
       </main>
       <Footer />
