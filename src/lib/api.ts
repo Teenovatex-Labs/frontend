@@ -43,7 +43,7 @@ export type UserProfile = {
   role: "member" | "mentor" | "moderator" | "admin";
   suspended_until: string | null;
   suspended_reason: string | null;
-  settings: { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile: boolean } | null;
+  settings: { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile: boolean; ai_chat: boolean } | null;
 };
 
 // "Remember me" decides *where* the refresh token lives: localStorage

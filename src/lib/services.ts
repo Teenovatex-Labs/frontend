@@ -118,7 +118,7 @@ export const peopleApi = {
     request<{ message: string }>(`/users/${encodeURIComponent(username)}/follow`, { method: "DELETE" }, { auth: true, activity: "Unfollowing" }),
 };
 
-export type NotificationSettings = { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile?: boolean };
+export type NotificationSettings = { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile?: boolean; ai_chat?: boolean };
 export type SessionInfo = { id: string; device_info: string | null; ip: string | null; last_active: string; created_at: string; current?: boolean };
 
 export const accountApi = {
@@ -363,4 +363,15 @@ export const labsDeepApi = {
   answer: (lab: string, requestId: string, accept: boolean) =>
     request<{ message: string }>(`/projects/${lab}/requests/${requestId}/${accept ? "accept" : "decline"}`, { method: "POST" }, write()),
   removeMember: (lab: string, username: string) => request<{ message: string }>(`/projects/${lab}/members/${encodeURIComponent(username)}`, { method: "DELETE" }, write()),
+};
+
+// --- Alfred's brain -------------------------------------------------------------------------
+
+export type PetStatus = { available: boolean; enabled_by_member: boolean; remaining_today: number; daily_limit: number };
+
+export const petApi = {
+  status: () => request<PetStatus>("/pet/status", {}, authed),
+  // What the member typed, plus the page they are on. Nothing else is sent.
+  brain: (text: string, page: string) =>
+    request<{ reply: string; intent: unknown; remaining_today: number }>("/pet/brain", { method: "POST", body: json({ text, page }) }, { auth: true, activity: false }),
 };
