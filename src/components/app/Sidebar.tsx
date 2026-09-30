@@ -5,16 +5,14 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  ArrowDown01Icon,
-  ArrowLeft01Icon,
-  ArrowRight01Icon,
-  ArrowUpRight01Icon,
-  Logout01Icon,
-  Search01Icon,
-  Settings01Icon,
-} from "@hugeicons/core-free-icons";
+import { ArrowUpRightIcon } from "@animateicons/react/lucide/arrow-up-right-icon";
+import { ChevronDownIcon } from "@animateicons/react/lucide/chevron-down-icon";
+import { ChevronLeftIcon } from "@animateicons/react/lucide/chevron-left-icon";
+import { ChevronRightIcon } from "@animateicons/react/lucide/chevron-right-icon";
+import { LogOutIcon } from "@animateicons/react/lucide/log-out-icon";
+import { SearchIcon } from "@animateicons/react/lucide/search-icon";
+import { SettingsIcon } from "@animateicons/react/lucide/settings-icon";
+import useIconHover from "@/lib/useIconHover";
 import { useAuth } from "@/context/AuthContext";
 import { siteUrl } from "@/lib/hosts";
 import { LINKS, MAIN, type NavItem, type NavLeaf } from "./nav";
@@ -151,7 +149,10 @@ function NavRow({
 }) {
   const reduce = useReducedMotion();
   const hover = useHoverPanel<HTMLDivElement>();
+  const icon = useIconHover();
+  const accessory = useIconHover();
   const hasChildren = Boolean(item.children?.length);
+  const Icon = item.icon;
 
   const content = (
     <>
@@ -163,7 +164,7 @@ function NavRow({
         />
       )}
       <span className="relative flex w-full items-center gap-3">
-        <HugeiconsIcon icon={item.icon} size={24} strokeWidth={1.6} className="shrink-0" />
+        <Icon ref={icon.ref} size={24} className="shrink-0" />
         <span
           className={`min-w-0 flex-1 truncate whitespace-nowrap text-left text-[15px] font-medium transition-opacity duration-200 ${
             collapsed ? "opacity-0" : "opacity-100 delay-75"
@@ -173,11 +174,11 @@ function NavRow({
         </span>
         {!collapsed && item.soon && !hasChildren && <SoonChip />}
         {hasChildren && (
-          <HugeiconsIcon
-            icon={ArrowDown01Icon}
-            size={16}
-            className={`shrink-0 transition-all duration-300 ${collapsed ? "opacity-0" : "opacity-60"} ${open ? "rotate-180" : ""}`}
-          />
+          <span
+            className={`inline-flex shrink-0 transition-all duration-300 ${collapsed ? "opacity-0" : "opacity-60"} ${open ? "rotate-180" : ""}`}
+          >
+            <ChevronDownIcon ref={accessory.ref} size={16} />
+          </span>
         )}
       </span>
     </>
@@ -199,7 +200,9 @@ function NavRow({
       <a href={item.external} target="_blank" rel="noopener noreferrer" className={rowCls}>
         {content}
         {!collapsed && (
-          <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="ml-2 shrink-0 opacity-50" />
+          <span className="ml-2 inline-flex shrink-0 opacity-50">
+            <ArrowUpRightIcon ref={accessory.ref} size={14} />
+          </span>
         )}
       </a>
     );
@@ -224,7 +227,21 @@ function NavRow({
 
   return (
     <li>
-      <div ref={hover.ref} onMouseEnter={collapsed ? hover.show : undefined} onMouseLeave={collapsed ? hover.hide : undefined}>
+      <div
+        ref={hover.ref}
+        onMouseEnter={() => {
+          icon.onMouseEnter();
+          accessory.onMouseEnter();
+          if (collapsed) hover.show();
+        }}
+        onMouseLeave={() => {
+          icon.onMouseLeave();
+          accessory.onMouseLeave();
+          if (collapsed) hover.hide();
+        }}
+        onFocus={icon.onMouseEnter}
+        onBlur={icon.onMouseLeave}
+      >
         {row}
       </div>
 
@@ -288,6 +305,12 @@ export default function Sidebar({
   const [open, setOpen] = useState<string | null>("community");
   const [menuOpen, setMenuOpen] = useState(false);
   const [avatarFailed, setAvatarFailed] = useState(false);
+  const searchIcon = useIconHover();
+  const toggleIcon = useIconHover();
+  const settingsIcon = useIconHover();
+  const backIcon = useIconHover();
+  const logoutIcon = useIconHover();
+  const cardChevron = useIconHover();
   const [mod, setMod] = useState("⌘");
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -399,9 +422,11 @@ export default function Sidebar({
           onClick={onToggle}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!isCollapsed}
+          onMouseEnter={toggleIcon.onMouseEnter}
+          onMouseLeave={toggleIcon.onMouseLeave}
           className="absolute -right-3.5 top-[31px] z-20 flex h-7 w-7 items-center justify-center rounded-full border border-ink bg-pink text-ink shadow-[2px_2px_0_var(--ink)] transition-transform hover:scale-110 focus-visible:!outline-pink"
         >
-          <HugeiconsIcon icon={isCollapsed ? ArrowRight01Icon : ArrowLeft01Icon} size={16} strokeWidth={2} />
+          {isCollapsed ? <ChevronRightIcon ref={toggleIcon.ref} size={16} /> : <ChevronLeftIcon ref={toggleIcon.ref} size={16} />}
         </button>
       )}
 
@@ -412,8 +437,10 @@ export default function Sidebar({
             isCollapsed ? "border-cream/25 hover:border-pink" : "border-cream/25 focus-within:border-pink"
           }`}
           onClick={isCollapsed ? focusSearch : undefined}
+          onMouseEnter={searchIcon.onMouseEnter}
+          onMouseLeave={searchIcon.onMouseLeave}
         >
-          <HugeiconsIcon icon={Search01Icon} size={22} strokeWidth={1.6} className="shrink-0 text-cream/80" />
+          <SearchIcon ref={searchIcon.ref} size={22} className="shrink-0 text-cream/80" />
           <input
             ref={inputRef}
             value={query}
@@ -472,18 +499,22 @@ export default function Sidebar({
               <span
                 role="menuitem"
                 aria-disabled="true"
+                onMouseEnter={settingsIcon.onMouseEnter}
+                onMouseLeave={settingsIcon.onMouseLeave}
                 className="flex h-10 cursor-default items-center gap-3 rounded-xl px-3 text-sm text-cream/60"
               >
-                <HugeiconsIcon icon={Settings01Icon} size={18} />
+                <SettingsIcon ref={settingsIcon.ref} size={18} />
                 Settings
                 <SoonChip />
               </span>
               <a
                 role="menuitem"
                 href={siteUrl("/")}
+                onMouseEnter={backIcon.onMouseEnter}
+                onMouseLeave={backIcon.onMouseLeave}
                 className="flex h-10 items-center gap-3 rounded-xl px-3 text-sm text-cream/80 hover:bg-cream/[0.08] hover:text-cream"
               >
-                <HugeiconsIcon icon={ArrowUpRight01Icon} size={18} />
+                <ArrowUpRightIcon ref={backIcon.ref} size={18} />
                 Back to teenovatex.org
               </a>
               <button
@@ -493,9 +524,11 @@ export default function Sidebar({
                   await logout();
                   window.location.assign(siteUrl("/"));
                 }}
+                onMouseEnter={logoutIcon.onMouseEnter}
+                onMouseLeave={logoutIcon.onMouseLeave}
                 className="flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm text-pink hover:bg-pink/10"
               >
-                <HugeiconsIcon icon={Logout01Icon} size={18} />
+                <LogOutIcon ref={logoutIcon.ref} size={18} />
                 Log out
               </button>
             </motion.div>
@@ -507,6 +540,8 @@ export default function Sidebar({
           onClick={() => setMenuOpen((v) => !v)}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
+          onMouseEnter={cardChevron.onMouseEnter}
+          onMouseLeave={cardChevron.onMouseLeave}
           className="flex h-14 w-full items-center overflow-hidden rounded-2xl border border-cream/15 bg-cream/[0.04] px-2 text-left transition-colors hover:border-pink/60"
         >
           {user?.avatar_url && !avatarFailed ? (
@@ -528,11 +563,11 @@ export default function Sidebar({
             <span className="block truncate text-[14px] font-semibold">{user?.full_name}</span>
             <span className="block truncate text-[12px] text-cream/50">@{user?.username}</span>
           </span>
-          <HugeiconsIcon
-            icon={ArrowDown01Icon}
-            size={16}
-            className={`mr-1 shrink-0 text-cream/50 transition-all duration-300 ${menuOpen ? "" : "rotate-180"} ${isCollapsed ? "opacity-0" : ""}`}
-          />
+          <span
+            className={`mr-1 inline-flex shrink-0 text-cream/50 transition-all duration-300 ${menuOpen ? "" : "rotate-180"} ${isCollapsed ? "opacity-0" : ""}`}
+          >
+            <ChevronDownIcon ref={cardChevron.ref} size={16} />
+          </span>
         </button>
       </div>
     </aside>

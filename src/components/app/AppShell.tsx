@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Cancel01Icon, Menu01Icon } from "@hugeicons/core-free-icons";
+import { MenuIcon } from "@animateicons/react/lucide/menu-icon";
+import { XIcon } from "@animateicons/react/lucide/x-icon";
+import useIconHover from "@/lib/useIconHover";
 import Sidebar from "./Sidebar";
 
 const STORAGE_KEY = "tx_sidebar_collapsed";
@@ -15,6 +16,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [drawer, setDrawer] = useState(false);
+  const menuIcon = useIconHover();
+  const closeIcon = useIconHover();
 
   useEffect(() => {
     try {
@@ -67,9 +70,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
           onClick={() => setDrawer(true)}
           aria-label="Open menu"
           aria-expanded={drawer}
+          onMouseEnter={menuIcon.onMouseEnter}
+          onMouseLeave={menuIcon.onMouseLeave}
           className="flex h-10 w-10 items-center justify-center rounded-xl border border-cream/25 hover:border-pink"
         >
-          <HugeiconsIcon icon={Menu01Icon} size={22} />
+          <MenuIcon ref={menuIcon.ref} size={22} />
         </button>
       </header>
 
@@ -97,9 +102,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={() => setDrawer(false)}
                 aria-label="Close menu"
+                onMouseEnter={closeIcon.onMouseEnter}
+                onMouseLeave={closeIcon.onMouseLeave}
                 className="absolute -right-3 top-6 flex h-8 w-8 items-center justify-center rounded-full border border-ink bg-pink text-ink"
               >
-                <HugeiconsIcon icon={Cancel01Icon} size={16} strokeWidth={2} />
+                <XIcon ref={closeIcon.ref} size={16} />
               </button>
             </motion.div>
           </>

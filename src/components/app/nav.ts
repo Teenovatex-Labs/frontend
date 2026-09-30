@@ -1,14 +1,16 @@
-import type { IconSvgElement } from "@hugeicons/react";
-import {
-  Award01Icon,
-  FavouriteIcon,
-  Home01Icon,
-  Notification03Icon,
-  Rocket01Icon,
-  UserAdd01Icon,
-  UserGroupIcon,
-  WhatsappIcon,
-} from "@hugeicons/core-free-icons";
+import type { ComponentType, RefAttributes } from "react";
+import type { IconHandle } from "@animateicons/react";
+import { BellIcon } from "@animateicons/react/lucide/bell-icon";
+import { ChartBarIncreasingIcon } from "@animateicons/react/lucide/chart-bar-increasing-icon";
+import { HeartIcon } from "@animateicons/react/lucide/heart-icon";
+import { HouseIcon } from "@animateicons/react/lucide/house-icon";
+import { MessageCircleIcon } from "@animateicons/react/lucide/message-circle-icon";
+import { RocketIcon } from "@animateicons/react/lucide/rocket-icon";
+import { UserPlusIcon } from "@animateicons/react/lucide/user-plus-icon";
+import { UsersIcon } from "@animateicons/react/lucide/users-icon";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
+
+export type AnimatedIcon = ComponentType<{ size?: number; className?: string } & RefAttributes<IconHandle>>;
 
 export type NavLeaf = {
   id: string;
@@ -19,14 +21,14 @@ export type NavLeaf = {
   soon?: boolean;
 };
 
-export type NavItem = NavLeaf & { icon: IconSvgElement; children?: NavLeaf[] };
+export type NavItem = NavLeaf & { icon: AnimatedIcon; children?: NavLeaf[] };
 
 export const MAIN: NavItem[] = [
-  { id: "home", label: "Home", href: "/home", icon: Home01Icon },
+  { id: "home", label: "Home", href: "/home", icon: HouseIcon },
   {
     id: "projects",
     label: "Projects",
-    icon: Rocket01Icon,
+    icon: RocketIcon,
     soon: true,
     children: [
       { id: "showcase", label: "Showcase", soon: true },
@@ -37,7 +39,7 @@ export const MAIN: NavItem[] = [
   {
     id: "community",
     label: "Community",
-    icon: UserGroupIcon,
+    icon: UsersIcon,
     soon: true,
     children: [
       { id: "forums", label: "Forums", soon: true },
@@ -45,22 +47,23 @@ export const MAIN: NavItem[] = [
       { id: "events", label: "Events", soon: true },
     ],
   },
-  { id: "leaderboard", label: "Leaderboard", icon: Award01Icon, soon: true },
-  { id: "notifications", label: "Notifications", icon: Notification03Icon, soon: true },
+  { id: "messages", label: "Messages", icon: MessageCircleIcon, soon: true },
+  { id: "leaderboard", label: "Leaderboard", icon: ChartBarIncreasingIcon, soon: true },
+  { id: "notifications", label: "Notifications", icon: BellIcon, soon: true },
 ];
 
 export const LINKS: NavItem[] = [
   {
     id: "whatsapp",
     label: "WhatsApp community",
-    icon: WhatsappIcon,
+    icon: WhatsAppIcon,
     external: "https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW",
   },
   {
     id: "support",
     label: "Support us",
-    icon: FavouriteIcon,
+    icon: HeartIcon,
     external: "https://hcb.hackclub.com/donations/start/teenovatex-labs?utm_source=app.teenovatex.org",
   },
-  { id: "core-team", label: "Join the core team", icon: UserAdd01Icon, external: "https://teenovatex.fillout.com/cftm" },
+  { id: "core-team", label: "Join the core team", icon: UserPlusIcon, external: "https://teenovatex.fillout.com/cftm" },
 ];
