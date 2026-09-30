@@ -5,7 +5,7 @@
 
 import { ApiError } from "@/lib/api";
 import { PAGES, interpret, type Intent } from "@/lib/alfred-intents";
-import { eventsApi, inboxApi, labsApi, labsDeepApi, peopleApi, petApi, rewardsApi, votesApi } from "@/lib/services";
+import { eventsApi, inboxApi, labsApi, labsDeepApi, petApi, rewardsApi, votesApi } from "@/lib/services";
 
 // --- running an intent -----------------------------------------------------------------------
 
@@ -33,12 +33,12 @@ export const HELP_TEXT = `here's what i can do:
 ${list([
   "take you places: “open labs”, “go to my profile”, “start a lab”",
   "tell you stuff: “my points”, “my streak”, “what's due”, “what's new”, “upcoming events”, “trending labs”",
-  "do things (i always ask first): “mark all notifications read”, “follow @name”, “vote for <lab name>”, “sign out”",
+  "do things (i always ask first): “mark all notifications read”, “vote for <lab name>”, “sign out”",
   "remember things: “remember that I hate gradients”, or “forget everything”",
 ])}`;
 
 /** Logs something Alfred did so the member can see it and undo it. A failed log never breaks the action. */
-async function record(kind: "follow" | "unfollow" | "vote" | "readall", summary: string, payload: Record<string, unknown>): Promise<string | undefined> {
+async function record(kind: "vote" | "readall", summary: string, payload: Record<string, unknown>): Promise<string | undefined> {
   try {
     return (await petApi.logAction({ kind, summary, payload })).id;
   } catch {
@@ -146,21 +146,6 @@ async function runInner(intent: Intent, ctx: CommandContext): Promise<string | O
       ctx.changed();
       const undoId = await record("readall", `Marked ${plural(ids.length, "notification")} as read`, { ids: ids.slice(0, 100) });
       return { text: "done. all marked read.", undoId };
-    }
-
-    case "follow": {
-      if (intent.username.toLowerCase() === ctx.me.username.toLowerCase()) return "bro that's you 😭 nobody follows themselves.";
-      const person = await peopleApi.get(intent.username);
-      const ok = await ctx.ask({
-        title: intent.undo ? `Unfollow @${person.username}?` : `Follow @${person.username}?`,
-        message: intent.undo ? `You'll stop seeing updates from @${person.username}.` : `@${person.username} will get a notification that you followed them.`,
-      });
-      if (!ok) return DECLINED;
-      if (intent.undo) await peopleApi.unfollow(person.username);
-      else await peopleApi.follow(person.username);
-      ctx.changed();
-      const undoId = await record(intent.undo ? "unfollow" : "follow", `${intent.undo ? "Unfollowed" : "Followed"} @${person.username}`, { username: person.username });
-      return { text: intent.undo ? `unfollowed @${person.username}.` : `you're following @${person.username} now.`, undoId };
     }
 
     case "vote": {

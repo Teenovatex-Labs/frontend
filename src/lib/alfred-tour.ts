@@ -8,7 +8,7 @@ export const TOUR: TourStep[] = [
   { message: "Labs are projects. Start one, post updates, plan it on a board, and get votes from other teens.", path: "/labs" },
   { message: "Learn has short lessons, and every one you finish earns points.", path: "/learn" },
   { message: "Community is for asking questions and sharing what you made. Be kind, and keep your details private.", path: "/community" },
-  { message: "Messages are for people you follow each other with, so you only hear from people you chose. Anything that feels off, you can report or block.", path: "/messages" },
+  { message: "You can message anyone by their username. Everyone here is equal. Anything that feels off, you can report or block.", path: "/messages" },
   { message: "That's it! Say “Yo” any time. I can take you places, tell you your points, and more. Have fun building.", path: "/home" },
 ];
 

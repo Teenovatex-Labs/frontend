@@ -252,7 +252,7 @@ function AlfredDataSection() {
       {actions.isPending ? (
         <Skeleton className="mt-2 h-10 w-full" />
       ) : !actions.data || actions.data.actions.length === 0 ? (
-        <p className="mt-2 text-sm text-muted">Nothing yet. When you ask Alfred to follow, vote or clear notifications, it shows up here.</p>
+        <p className="mt-2 text-sm text-muted">Nothing yet. When you ask Alfred to vote or clear notifications, it shows up here.</p>
       ) : (
         <ul className="mt-2 divide-y divide-line">
           {actions.data.actions.slice(0, 8).map((a) => (

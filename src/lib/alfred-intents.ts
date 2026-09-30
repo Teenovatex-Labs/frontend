@@ -21,7 +21,6 @@ export type Intent =
   | { kind: "forget" }
   | { kind: "quest" }
   | { kind: "readall" }
-  | { kind: "follow"; username: string; undo: boolean }
   | { kind: "vote"; query: string }
   | { kind: "signout" }
   | { kind: "unknown" };
@@ -70,8 +69,6 @@ export function interpret(input: string): Intent {
   if (has(t, "sign out", "log out", "logout", "signout")) return { kind: "signout" };
   if (has(t, "mark all", "read all", "clear notifications", "mark everything") && has(t, "read", "notification")) return { kind: "readall" };
 
-  const follow = t.match(/\b(un)?follow\s+@?([a-z0-9_]{3,30})\b/);
-  if (follow) return { kind: "follow", username: follow[2]!, undo: Boolean(follow[1]) };
 
   const vote = t.match(/\bvote (?:for|on)\s+(.{2,})$/);
   if (vote) return { kind: "vote", query: vote[1]!.replace(/^(the|my)\s+/, "").trim() };
