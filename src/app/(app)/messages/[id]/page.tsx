@@ -184,7 +184,7 @@ export default function ThreadPage() {
         <Composer onSend={(body) => send.mutate(body)} />
       ) : (
         <p className="border-t border-ink bg-white px-4 py-4 text-center text-sm text-muted">
-          You can&rsquo;t send messages to {t.with.group ? t.with.username : `@${t.with.username}`} right now. Chats need you to follow each other, and neither of you to have blocked the other.
+          You can&rsquo;t send messages to {t.with.group ? t.with.username : `@${t.with.username}`} right now. One of you has blocked the other.
         </p>
       )}
     </>

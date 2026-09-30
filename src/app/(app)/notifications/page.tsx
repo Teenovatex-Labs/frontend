@@ -48,7 +48,7 @@ export default function NotificationsPage() {
           ) : undefined
         }
       >
-        Votes, follows and event updates show up here.
+        Votes, messages and event updates show up here.
       </PageHeader>
 
       <div className="mt-8">
@@ -62,7 +62,7 @@ export default function NotificationsPage() {
           <EmptyState title="That didn't load." action={<button className="btn-secondary" onClick={() => inbox.refetch()}>Try again</button>} />
         ) : inbox.data.length === 0 ? (
           <EmptyState title="All quiet." action={<Link href="/labs" className="btn-secondary">Explore labs</Link>}>
-            When someone votes for your lab or follows you, you&rsquo;ll see it here.
+            When someone votes for your lab or messages you, you&rsquo;ll see it here.
           </EmptyState>
         ) : (
           <ul className="space-y-3">
