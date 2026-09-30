@@ -5,10 +5,10 @@ import { useState } from "react";
 import Link from "next/link";
 
 const NAV_LINKS = [
-  { href: "#about", label: "About us", dot: "bg-pink" },
+  { href: "#about", label: "About", dot: "bg-pink" },
   { href: "#explore", label: "What we do", dot: "bg-yellow" },
-  { href: "#people", label: "Meet the team", dot: "bg-ink" },
-  { href: "#story", label: "Our story", dot: "bg-rose" },
+  { href: "#people", label: "Team", dot: "bg-ink" },
+  { href: "#story", label: "Story", dot: "bg-rose" },
   { href: "#donate", label: "Donate", dot: "bg-yellow" },
   { href: "#contact", label: "Contact", dot: "bg-pink" },
 ];
