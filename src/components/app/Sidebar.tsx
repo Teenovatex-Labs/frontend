@@ -20,6 +20,8 @@ import { LINKS, MAIN, type NavItem, type NavLeaf } from "./nav";
 
 const OUT = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 
+const ALL_HREFS = [...MAIN, ...LINKS].flatMap((i) => [i.href, ...(i.children?.map((c) => c.href) ?? [])]).filter((h): h is string => !!h);
+
 /* ---------- hover panels (flyouts + tooltips) rendered in a portal ---------- */
 
 function useHoverPanel<T extends HTMLElement>() {
@@ -318,7 +320,14 @@ export default function Sidebar({
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isLeafActive = useCallback(
-    (l: NavLeaf) => Boolean(l.href && (pathname === l.href || pathname.startsWith(`${l.href}/`))),
+    (l: NavLeaf) => {
+      if (!l.href) return false;
+      if (pathname === l.href) return true;
+      if (!pathname.startsWith(`${l.href}/`)) return false;
+      // /labs/mine belongs to "My labs", not also to "Showcase": the most specific link wins.
+      const more = ALL_HREFS.some((h) => h.length > l.href!.length && (pathname === h || pathname.startsWith(`${h}/`)));
+      return !more;
+    },
     [pathname]
   );
 

@@ -31,10 +31,10 @@ export const MAIN: NavItem[] = [
     id: "projects",
     label: "Labs",
     icon: RocketIcon,
-    soon: true,
+    href: "/labs",
     children: [
-      { id: "showcase", label: "Showcase", soon: true },
-      { id: "my-projects", label: "My labs", soon: true },
+      { id: "showcase", label: "Showcase", href: "/labs" },
+      { id: "my-projects", label: "My labs", href: "/labs/mine" },
       { id: "collabs", label: "Collabs", soon: true },
     ],
   },
