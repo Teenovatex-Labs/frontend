@@ -12,6 +12,7 @@ import { ChevronRightIcon } from "@animateicons/react/lucide/chevron-right-icon"
 import { LogOutIcon } from "@animateicons/react/lucide/log-out-icon";
 import { SearchIcon } from "@animateicons/react/lucide/search-icon";
 import { SettingsIcon } from "@animateicons/react/lucide/settings-icon";
+import { UserIcon } from "@animateicons/react/lucide/user-icon";
 import useIconHover from "@/lib/useIconHover";
 import { useAuth } from "@/context/AuthContext";
 import { siteUrl } from "@/lib/hosts";
@@ -307,6 +308,7 @@ export default function Sidebar({
   const [avatarFailed, setAvatarFailed] = useState(false);
   const searchIcon = useIconHover();
   const toggleIcon = useIconHover();
+  const profileIcon = useIconHover();
   const settingsIcon = useIconHover();
   const backIcon = useIconHover();
   const logoutIcon = useIconHover();
@@ -496,6 +498,17 @@ export default function Sidebar({
               transition={{ duration: 0.16 }}
               className="absolute bottom-[calc(100%-6px)] left-4 z-30 w-[232px] origin-bottom-left rounded-2xl border border-cream/10 bg-ink p-2 shadow-[4px_4px_0_var(--pink)]"
             >
+              <span
+                role="menuitem"
+                aria-disabled="true"
+                onMouseEnter={profileIcon.onMouseEnter}
+                onMouseLeave={profileIcon.onMouseLeave}
+                className="flex h-10 cursor-default items-center gap-3 rounded-xl px-3 text-sm text-cream/60"
+              >
+                <UserIcon ref={profileIcon.ref} size={18} />
+                Profile
+                <SoonChip />
+              </span>
               <span
                 role="menuitem"
                 aria-disabled="true"
