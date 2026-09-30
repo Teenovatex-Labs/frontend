@@ -230,3 +230,64 @@ test("a new session forgets the last person's job, question and chat", async () 
   assert.equal(alfred.getSnapshot().state, "idle");
   alfred.destroy();
 });
+
+test("a tour walks through its steps, then ends", () => {
+  const alfred = make();
+  alfred.startTour([{ message: "One", path: "/a" }, { message: "Two" }, { message: "Three" }]);
+  let s = alfred.getSnapshot();
+  assert.equal(s.tour?.index, 0);
+  assert.equal(s.tour?.total, 3);
+  assert.equal(s.message, "One");
+  assert.equal(s.bubble, true);
+  assert.equal(s.state, "greeting");
+
+  const step = alfred.nextTour();
+  assert.equal(step?.message, "Two");
+  assert.equal(alfred.getSnapshot().message, "Two");
+  alfred.nextTour();
+  assert.equal(alfred.nextTour(), null); // past the last step
+  s = alfred.getSnapshot();
+  assert.equal(s.tour, null);
+  assert.equal(s.state, "idle");
+  assert.equal(s.bubble, false);
+  alfred.destroy();
+});
+
+test("the tour can be skipped at any point", () => {
+  const alfred = make();
+  alfred.startTour([{ message: "One" }, { message: "Two" }]);
+  alfred.endTour();
+  assert.equal(alfred.getSnapshot().tour, null);
+  assert.equal(alfred.getSnapshot().state, "idle");
+  assert.equal(alfred.nextTour(), null); // nothing to advance
+  alfred.destroy();
+});
+
+test("each tour step replays his greeting", () => {
+  const alfred = make();
+  alfred.startTour([{ message: "One" }, { message: "Two" }]);
+  const first = alfred.getSnapshot().runKey;
+  alfred.nextTour();
+  assert.notEqual(alfred.getSnapshot().runKey, first);
+  alfred.destroy();
+});
+
+test("a permission request interrupts the tour and the tour resumes after", async () => {
+  const alfred = make();
+  alfred.startTour([{ message: "One" }, { message: "Two" }]);
+  const answer = alfred.requestConsent({ title: "Sure?", message: "Really?" });
+  assert.equal(alfred.getSnapshot().state, "consent");
+  alfred.resolveConsent(true);
+  await answer;
+  assert.equal(alfred.getSnapshot().message, "One");
+  assert.equal(alfred.getSnapshot().tour?.index, 0);
+  alfred.destroy();
+});
+
+test("a new session ends any tour", () => {
+  const alfred = make();
+  alfred.startTour([{ message: "One" }]);
+  alfred.resetSession();
+  assert.equal(alfred.getSnapshot().tour, null);
+  alfred.destroy();
+});

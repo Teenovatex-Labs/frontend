@@ -13,6 +13,12 @@ test("greetings", () => {
   for (const t of ["yo", "Hey!", "hello", "hi there", "good morning"]) assert.equal(kind(t), "greet", t);
 });
 
+test("the tour", () => {
+  assert.equal(kind("show me around"), "tour");
+  assert.equal(kind("give me a tour"), "tour");
+  assert.equal(kind("how does this work"), "tour");
+});
+
 test("help", () => {
   assert.equal(kind("help"), "help");
   assert.equal(kind("what can you do?"), "help");
