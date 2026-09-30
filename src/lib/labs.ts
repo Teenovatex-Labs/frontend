@@ -34,6 +34,8 @@ export const keys = {
   team: (id: string) => ["labs", "team", id] as const,
   myTasks: ["labs", "my-tasks"] as const,
   announcements: ["announcements"] as const,
+  quest: ["rewards", "quest"] as const,
+  badges: ["rewards", "badges"] as const,
   spaces: ["community", "spaces"] as const,
   feed: (slug: string) => ["community", "feed", slug] as const,
   post: (id: string) => ["community", "post", id] as const,

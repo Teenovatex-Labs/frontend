@@ -1,4 +1,4 @@
-import { request, type UserProfile } from "@/lib/api";
+import { request, type LevelInfo, type UserProfile } from "@/lib/api";
 
 // Typed wrappers over the REST API. Shapes mirror the backend controllers; when a
 // response changes there, change it here and the compiler shows every screen it touches.
@@ -102,6 +102,8 @@ export type PublicProfile =
   | (Pick<UserProfile, "id" | "username" | "full_name" | "avatar_url" | "bio" | "points" | "streak" | "social_links" | "created_at"> & {
       private: false;
       rank: number;
+      level: LevelInfo;
+      badges: EarnedBadge[];
       followers: number;
       following: number;
       lab_count: number;
@@ -394,4 +396,16 @@ export const eventAdminApi = {
   create: (data: EventInput) => request<EventItem>("/events", { method: "POST", body: json(data) }, { auth: true, activity: false }),
   update: (id: string, data: Partial<EventInput>) => request<EventItem>(`/events/${id}`, { method: "PATCH", body: json(data) }, { auth: true, activity: false }),
   remove: (id: string) => request<unknown>(`/events/${id}`, { method: "DELETE" }, { auth: true, activity: false }),
+};
+
+// --- rewards --------------------------------------------------------------------------------
+
+export type EarnedBadge = { key: string; title: string; description: string; symbol: string; awarded_at: string };
+export type BadgeStatus = { key: string; title: string; description: string; symbol: string; earned: boolean; awarded_at: string | null };
+export type Quest = { key: string; title: string; description: string; goal: number; points: number; progress: number; complete: boolean; claimed: boolean; resets_at: string };
+
+export const rewardsApi = {
+  badges: () => request<{ badges: BadgeStatus[] }>("/rewards/badges", {}, authed),
+  quest: () => request<Quest>("/rewards/quest", {}, authed),
+  claim: () => request<{ claimed: boolean; points_awarded: number }>("/rewards/quest/claim", { method: "POST" }, { auth: true, activity: false }),
 };

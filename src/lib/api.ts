@@ -17,6 +17,7 @@ export class ApiError extends Error {
 
 export type AuthUser = { id: string; username: string; avatar_url?: string | null; email?: string };
 export type AuthResponse = { access_token: string; refresh_token: string; user: AuthUser };
+export type LevelInfo = { level: number; title: string; points: number; level_start: number; next_at: number | null; progress: number };
 export type UserProfile = {
   id: string;
   username: string;
@@ -43,6 +44,8 @@ export type UserProfile = {
   role: "member" | "mentor" | "moderator" | "admin";
   suspended_until: string | null;
   suspended_reason: string | null;
+  streak_freezes: number;
+  level: LevelInfo;
   settings: { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile: boolean; ai_chat: boolean } | null;
 };
 
