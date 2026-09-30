@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MIN_AGE, UNDER_AGE_MESSAGE, ageFromBirthDate } from "@/lib/age";
 
 // Mirrors backend/src/schemas/auth.ts exactly so client and server agree on the rules.
 export const strongPassword = z
@@ -22,13 +23,26 @@ export const loginFormSchema = z.object({
 // Split out from registerFormSchema so the signup stepper can validate one
 // step's fields at a time via `.pick()` — a ZodEffects (the `.refine()`
 // result below) can't be picked from.
+export const usernameSchema = z
+  .string()
+  .min(3, "At least 3 characters")
+  .max(30, "At most 30 characters")
+  .regex(/^[a-zA-Z0-9_]+$/, "Letters, numbers, underscores only");
+
+export const birthDateSchema = z
+  .string()
+  .min(1, "Enter your date of birth")
+  .superRefine((value, ctx) => {
+    const age = ageFromBirthDate(value);
+    if (age === null) ctx.addIssue({ code: "custom", message: "Enter a real date of birth" });
+    else if (age < 0 || age > 120) ctx.addIssue({ code: "custom", message: "Check that date. It doesn't look right" });
+    else if (age < MIN_AGE) ctx.addIssue({ code: "custom", message: UNDER_AGE_MESSAGE });
+  });
+
 export const registerBaseSchema = z.object({
   full_name: z.string().min(2, "Enter your full name").max(100),
-  username: z
-    .string()
-    .min(3, "At least 3 characters")
-    .max(30)
-    .regex(/^[a-zA-Z0-9_]+$/, "Letters, numbers, underscores only"),
+  username: usernameSchema,
+  birth_date: birthDateSchema,
   email: z.string().email("Enter a valid email"),
   password: strongPassword,
   confirm_password: z.string(),
