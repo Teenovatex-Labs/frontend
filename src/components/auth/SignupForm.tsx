@@ -1,5 +1,6 @@
 "use client";
 
+import { landingPath } from "@/lib/landing";
 import { siteUrl } from "@/lib/hosts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -53,7 +54,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
   const rocketIcon = useIconHover();
 
   useEffect(() => {
-    if (!loading && user) router.replace("/home");
+    if (!loading && user) router.replace(landingPath());
   }, [loading, user, router]);
 
   const goTo = (index: number, dir: "forward" | "back") => {
@@ -157,7 +158,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
         description="We sent a 6-digit code to finish becoming a Teenovator to"
         onSubmit={async (code) => {
           await verifyEmail(email, code);
-          setTimeout(() => router.push("/home"), 700);
+          setTimeout(() => router.push(landingPath()), 700);
         }}
         onResend={() => resendVerification(email)}
         onBack={() => {
@@ -204,7 +205,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
               setGoogleBusy(true);
               try {
                 await loginWithGoogle(credentialResponse.credential);
-                router.push("/home");
+                router.push(landingPath());
               } catch (err) {
                 setGoogleBusy(false);
                 setFormError(err instanceof Error ? err.message : "Google sign-in failed");

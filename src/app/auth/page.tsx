@@ -1,5 +1,6 @@
 "use client";
 
+import { landingPath } from "@/lib/landing";
 import { siteUrl } from "@/lib/hosts";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
@@ -22,7 +23,7 @@ function EmailLinkVerifier({ email, code }: { email: string; code: string }) {
 
   useEffect(() => {
     verifyEmail(email, code)
-      .then(() => router.replace("/home"))
+      .then(() => router.replace(landingPath()))
       .catch((err) => {
         setState("error");
         setError(err instanceof Error ? err.message : "That link isn't valid anymore.");

@@ -1,5 +1,6 @@
 "use client";
 
+import { landingPath } from "@/lib/landing";
 import { siteUrl } from "@/lib/hosts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -52,7 +53,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
   const loginIcon = useIconHover();
 
   useEffect(() => {
-    if (!loading && user) router.replace("/home");
+    if (!loading && user) router.replace(landingPath());
   }, [loading, user, router]);
 
   const goTo = (index: number, dir: "forward" | "back") => {
@@ -103,7 +104,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
     setSubmitting(true);
     try {
       await login(result.data.email, result.data.password, rememberMe);
-      router.push("/home");
+      router.push(landingPath());
     } catch (err) {
       if (err instanceof ApiError && err.code === "EMAIL_NOT_VERIFIED") {
         setNeedsVerification(true);
@@ -135,7 +136,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
         description="Your email isn't verified yet — we sent a 6-digit code to"
         onSubmit={async (code) => {
           await verifyEmail(email, code);
-          router.push("/home");
+          router.push(landingPath());
         }}
         onResend={() => resendVerification(email)}
         onBack={() => setNeedsVerification(false)}
@@ -177,7 +178,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
               setGoogleBusy(true);
               try {
                 await loginWithGoogle(credentialResponse.credential);
-                router.push("/home");
+                router.push(landingPath());
               } catch (err) {
                 setGoogleBusy(false);
                 setFormError(err instanceof Error ? err.message : "Google sign-in failed");
