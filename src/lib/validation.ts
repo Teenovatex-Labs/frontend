@@ -48,3 +48,13 @@ export function fieldErrors(result: { success: boolean; error?: z.ZodError }): R
   }
   return errors;
 }
+
+export const CONTACT_TOPICS = ["hello", "partner", "sponsor", "mentor", "donate", "press", "other"] as const;
+export type ContactTopic = (typeof CONTACT_TOPICS)[number];
+
+export const contactFormSchema = z.object({
+  name: z.string().trim().min(2, "Tell us your name").max(100),
+  email: z.string().trim().email("Enter a valid email"),
+  topic: z.enum(CONTACT_TOPICS),
+  message: z.string().trim().min(10, "Say a little more (10 characters minimum)").max(2000),
+});

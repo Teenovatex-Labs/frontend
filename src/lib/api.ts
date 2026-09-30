@@ -199,3 +199,9 @@ export const settingsApi = {
       { auth: true }
     ),
 };
+
+export const contactApi = {
+  // `website` is a honeypot — always empty for real people.
+  send: (data: { name: string; email: string; topic: string; message: string; website?: string }) =>
+    request<{ message: string }>("/contact", { method: "POST", body: JSON.stringify(data) }),
+};
