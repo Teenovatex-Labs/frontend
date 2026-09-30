@@ -1,5 +1,6 @@
 "use client";
 
+import { siteUrl } from "@/lib/hosts";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,7 +22,7 @@ function EmailLinkVerifier({ email, code }: { email: string; code: string }) {
 
   useEffect(() => {
     verifyEmail(email, code)
-      .then(() => router.replace("/dashboard"))
+      .then(() => router.replace("/home"))
       .catch((err) => {
         setState("error");
         setError(err instanceof Error ? err.message : "That link isn't valid anymore.");
@@ -31,7 +32,7 @@ function EmailLinkVerifier({ email, code }: { email: string; code: string }) {
 
   return (
     <>
-      <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
+      <Link href={siteUrl("/")} aria-label="TeenovateX home" className="mb-5 flex items-center">
         <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
       </Link>
       <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">

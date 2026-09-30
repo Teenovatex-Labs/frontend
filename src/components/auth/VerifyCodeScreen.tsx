@@ -1,5 +1,6 @@
 "use client";
 
+import { siteUrl } from "@/lib/hosts";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -73,7 +74,7 @@ export default function VerifyCodeScreen({
 
   return (
     <>
-      <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
+      <Link href={siteUrl("/")} aria-label="TeenovateX home" className="mb-5 flex items-center">
         <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
       </Link>
 

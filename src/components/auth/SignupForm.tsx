@@ -1,5 +1,6 @@
 "use client";
 
+import { siteUrl } from "@/lib/hosts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
@@ -48,7 +49,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
   const rocketIcon = useIconHover();
 
   useEffect(() => {
-    if (!loading && user) router.replace("/dashboard");
+    if (!loading && user) router.replace("/home");
   }, [loading, user, router]);
 
   const goTo = (index: number, dir: "forward" | "back") => {
@@ -145,7 +146,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
         description="We sent a 6-digit code to finish becoming a Teenovator to"
         onSubmit={async (code) => {
           await verifyEmail(email, code);
-          setTimeout(() => router.push("/dashboard"), 700);
+          setTimeout(() => router.push("/home"), 700);
         }}
         onResend={() => resendVerification(email)}
         onBack={() => {
@@ -158,7 +159,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
 
   return (
     <>
-      <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
+      <Link href={siteUrl("/")} aria-label="TeenovateX home" className="mb-5 flex items-center">
         <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
       </Link>
 
@@ -191,7 +192,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
               setFormError(null);
               try {
                 await loginWithGoogle(credentialResponse.credential);
-                router.push("/dashboard");
+                router.push("/home");
               } catch (err) {
                 setFormError(err instanceof Error ? err.message : "Google sign-in failed");
               }

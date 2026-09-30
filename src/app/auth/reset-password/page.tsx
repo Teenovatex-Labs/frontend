@@ -1,5 +1,6 @@
 "use client";
 
+import { siteUrl } from "@/lib/hosts";
 import Link from "next/link";
 import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -31,7 +32,7 @@ function ResetPasswordInner() {
   if (!token) {
     return (
       <>
-        <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
+        <Link href={siteUrl("/")} aria-label="TeenovateX home" className="mb-5 flex items-center">
           <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
         </Link>
         <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">
@@ -51,7 +52,7 @@ function ResetPasswordInner() {
   if (done) {
     return (
       <>
-        <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
+        <Link href={siteUrl("/")} aria-label="TeenovateX home" className="mb-5 flex items-center">
           <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
         </Link>
         <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">
@@ -93,7 +94,7 @@ function ResetPasswordInner() {
 
   return (
     <>
-      <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
+      <Link href={siteUrl("/")} aria-label="TeenovateX home" className="mb-5 flex items-center">
         <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
       </Link>
       <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">

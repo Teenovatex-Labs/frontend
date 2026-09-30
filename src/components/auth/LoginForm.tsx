@@ -1,5 +1,6 @@
 "use client";
 
+import { siteUrl } from "@/lib/hosts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
@@ -49,7 +50,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
   const loginIcon = useIconHover();
 
   useEffect(() => {
-    if (!loading && user) router.replace("/dashboard");
+    if (!loading && user) router.replace("/home");
   }, [loading, user, router]);
 
   const goTo = (index: number, dir: "forward" | "back") => {
@@ -100,7 +101,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
     setSubmitting(true);
     try {
       await login(result.data.email, result.data.password, rememberMe);
-      router.push("/dashboard");
+      router.push("/home");
     } catch (err) {
       if (err instanceof ApiError && err.code === "EMAIL_NOT_VERIFIED") {
         setNeedsVerification(true);
@@ -137,7 +138,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
         description="Your email isn't verified yet — we sent a 6-digit code to"
         onSubmit={async (code) => {
           await verifyEmail(email, code);
-          router.push("/dashboard");
+          router.push("/home");
         }}
         onResend={() => resendVerification(email)}
         onBack={() => setNeedsVerification(false)}
@@ -151,7 +152,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
 
   return (
     <>
-      <Link href="/" aria-label="TeenovateX home" className="mb-5 flex items-center">
+      <Link href={siteUrl("/")} aria-label="TeenovateX home" className="mb-5 flex items-center">
         <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-7 w-auto" />
       </Link>
 
@@ -178,7 +179,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
               setFormError(null);
               try {
                 await loginWithGoogle(credentialResponse.credential);
-                router.push("/dashboard");
+                router.push("/home");
               } catch (err) {
                 setFormError(err instanceof Error ? err.message : "Google sign-in failed");
               }
