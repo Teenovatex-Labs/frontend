@@ -12,6 +12,8 @@ import SigningIn from "@/components/auth/SigningIn";
 const NAV = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/reports", label: "Reports" },
+  { href: "/admin/events", label: "Events" },
+  { href: "/admin/announcements", label: "Announcements" },
   { href: "/admin/members", label: "Members" },
   { href: "/admin/audit", label: "Audit log" },
 ];
