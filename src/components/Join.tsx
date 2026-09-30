@@ -32,7 +32,7 @@ export default function Join() {
             <Link href={appUrl("/auth?mode=signup")} className="btn">
               Become a Teenovator <span>↗︎</span>
             </Link>
-            <Link href={appUrl("/auth?mode=login")} className="btn-secondary">
+            <Link href={appUrl("/auth?mode=login")} className="btn-secondary on-yellow">
               Log in
             </Link>
           </div>
