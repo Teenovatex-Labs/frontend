@@ -44,6 +44,9 @@ export type AlfredNotice = { id: string; message: string; kind: AlfredNoticeKind
 
 export type ChatMessage = { id: string; from: "you" | "alfred"; text: string; at: number };
 
+export type TourStep = { message: string; path?: string };
+export type TourState = { index: number; total: number; step: TourStep };
+
 export type AlfredSnapshot = {
   state: AlfredState;
   /** What the sprite should play, or null for the still pose. */
@@ -55,6 +58,8 @@ export type AlfredSnapshot = {
   bubble: boolean;
   consent: AlfredConsent | null;
   notice: AlfredNotice | null;
+  /** A guided walkthrough in progress, or null. */
+  tour: TourState | null;
   minimized: boolean;
   chatOpen: boolean;
   messages: ChatMessage[];
@@ -130,6 +135,8 @@ export class AlfredController {
   private dragUntil = 0;
   private offline = false;
   private transient: Transient | null = null;
+  private tourSteps: TourStep[] = [];
+  private tourIndex = -1;
   private sessionGeneration = 0;
   private always: Set<string>;
   private consentResolver: ((approved: boolean) => void) | undefined;
@@ -141,6 +148,7 @@ export class AlfredController {
     bubble: false,
     consent: null,
     notice: null,
+    tour: null,
     minimized: false,
     chatOpen: false,
     messages: [],
@@ -178,6 +186,7 @@ export class AlfredController {
     let bubble = false;
     const { consent, notice } = this.snapshot;
     const task = this.activeTask();
+    const touring = this.tourIndex >= 0 ? this.tourSteps[this.tourIndex] : undefined;
 
     if (consent) {
       state = "consent";
@@ -190,6 +199,11 @@ export class AlfredController {
     } else if (notice) {
       state = "alerting";
       message = notice.message;
+      bubble = true;
+    } else if (touring) {
+      // A step of the walkthrough: he greets you, and the bubble carries the step's words.
+      state = 'greeting';
+      message = touring.message;
       bubble = true;
     } else if (this.transient) {
       state = this.transient.state;
@@ -362,6 +376,44 @@ export class AlfredController {
     this.emit({ minimized: value, ...(value ? { chatOpen: false } : {}) });
   }
 
+  // --- guided tour ------------------------------------------------------------------------
+
+  private publishTour(): void {
+    const step = this.tourSteps[this.tourIndex];
+    const tour = step ? { index: this.tourIndex, total: this.tourSteps.length, step } : null;
+    this.runKey += 1; // each step replays his greeting
+    this.snapshot = { ...this.snapshot, tour, runKey: this.runKey };
+    this.refresh();
+    this.emit({ tour, runKey: this.runKey });
+  }
+
+  startTour(steps: TourStep[]): void {
+    if (steps.length === 0) return;
+    this.tourSteps = steps;
+    this.tourIndex = 0;
+    this.publishTour();
+  }
+
+  /** Moves on, and returns the step now showing (so the app can take the member there), or null at the end. */
+  nextTour(): TourStep | null {
+    if (this.tourIndex < 0) return null;
+    this.tourIndex += 1;
+    if (this.tourIndex >= this.tourSteps.length) {
+      this.endTour();
+      return null;
+    }
+    this.publishTour();
+    return this.tourSteps[this.tourIndex] ?? null;
+  }
+
+  endTour(): void {
+    this.tourIndex = -1;
+    this.tourSteps = [];
+    this.snapshot = { ...this.snapshot, tour: null };
+    this.emit({ tour: null });
+    this.refresh();
+  }
+
   // --- chat -----------------------------------------------------------------------------
 
   setChatOpen(value: boolean): void {
@@ -396,8 +448,10 @@ export class AlfredController {
     this.noticeTimer = undefined;
     const resolve = this.consentResolver;
     this.consentResolver = undefined;
-    this.snapshot = { ...this.snapshot, consent: null, notice: null };
-    this.emit({ consent: null, notice: null, messages: [], chatOpen: false });
+    this.tourIndex = -1;
+    this.tourSteps = [];
+    this.snapshot = { ...this.snapshot, consent: null, notice: null, tour: null };
+    this.emit({ consent: null, notice: null, tour: null, messages: [], chatOpen: false });
     this.refresh();
     resolve?.(false);
   }
