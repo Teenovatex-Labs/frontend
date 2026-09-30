@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { DONATE, formatMoney } from "@/lib/donate";
+import { DONATE, donateUrl, formatMoney } from "@/lib/donate";
 import { openContact } from "@/lib/contactBus";
 
 const SEGMENTS = 8;
@@ -56,9 +56,8 @@ export default function Donate() {
   const reduce = useReducedMotion();
   const [amount, setAmount] = useState<number>(DONATE.defaultAmount);
   const [custom, setCustom] = useState("");
-  const [copied, setCopied] = useState<string | null>(null);
+  const [monthly, setMonthly] = useState(false);
 
-  const live = Boolean(DONATE.url);
   const lit = litFor(amount);
 
   const pick = (a: number) => {
@@ -71,17 +70,6 @@ export default function Donate() {
     setCustom(digits);
     const n = Number(digits);
     if (n >= 1) setAmount(Math.min(n, DONATE.maxAmount));
-  };
-
-  const copy = async (label: string, value: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(label);
-      window.setTimeout(() => setCopied(null), 1600);
-    } catch {
-      // Clipboard can be blocked (permissions, insecure context); the value
-      // is still on screen to copy by hand.
-    }
   };
 
   return (
@@ -153,7 +141,24 @@ export default function Donate() {
                 {formatMoney(amount)}
               </p>
 
-              <div role="group" aria-label="Choose an amount" className="mt-5 flex flex-wrap gap-2">
+              <div role="group" aria-label="How often" className="mt-4 inline-flex rounded-full border border-ink p-0.5 text-sm font-semibold">
+                {[
+                  { id: false, label: "One-time" },
+                  { id: true, label: "Monthly" },
+                ].map((o) => (
+                  <button
+                    key={o.label}
+                    type="button"
+                    onClick={() => setMonthly(o.id)}
+                    aria-pressed={monthly === o.id}
+                    className={`rounded-full px-4 py-1 transition-colors ${monthly === o.id ? "bg-ink text-cream" : "hover:bg-yellow"}`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+
+              <div role="group" aria-label="Choose an amount" className="mt-4 flex flex-wrap gap-2">
                 {DONATE.amounts.map((a) => (
                   <button
                     key={a}
@@ -185,48 +190,23 @@ export default function Donate() {
             </div>
           </div>
 
-          {live ? (
-            <a href={DONATE.url} target="_blank" rel="noopener noreferrer" className="btn mt-7 w-full">
-              Give {formatMoney(amount)} <span>↗︎</span>
+          <a
+            href={donateUrl(amount, monthly)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn mt-7 w-full"
+          >
+            Give {formatMoney(amount)}
+            {monthly ? " a month" : ""} <span>↗︎</span>
+          </a>
+          <p className="mt-3 text-center text-xs text-muted">
+            Secure checkout on HCB. TeenovateX Labs is fiscally sponsored by Hack Club, a 501(c)(3) nonprofit, so
+            your gift is tax-deductible in the US.{" "}
+            <a href={DONATE.orgPage} target="_blank" rel="noopener noreferrer" className="font-semibold underline underline-offset-2 hover:text-rose">
+              See our public finances
             </a>
-          ) : (
-            <div className="mt-7">
-              <button type="button" onClick={() => openContact("donate")} className="btn w-full">
-                Donations open soon. Tell us you&rsquo;re in <span>↗︎</span>
-              </button>
-              <p className="mt-2.5 text-center text-xs text-muted">
-                We&rsquo;ll reach out the moment giving is live.
-              </p>
-            </div>
-          )}
-
-          {DONATE.bank && (
-            <details className="mt-5 border-t border-line pt-4 text-sm">
-              <summary className="cursor-pointer font-semibold">Prefer a bank transfer?</summary>
-              <dl className="mt-3 space-y-2">
-                {[
-                  ["Bank", DONATE.bank.bank],
-                  ["Account name", DONATE.bank.accountName],
-                  ["Account number", DONATE.bank.accountNumber],
-                ].map(([k, v]) => (
-                  <div key={k} className="flex items-center justify-between gap-3">
-                    <dt className="text-muted">{k}</dt>
-                    <dd className="flex items-center gap-2 font-medium">
-                      {v}
-                      <button
-                        type="button"
-                        onClick={() => copy(k, v)}
-                        className="rounded border border-ink px-2 py-0.5 text-[11px] font-semibold hover:bg-yellow"
-                      >
-                        {copied === k ? "Copied" : "Copy"}
-                      </button>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-              {DONATE.bank.note && <p className="mt-3 text-xs text-muted">{DONATE.bank.note}</p>}
-            </details>
-          )}
+            .
+          </p>
         </div>
       </div>
     </section>
