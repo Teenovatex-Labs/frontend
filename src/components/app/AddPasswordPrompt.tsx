@@ -58,11 +58,11 @@ export default function AddPasswordPrompt() {
               <button
                 type="button"
                 onClick={() => setDismissed(true)}
-                className="text-xs font-semibold text-muted underline underline-offset-4 hover:text-ink"
+                className="btn-secondary btn-sm"
               >
                 Not now
               </button>
-              <button type="button" onClick={() => setOpen(true)} className="btn">
+              <button type="button" onClick={() => setOpen(true)} className="btn btn-sm">
                 Set a password
               </button>
             </div>
