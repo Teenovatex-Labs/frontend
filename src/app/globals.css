@@ -4,44 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @ogtirth/liquid-glass-oss ships its own hardcoded accent colors (an iOS
-   green toggle switch, a blue selected-tab indicator) with no themeable
-   variable for either — override its own classes directly so every
-   instance across the site picks up our brand color instead. !important
-   guards against a future release of the library reordering its own
-   rules relative to this file. */
-.lg-button.is-checked .lg-button__switch {
-  background: linear-gradient(180deg, var(--rose) 0%, #6f2646 100%) !important;
-}
-.lg-dock__item.is-selected,
-.lg-tabbar__item.is-selected,
-.lg-breadcrumb__item.is-selected {
-  color: var(--pink) !important;
-}
-.lg-icon-button.is-active,
-.lg-icon-button.is-active .lg-icon-button__icon {
-  color: var(--pink) !important;
-}
-
-/* LiquidGlassIconButton ships fixed at 96x96 (or 132x72/88x40 for the
-   capsule shape) — sizing is a JS-computed WebGL geometry
-   (src/LiquidGlassIconButton.tsx `geometry`), not read from CSS, but the
-   component has no pointer-position math tied to that size (unlike the
-   tab bar/slider), so its canvas scales safely to whatever CSS size we
-   give it. This is our compact navbar-icon size, used for every nav/
-   search/settings button so they all match. */
-.app-nav-icon-btn.lg-icon-button {
-  width: 44px !important;
-  height: 44px !important;
-}
-/* The glass canvas gets an inline `style.width/height` from the library's
-   own resize() call (fixed to the 96px geometry above), which beats a plain
-   external rule — !important is required here, not just for safety. */
-.app-nav-icon-btn .lg-icon-button__glass {
-  width: 44px !important;
-  height: 44px !important;
-}
-
 :root {
   --cream: #fff9eb;
   --ink: #262822;
