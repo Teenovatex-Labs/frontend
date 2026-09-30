@@ -1,3 +1,5 @@
+import { alfredController } from "@/lib/alfred";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 const REFRESH_TOKEN_KEY = "tx_refresh_token";
 
@@ -86,7 +88,25 @@ async function tryRefresh(): Promise<boolean> {
 async function request<T>(
   path: string,
   init: RequestInit = {},
-  opts: { auth?: boolean; retry?: boolean } = {}
+  opts: { auth?: boolean; retry?: boolean; activity?: string | false } = {}
+): Promise<T> {
+  const activity = opts.activity === false ? null : alfredController.beginTask(
+    opts.activity ?? apiActivityLabel(path, init.method ?? "GET")
+  );
+  try {
+    const result = await performRequest<T>(path, init, opts);
+    activity?.done();
+    return result;
+  } catch (error) {
+    activity?.fail(error instanceof ApiError ? error.message : "I couldn’t reach the service.");
+    throw error;
+  }
+}
+
+async function performRequest<T>(
+  path: string,
+  init: RequestInit,
+  opts: { auth?: boolean; retry?: boolean; activity?: string | false }
 ): Promise<T> {
   const headers = new Headers(init.headers);
   headers.set("Content-Type", "application/json");
@@ -96,7 +116,7 @@ async function request<T>(
 
   if (res.status === 401 && opts.auth && opts.retry !== false) {
     const refreshed = await tryRefresh();
-    if (refreshed) return request<T>(path, init, { ...opts, retry: false });
+    if (refreshed) return performRequest<T>(path, init, { ...opts, retry: false });
   }
 
   const body = await res.json().catch(() => null);
@@ -104,6 +124,25 @@ async function request<T>(
     throw new ApiError(body?.error ?? "Something went wrong", body?.code ?? "UNKNOWN", res.status);
   }
   return body as T;
+}
+
+function apiActivityLabel(path: string, method: string): string {
+  const labels: Record<string, string> = {
+    "/auth/register": "Creating your account",
+    "/auth/verify-email": "Verifying your email",
+    "/auth/resend-verification": "Resending your code",
+    "/auth/login": "Signing in",
+    "/auth/google": "Signing in with Google",
+    "/auth/logout": "Signing out",
+    "/auth/forgot-password": "Sending a reset code",
+    "/auth/verify-reset-code": "Checking your reset code",
+    "/auth/reset-password": "Updating your password",
+    "/users/me": "Loading your profile",
+    "/settings/password": "Updating your password",
+    "/contact": "Sending your message",
+  };
+  if (path === "/notifications" && method === "GET") return "Checking your updates";
+  return labels[path] ?? "Working on your request";
 }
 
 export const authApi = {
@@ -204,4 +243,16 @@ export const contactApi = {
   // `website` is a honeypot — always empty for real people.
   send: (data: { name: string; email: string; topic: string; message: string; website?: string }) =>
     request<{ message: string }>("/contact", { method: "POST", body: JSON.stringify(data) }),
+};
+
+export type AppNotification = {
+  id: string;
+  type: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+};
+
+export const notificationsApi = {
+  list: () => request<AppNotification[]>("/notifications", {}, { auth: true, activity: false }),
 };
