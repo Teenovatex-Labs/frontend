@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
-import { peopleApi, safetyApi } from "@/lib/services";
+import { messagesApi, peopleApi, safetyApi } from "@/lib/services";
 import ReportButton from "@/components/safety/ReportDialog";
 import { keys } from "@/lib/labs";
 import Avatar from "@/components/ui/Avatar";
@@ -20,6 +20,7 @@ export default function PersonPage() {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
   const qc = useQueryClient();
+  const router = useRouter();
   const toast = useToast();
 
   const person = useQuery({ queryKey: keys.person(username), queryFn: () => peopleApi.get(username) });
@@ -35,6 +36,12 @@ export default function PersonPage() {
     mutationFn: (following: boolean) => (following ? peopleApi.unfollow(username) : peopleApi.follow(username)),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.person(username) }),
     onError: (err) => toast.error(err instanceof ApiError ? err.message : "That didn't work. Try again."),
+  });
+
+  const message = useMutation({
+    mutationFn: () => messagesApi.open(username),
+    onSuccess: (c) => router.push(`/messages/${c.id}`),
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : "Couldn't open the chat."),
   });
 
   const block = useMutation({
@@ -107,6 +114,13 @@ export default function PersonPage() {
             <button className={p.is_following ? "btn-secondary" : "btn"} disabled={follow.isPending} onClick={() => follow.mutate(p.is_following)}>
               {p.is_following ? "Following" : "Follow"}
             </button>
+            {p.is_following && p.follows_you ? (
+              <button className="btn-secondary btn-sm" disabled={message.isPending} onClick={() => message.mutate()}>Message</button>
+            ) : (
+              <span className="max-w-[200px] text-right text-xs text-muted">
+                {p.is_following ? "You can message once they follow you back." : "You can message each other once you both follow."}
+              </span>
+            )}
             <span className="flex items-center gap-3">
               <ReportButton targetType="user" targetId={p.username} what={`@${p.username}`} />
               <button type="button" onClick={() => block.mutate()} disabled={block.isPending} className="text-xs text-muted underline underline-offset-4 hover:text-rose">

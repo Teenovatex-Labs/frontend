@@ -47,7 +47,7 @@ export const MAIN: NavItem[] = [
     ],
   },
   { id: "learn", label: "Learn", href: "/learn", icon: BookOpenIcon },
-  { id: "messages", label: "Messages", icon: MessageCircleIcon, soon: true },
+  { id: "messages", label: "Messages", href: "/messages", icon: MessageCircleIcon },
   { id: "leaderboard", label: "Leaderboard", href: "/leaderboard", icon: ChartBarIncreasingIcon },
   { id: "notifications", label: "Notifications", href: "/notifications", icon: BellIcon },
 ];

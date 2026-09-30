@@ -18,7 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { siteUrl } from "@/lib/hosts";
 import { LINKS, MAIN, type NavItem, type NavLeaf } from "./nav";
 import { useQuery } from "@tanstack/react-query";
-import { inboxApi } from "@/lib/services";
+import { inboxApi, messagesApi } from "@/lib/services";
 import { keys } from "@/lib/labs";
 
 const OUT = "ease-[cubic-bezier(0.22,1,0.36,1)]";
@@ -160,12 +160,19 @@ function NavRow({
   const hasChildren = Boolean(item.children?.length);
   const Icon = item.icon;
   // Only the Notifications row asks; the query is shared with the Notifications page.
-  const unread = useQuery({
+  const inboxUnread = useQuery({
     queryKey: keys.unread,
     queryFn: inboxApi.unread,
     enabled: item.id === "notifications",
     refetchInterval: 60_000,
   }).data?.unread ?? 0;
+  const chatUnread = useQuery({
+    queryKey: keys.unreadChats,
+    queryFn: messagesApi.unread,
+    enabled: item.id === "messages",
+    refetchInterval: 20_000,
+  }).data?.unread ?? 0;
+  const unread = item.id === "messages" ? chatUnread : inboxUnread;
 
   const content = (
     <>
@@ -186,7 +193,7 @@ function NavRow({
           {item.label}
         </span>
         {!collapsed && item.soon && !hasChildren && <SoonChip />}
-        {item.id === "notifications" && unread > 0 && (
+        {(item.id === "notifications" || item.id === "messages") && unread > 0 && (
           <span
             aria-label={`${unread} unread`}
             className={`shrink-0 rounded-full bg-pink px-2 py-0.5 text-[11px] font-semibold tabular-nums text-ink ${collapsed ? "absolute right-2 top-2 px-1.5" : ""}`}
