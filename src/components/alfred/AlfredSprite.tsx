@@ -1,203 +1,221 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { AlfredState } from "@/lib/alfred";
+import type { AlfredAnimation } from "@/lib/alfred";
 
 const MANIFEST_URL = "/alfred/animations.json";
-const FRAME_WIDTH = 256;
-const FRAME_HEIGHT = 320;
-const COLUMNS = 4;
+/** The still pose he holds when nothing is happening: the first frame of "curious". */
+const STILL: AlfredAnimation = "curious";
+const CROSSFADE_MS = 180;
 
-type Animation = { source: string; frames: number; fps: number; loop: boolean };
-type AnimationManifest = {
+type Animation = { source: string; frames: number; fps: number; loop: boolean; blend?: boolean };
+type Manifest = {
   version: number;
   cellWidth: number;
   cellHeight: number;
   columns: number;
-  animations: Partial<Record<AlfredState, Animation>>;
+  animations: Partial<Record<AlfredAnimation, Animation>>;
 };
-type Playhead = { state: AlfredState; elapsed: number; lastTimestamp: number };
 
-let manifestPromise: Promise<AnimationManifest> | undefined;
-const sheetPromises = new Map<string, Promise<HTMLImageElement>>();
+let manifestPromise: Promise<Manifest> | undefined;
+const sheets = new Map<string, Promise<HTMLImageElement>>();
 
-function loadManifest(): Promise<AnimationManifest> {
-  if (!manifestPromise) {
-    manifestPromise = fetch(MANIFEST_URL)
-      .then((response) => {
-        if (!response.ok) throw new Error("Alfred animations could not be loaded");
-        return response.json() as Promise<AnimationManifest>;
-      })
-      .then((manifest) => {
-        if (manifest.version !== 2 || manifest.cellWidth !== FRAME_WIDTH || manifest.cellHeight !== FRAME_HEIGHT || manifest.columns !== COLUMNS) {
-          throw new Error("Alfred animation manifest is incompatible");
-        }
-        return manifest;
-      })
-      .catch((error) => {
-        manifestPromise = undefined;
-        throw error;
-      });
-  }
+function loadManifest(): Promise<Manifest> {
+  manifestPromise ??= fetch(MANIFEST_URL)
+    .then((r) => {
+      if (!r.ok) throw new Error("Alfred animations could not be loaded");
+      return r.json() as Promise<Manifest>;
+    })
+    .then((m) => {
+      if (m.version !== 3) throw new Error("Alfred animation manifest is incompatible");
+      return m;
+    })
+    .catch((e) => {
+      manifestPromise = undefined;
+      throw e;
+    });
   return manifestPromise;
 }
 
-function loadSheet(source: string): Promise<HTMLImageElement> {
-  const existing = sheetPromises.get(source);
-  if (existing) return existing;
-  const promise = new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Alfred animation sheet could not be loaded"));
-    image.src = source;
-  }).catch((error) => {
-    sheetPromises.delete(source);
-    throw error;
-  });
-  sheetPromises.set(source, promise);
-  return promise;
+function loadSheet(src: string): Promise<HTMLImageElement> {
+  let p = sheets.get(src);
+  if (!p) {
+    p = new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("Alfred sheet could not be loaded"));
+      img.src = src;
+    }).catch((e) => {
+      sheets.delete(src);
+      throw e;
+    });
+    sheets.set(src, p);
+  }
+  return p;
 }
 
 export type AlfredSpriteProps = {
-  state: AlfredState;
+  /** Which animation to play, or null for the still pose. */
+  animation: AlfredAnimation | null;
+  /** Bump this to restart the animation from its first frame. */
+  runKey: number;
   className?: string;
-  paused?: boolean;
-  reducedMotion?: boolean;
 };
 
-export default function AlfredSprite({ state, className, paused = false, reducedMotion = false }: AlfredSpriteProps) {
+/**
+ * Draws Alfred on a canvas. While he is still, one frame is painted and then NOTHING runs, so an
+ * idle Alfred costs no CPU. While he animates, neighbouring frames are blended together (the
+ * frames are separate paintings, so stepping between them would look like a flicker), and a
+ * change of pose crossfades instead of cutting.
+ */
+export default function AlfredSprite({ animation, runKey, className }: AlfredSpriteProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const playhead = useRef<Playhead>({ state, elapsed: 0, lastTimestamp: 0 });
-  const [error, setError] = useState(false);
+  const previous = useRef<HTMLCanvasElement | null>(null); // the last picture, kept for crossfades
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
 
     let disposed = false;
-    let frameRequest = 0;
-    let sheet: HTMLImageElement | undefined;
-    let animation: Animation | undefined;
-    let inViewport = !document.hidden;
-    let lastWidth = 0;
-    let lastHeight = 0;
+    let raf = 0;
+    let running = false; // true while a frame is scheduled, so handlers never start a second loop
+    let cleanup: (() => void) | undefined;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    if (playhead.current.state !== state) {
-      playhead.current = { state, elapsed: 0, lastTimestamp: 0 };
-    } else {
-      playhead.current.lastTimestamp = 0;
-    }
-    setError(false);
-
-    const resizeCanvas = () => {
-      const bounds = canvas.getBoundingClientRect();
-      if (!bounds.width || !bounds.height) return;
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      const width = Math.round(bounds.width * ratio);
-      const height = Math.round(bounds.height * ratio);
-      if (width !== lastWidth || height !== lastHeight) {
-        canvas.width = width;
-        canvas.height = height;
-        lastWidth = width;
-        lastHeight = height;
+    const fit = () => {
+      const box = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.round(box.width * dpr);
+      const h = Math.round(box.height * dpr);
+      if (w && h && (canvas.width !== w || canvas.height !== h)) {
+        canvas.width = w;
+        canvas.height = h;
       }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
     };
 
-    const draw = (timestamp: number) => {
-      if (disposed || !sheet || !animation) return;
-      const head = playhead.current;
-      const motionReduced = reducedMotion || media.matches;
-      if (!paused && !motionReduced) {
-        if (head.lastTimestamp) head.elapsed += Math.max(0, timestamp - head.lastTimestamp) / 1000;
-      }
-      head.lastTimestamp = timestamp;
-      resizeCanvas();
-      if (canvas.width && canvas.height) {
-        const frame = motionReduced ? 0 : Math.floor(head.elapsed * animation.fps);
-        const frameIndex = animation.loop
-          ? frame % animation.frames
-          : Math.min(animation.frames - 1, frame);
-        const sourceX = (frameIndex % COLUMNS) * FRAME_WIDTH;
-        const sourceY = Math.floor(frameIndex / COLUMNS) * FRAME_HEIGHT;
-        context.setTransform(1, 0, 0, 1, 0, 0);
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(sheet, sourceX, sourceY, FRAME_WIDTH, FRAME_HEIGHT, 0, 0, canvas.width, canvas.height);
-      }
-      if (!paused && !motionReduced && inViewport && !document.hidden) {
-        frameRequest = requestAnimationFrame(draw);
-      } else {
-        head.lastTimestamp = 0;
-      }
+    const snapshot = () => {
+      const copy = previous.current ?? document.createElement("canvas");
+      copy.width = canvas.width;
+      copy.height = canvas.height;
+      copy.getContext("2d")?.drawImage(canvas, 0, 0);
+      previous.current = copy;
     };
 
-    const restart = () => {
-      if (frameRequest) cancelAnimationFrame(frameRequest);
-      frameRequest = 0;
-      playhead.current.lastTimestamp = 0;
-      if (sheet && animation && inViewport && !document.hidden) {
-        draw(performance.now());
-      }
-    };
-
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onVisibilityChange = () => {
-      restart();
-    };
-    const intersection = typeof IntersectionObserver !== "undefined"
-      ? new IntersectionObserver(([entry]) => {
-          inViewport = entry.isIntersecting;
-          restart();
-        })
-      : undefined;
-    const resizeObserver = typeof ResizeObserver !== "undefined"
-      ? new ResizeObserver(() => {
-          resizeCanvas();
-          restart();
-        })
-      : undefined;
-    intersection?.observe(canvas);
-    resizeObserver?.observe(canvas);
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    media.addEventListener("change", restart);
-
-    void loadManifest()
-      .then((manifest) => {
-        const selected = manifest.animations[state];
-        if (!selected || selected.frames !== 16 || selected.fps <= 0) throw new Error(`Alfred animation is missing: ${state}`);
-        animation = selected;
-        return loadSheet(selected.source);
-      })
-      .then((image) => {
+    (async () => {
+      try {
+        const manifest = await loadManifest();
+        const wanted = animation ?? STILL;
+        const anim = manifest.animations[wanted];
+        if (!anim) throw new Error(`Alfred animation is missing: ${wanted}`);
+        const sheet = await loadSheet(anim.source);
         if (disposed) return;
-        sheet = image;
-        resizeCanvas();
-        restart();
-      })
-      .catch(() => {
-        if (!disposed) setError(true);
-      });
+
+        const { cellWidth: cw, cellHeight: ch, columns } = manifest;
+        const still = animation === null || reduced.matches;
+        const cell = (i: number) => ({ x: (i % columns) * cw, y: Math.floor(i / columns) * ch });
+        const paint = (i: number, alpha: number) => {
+          const { x, y } = cell(i);
+          ctx.globalAlpha = alpha;
+          ctx.drawImage(sheet, x, y, cw, ch, 0, 0, canvas.width, canvas.height);
+        };
+
+        fit();
+        const hadPicture = previous.current !== null && canvas.width > 0;
+        const start = performance.now();
+
+        const draw = (now: number) => {
+          if (disposed) return;
+          fit();
+          const t = (now - start) / 1000;
+          let index = 0;
+          let blendTo = -1;
+          let blendAmount = 0;
+          let finished = false;
+
+          if (!still) {
+            const position = t * anim.fps;
+            const whole = Math.floor(position);
+            if (anim.loop) {
+              index = whole % anim.frames;
+              blendTo = (index + 1) % anim.frames;
+            } else if (whole >= anim.frames - 1) {
+              index = anim.frames - 1;
+              finished = true;
+            } else {
+              index = whole;
+              blendTo = index + 1;
+            }
+            blendAmount = anim.blend && blendTo >= 0 ? position - whole : 0;
+          }
+
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Ease in from whatever was on screen so a change of pose never pops.
+          const fade = hadPicture ? Math.min(1, (now - start) / CROSSFADE_MS) : 1;
+          if (fade < 1 && previous.current) {
+            ctx.globalAlpha = 1 - fade;
+            ctx.drawImage(previous.current, 0, 0);
+          }
+          paint(index, fade);
+          if (blendAmount > 0.02) paint(blendTo, blendAmount * fade);
+          ctx.globalAlpha = 1;
+
+          const settling = fade < 1;
+          running = false;
+          if (still && !settling) return; // painted once; nothing more runs
+          if (finished && !settling) return; // one-shot animations hold their last frame
+          if (document.hidden) return;
+          schedule();
+        };
+        const schedule = () => {
+          if (running || disposed) return;
+          running = true;
+          raf = requestAnimationFrame(draw);
+        };
+
+        // Keep a copy of what is showing so the NEXT change can crossfade from it.
+        const remember = () => snapshot();
+        schedule();
+        const onVisible = () => {
+          if (!document.hidden) schedule();
+        };
+        document.addEventListener("visibilitychange", onVisible);
+        const onResize = () => schedule();
+        window.addEventListener("resize", onResize);
+        cleanup = () => {
+          remember();
+          document.removeEventListener("visibilitychange", onVisible);
+          window.removeEventListener("resize", onResize);
+        };
+      } catch {
+        if (!disposed) setFailed(true);
+      }
+    })();
 
     return () => {
       disposed = true;
-      if (frameRequest) cancelAnimationFrame(frameRequest);
-      intersection?.disconnect();
-      resizeObserver?.disconnect();
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      media.removeEventListener("change", restart);
+      if (raf) cancelAnimationFrame(raf);
+      cleanup?.();
     };
-  }, [state, paused, reducedMotion]);
+  }, [animation, runKey]);
 
   return (
     <div className={className} style={{ position: "relative", width: "100%", aspectRatio: "4 / 5" }}>
-    {error && <img src="/alfred/concept.png" alt="Alfred, your curly-haired companion in a charcoal suit" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }} />}
-    <canvas
-      ref={canvasRef}
-      role="img"
-      aria-label={`Alfred is ${state === "consent" ? "asking for your permission" : state}`}
-      data-alfred-state={state}
-      style={{ display: "block", visibility: error ? "hidden" : "visible", width: "100%", height: "100%" }}
-    />
+      {failed && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src="/alfred/concept.png" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }} />
+      )}
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        data-alfred-animation={animation ?? "still"}
+        style={{ display: "block", width: "100%", height: "100%", visibility: failed ? "hidden" : "visible" }}
+      />
     </div>
   );
 }
