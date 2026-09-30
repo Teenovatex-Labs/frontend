@@ -375,3 +375,23 @@ export const petApi = {
   brain: (text: string, page: string) =>
     request<{ reply: string; intent: unknown; remaining_today: number }>("/pet/brain", { method: "POST", body: json({ text, page }) }, { auth: true, activity: false }),
 };
+
+// --- announcements and event management -----------------------------------------------------
+
+export type AnnouncementItem = { id: string; title: string; body: string; link: string | null; created_at: string; expires_at?: string | null };
+
+export const announcementsApi = {
+  active: () => request<{ announcements: AnnouncementItem[] }>("/announcements", {}, authed),
+  all: () => request<{ announcements: AnnouncementItem[] }>("/announcements/all", {}, authed),
+  create: (data: { title: string; body: string; link?: string; expires_at?: string }) =>
+    request<AnnouncementItem>("/announcements", { method: "POST", body: json(data) }, { auth: true, activity: false }),
+  remove: (id: string) => request<unknown>(`/announcements/${id}`, { method: "DELETE" }, { auth: true, activity: false }),
+};
+
+export type EventInput = { title: string; description: string; starts_at: string; ends_at?: string; location?: string; capacity?: number };
+
+export const eventAdminApi = {
+  create: (data: EventInput) => request<EventItem>("/events", { method: "POST", body: json(data) }, { auth: true, activity: false }),
+  update: (id: string, data: Partial<EventInput>) => request<EventItem>(`/events/${id}`, { method: "PATCH", body: json(data) }, { auth: true, activity: false }),
+  remove: (id: string) => request<unknown>(`/events/${id}`, { method: "DELETE" }, { auth: true, activity: false }),
+};
