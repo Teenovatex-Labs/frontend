@@ -27,3 +27,6 @@ next-env.d.ts
 *.njsproj
 *.sln
 *.sw?
+
+# Alfred source sheets (large, only needed to regenerate sprites)
+public/alfred/source/
