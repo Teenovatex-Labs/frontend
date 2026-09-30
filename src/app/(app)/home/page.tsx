@@ -7,6 +7,7 @@ import { eventsApi, inboxApi, labsApi, labsDeepApi, learnApi, votesApi } from "@
 import { keys, timeAgo } from "@/lib/labs";
 import { eventDay, eventTime } from "@/lib/dates";
 import StatTile from "@/components/ui/StatTile";
+import QuestCard from "@/components/rewards/QuestCard";
 import Card from "@/components/ui/Card";
 import Skeleton from "@/components/ui/Skeleton";
 
@@ -60,12 +61,36 @@ export default function HomePage() {
 
       <div className="mt-10 grid gap-5 sm:grid-cols-3">
         <StatTile label="Points" value={user.points.toLocaleString()} tone="yellow" />
-        <StatTile label="Day streak" value={user.streak} tone="pink" className="sm:rotate-1" />
+        <StatTile
+          label="Day streak"
+          value={user.streak}
+          tone="pink"
+          className="sm:rotate-1"
+          hint={user.streak_freezes > 0 ? `${user.streak_freezes} streak freeze${user.streak_freezes === 1 ? "" : "s"} saved` : "Earn a freeze every 7 days"}
+        />
         <StatTile label="Rank" value={user.rank ? `#${user.rank}` : "Unranked"} className="sm:-rotate-1" />
       </div>
 
+      <div className="mt-5 border border-ink bg-white p-4 shadow-[5px_5px_0_var(--ink)] md:p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p className="text-lg">
+            Level {user.level.level}: <span className="font-serif italic">{user.level.title}</span>
+          </p>
+          <p className="text-xs text-muted">
+            {user.level.next_at ? `${user.level.next_at - user.points} points to the next level` : "You've reached the top level"}
+          </p>
+        </div>
+        <div className="mt-2.5 h-2.5 overflow-hidden rounded-full border border-ink bg-cream" role="progressbar" aria-valuenow={Math.round(user.level.progress * 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Progress to the next level">
+          <div className="h-full bg-yellow transition-[width] duration-700" style={{ width: `${Math.round(user.level.progress * 100)}%` }} />
+        </div>
+      </div>
+
       <div className="mt-10 grid gap-6 md:grid-cols-2">
-        <Panel title="Today" href="/labs" cta="Explore labs">
+        <Panel title="Today's quest" href="/labs" cta="Explore labs">
+          <QuestCard />
+        </Panel>
+
+        <Panel title="Votes today" href="/labs" cta="Explore labs">
           {votes.isPending ? (
             <Loading />
           ) : (
