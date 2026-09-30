@@ -4,7 +4,7 @@ import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError, settingsApi, uploadsApi } from "@/lib/api";
-import { accountApi, safetyApi } from "@/lib/services";
+import { accountApi, petApi, safetyApi } from "@/lib/services";
 import { keys, timeAgo } from "@/lib/labs";
 import { fieldErrors, newPasswordSchema } from "@/lib/validation";
 import PageHeader from "@/components/ui/PageHeader";
@@ -169,6 +169,57 @@ function PreferencesSection() {
         <Toggle label="Updates and events" hint="News about events and the community." checked={prefs.contest_updates} onChange={set("contest_updates")} />
         <Toggle label="Emails" hint="Send me email as well as in-app notifications." checked={prefs.email_notifications} onChange={set("email_notifications")} />
         <Toggle label="Public profile" hint="Let other members see your profile and labs. Turn off to keep it private." checked={prefs.public_profile} onChange={set("public_profile")} />
+      </div>
+    </Section>
+  );
+}
+
+function AlfredSection() {
+  const { user, refreshUser } = useAuth();
+  const toast = useToast();
+  const status = useQuery({ queryKey: ["pet", "status"], queryFn: petApi.status });
+  const [on, setOn] = useState(user?.settings?.ai_chat ?? false);
+
+  const save = useMutation({
+    mutationFn: (v: boolean) => accountApi.notifications({ ai_chat: v }),
+    onSuccess: () => void refreshUser(),
+    onError: (e, v) => {
+      setOn(!v);
+      toast.error(e instanceof ApiError ? e.message : "Couldn't save that.");
+    },
+  });
+
+  return (
+    <Section title="Alfred's AI brain" hint="Optional. Off unless you turn it on.">
+      <div className="space-y-3 text-sm text-muted">
+        <p>
+          Alfred already understands a fixed list of commands, and that all happens without sending anything anywhere. If you turn this on, then
+          when you type something he doesn&rsquo;t recognise, <strong className="text-ink">that message, your username and the page you&rsquo;re on</strong> are
+          sent to an AI service (Google Gemini or Groq) so it can work out what you mean.
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>We never send your email, other people&rsquo;s messages, or anything private.</li>
+          <li>Those services are outside TeenovateX and have their own privacy rules. Free plans may use what they receive to improve their products, so don&rsquo;t type anything personal to Alfred.</li>
+          <li>Alfred can only suggest things from a short list, and always asks before he changes anything.</li>
+          <li>You can turn this off any time. If you&rsquo;re under 16, please ask a parent or guardian first.</li>
+        </ul>
+      </div>
+      <div className="mt-4">
+        <Toggle
+          label="Let Alfred use AI"
+          hint={
+            status.data && !status.data.available
+              ? "Not available right now. Alfred's quick commands still work."
+              : status.data
+                ? `You have ${status.data.remaining_today} of ${status.data.daily_limit} AI chats left today.`
+                : "Off by default."
+          }
+          checked={on}
+          onChange={(v) => {
+            setOn(v);
+            save.mutate(v);
+          }}
+        />
       </div>
     </Section>
   );
@@ -358,6 +409,7 @@ export default function SettingsPage() {
       <div className="mt-8 flex flex-col gap-7">
         <ProfileSection />
         <PreferencesSection />
+        <AlfredSection />
         <PasswordSection />
         <DevicesSection />
         <BlockedSection />
