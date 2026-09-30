@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { MenuIcon } from "@animateicons/react/lucide/menu-icon";
 import { XIcon } from "@animateicons/react/lucide/x-icon";
+import { AlfredProvider } from "@/context/AlfredContext";
 import useIconHover from "@/lib/useIconHover";
 import Sidebar from "./Sidebar";
+import AlfredCompanion from "@/components/alfred/AlfredCompanion";
 
 const STORAGE_KEY = "tx_sidebar_collapsed";
 
@@ -53,6 +55,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   }, [drawer]);
 
   return (
+    <AlfredProvider>
     <div className="min-h-screen" style={{ "--sb": collapsed ? "88px" : "296px" } as CSSProperties}>
       <div className="fixed inset-y-4 left-4 z-40 hidden lg:block">
         <Sidebar collapsed={collapsed} onToggle={toggle} />
@@ -117,5 +120,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         {children}
       </div>
     </div>
+    <AlfredCompanion />
+    </AlfredProvider>
   );
 }

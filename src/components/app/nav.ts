@@ -1,6 +1,7 @@
 import type { ComponentType, RefAttributes } from "react";
 import type { IconHandle } from "@animateicons/react";
 import { BellIcon } from "@animateicons/react/lucide/bell-icon";
+import { UserRoundIcon } from "@animateicons/react/lucide/user-round-icon";
 import { ChartBarIncreasingIcon } from "@animateicons/react/lucide/chart-bar-increasing-icon";
 import { HeartIcon } from "@animateicons/react/lucide/heart-icon";
 import { HouseIcon } from "@animateicons/react/lucide/house-icon";
@@ -25,6 +26,7 @@ export type NavItem = NavLeaf & { icon: AnimatedIcon; children?: NavLeaf[] };
 
 export const MAIN: NavItem[] = [
   { id: "home", label: "Home", href: "/home", icon: HouseIcon },
+  { id: "alfred", label: "Meet Alfred", href: "/alfred", icon: UserRoundIcon },
   {
     id: "projects",
     label: "Labs",
