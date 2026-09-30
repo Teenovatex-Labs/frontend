@@ -95,7 +95,7 @@
      .btn            primary   - the one action a screen wants you to take
      .btn-secondary  secondary - everything else that is still an action
      Modifiers: .btn-sm (compact), .btn-icon (square, icon only),
-     .on-dark (secondary on the ink background). */
+     .on-dark / .on-yellow (secondary on the ink or yellow bands). */
   .btn,
   .btn-secondary {
     display: inline-flex;
@@ -117,7 +117,7 @@
   }
 
   .btn-secondary {
-    background: transparent;
+    background: var(--yellow);
     color: var(--ink);
   }
 
@@ -127,8 +127,16 @@
     box-shadow: 4px 4px 0 var(--pink);
   }
 
-  .btn-secondary:hover {
-    background: var(--yellow);
+  /* Yellow at rest, see-through on hover and press. */
+  .btn-secondary:hover,
+  .btn-secondary:active {
+    background: transparent;
+  }
+
+  .btn:active,
+  .btn-secondary:active {
+    transform: translateY(0);
+    box-shadow: none;
   }
 
   .btn-sm {
@@ -144,15 +152,31 @@
     gap: 0;
   }
 
-  .btn-secondary.on-dark {
-    color: var(--cream);
-    border-color: rgba(255, 249, 235, 0.45);
+  /* On the yellow band a yellow button would vanish, so it rests on cream. */
+  .btn-secondary.on-yellow {
+    background: var(--cream);
   }
 
-  .btn-secondary.on-dark:hover {
+  .btn-secondary.on-yellow:hover,
+  .btn-secondary.on-yellow:active {
+    background: transparent;
+  }
+
+  /* On the ink band it rests yellow and turns to a yellow outline. */
+  .btn-secondary.on-dark {
+    background: var(--yellow);
+    color: var(--ink);
+    border-color: var(--yellow);
+  }
+
+  .btn-secondary.on-dark:hover,
+  .btn-secondary.on-dark:active {
     background: transparent;
     color: var(--yellow);
     border-color: var(--yellow);
+  }
+
+  .btn-secondary.on-dark:hover {
     box-shadow: 4px 4px 0 var(--rose);
   }
 
