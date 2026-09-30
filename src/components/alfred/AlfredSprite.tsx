@@ -6,7 +6,7 @@ import type { AlfredAnimation } from "@/lib/alfred";
 const MANIFEST_URL = "/alfred/animations.json";
 /** The still pose he holds when nothing is happening: the first frame of "curious". */
 const STILL: AlfredAnimation = "curious";
-const CROSSFADE_MS = 180;
+const CROSSFADE_MS = 0; // poses cut cleanly; blending frames made him look smeared
 
 type Animation = { source: string; frames: number; fps: number; loop: boolean; blend?: boolean };
 type Manifest = {
@@ -64,9 +64,8 @@ export type AlfredSpriteProps = {
 
 /**
  * Draws Alfred on a canvas. While he is still, one frame is painted and then NOTHING runs, so an
- * idle Alfred costs no CPU. While he animates, neighbouring frames are blended together (the
- * frames are separate paintings, so stepping between them would look like a flicker), and a
- * change of pose crossfades instead of cutting.
+ * idle Alfred costs no CPU. While he animates, each frame is drawn crisp and whole: blending
+ * neighbouring frames smeared him into a blur, so there is no blending and no crossfade.
  */
 export default function AlfredSprite({ animation, runKey, className }: AlfredSpriteProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -124,7 +123,6 @@ export default function AlfredSprite({ animation, runKey, className }: AlfredSpr
         };
 
         fit();
-        const hadPicture = previous.current !== null && canvas.width > 0;
         const start = performance.now();
 
         const draw = (now: number) => {
@@ -132,8 +130,6 @@ export default function AlfredSprite({ animation, runKey, className }: AlfredSpr
           fit();
           const t = (now - start) / 1000;
           let index = 0;
-          let blendTo = -1;
-          let blendAmount = 0;
           let finished = false;
 
           if (!still) {
@@ -141,28 +137,24 @@ export default function AlfredSprite({ animation, runKey, className }: AlfredSpr
             const whole = Math.floor(position);
             if (anim.loop) {
               index = whole % anim.frames;
-              blendTo = (index + 1) % anim.frames;
             } else if (whole >= anim.frames - 1) {
               index = anim.frames - 1;
               finished = true;
             } else {
               index = whole;
-              blendTo = index + 1;
             }
-            blendAmount = anim.blend && blendTo >= 0 ? position - whole : 0;
           }
 
           ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           // Ease in from whatever was on screen so a change of pose never pops.
-          const fade = hadPicture ? Math.min(1, (now - start) / CROSSFADE_MS) : 1;
+          const fade = 1;
           if (fade < 1 && previous.current) {
             ctx.globalAlpha = 1 - fade;
             ctx.drawImage(previous.current, 0, 0);
           }
           paint(index, fade);
-          if (blendAmount > 0.02) paint(blendTo, blendAmount * fade);
           ctx.globalAlpha = 1;
 
           const settling = fade < 1;
