@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { adminApi } from "@/lib/services";
 import { keys } from "@/lib/labs";
 import SigningIn from "@/components/auth/SigningIn";
+import AdminSignIn from "./AdminSignIn";
 
 const NAV = [
   { href: "/admin", label: "Overview" },
@@ -24,17 +25,13 @@ const NAV = [
 // gate is about showing the right screen, not about security.
 export default function AdminShell({ children }: { children: ReactNode }) {
   const { user, loading, logout } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
   const isStaff = user?.role === "moderator" || user?.role === "admin";
 
-  useEffect(() => {
-    if (!loading && !user) router.replace("/auth?mode=login&next=/admin");
-  }, [loading, user, router]);
-
   const stats = useQuery({ queryKey: keys.admin("stats"), queryFn: adminApi.stats, enabled: isStaff, refetchInterval: 60_000 });
 
-  if (loading || !user) return <SigningIn label="Checking your access" />;
+  if (loading) return <SigningIn label="Checking your access" />;
+  if (!user) return <AdminSignIn />;
 
   if (!isStaff) {
     return (
@@ -45,7 +42,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         </h1>
         <p className="max-w-[440px] text-muted">You&rsquo;re signed in as @{user.username}, which doesn&rsquo;t have moderator access.</p>
         <div className="flex gap-3">
-          <Link href="/home" className="btn">Go to the app</Link>
+          <a href="https://app.teenovatex.org/home" className="btn">Go to the app</a>
           <button className="btn-secondary" onClick={() => void logout()}>Sign out</button>
         </div>
       </main>
