@@ -186,6 +186,14 @@ function apiActivityLabel(path: string, method: string): string {
   return labels[path] ?? "Working on your request";
 }
 
+/** Opens a long-lived streaming response (live updates). Signs in again transparently if the token just expired. */
+export async function openStream(path: string, signal: AbortSignal): Promise<Response> {
+  const go = () => fetch(`${API_URL}${path}`, { headers: { Authorization: `Bearer ${accessToken ?? ""}`, Accept: "text/event-stream" }, signal });
+  let res = await go();
+  if (res.status === 401 && (await tryRefresh())) res = await go();
+  return res;
+}
+
 export const authApi = {
   // No tokens yet — the account exists but is unverified until the code
   // from verifyEmail() is confirmed.
