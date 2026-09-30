@@ -1,3 +1,4 @@
+import { appUrl } from "@/lib/hosts";
 import Link from "next/link";
 import TrueFocus from "./TrueFocus";
 
@@ -65,7 +66,7 @@ export default function Hero() {
           </div>
 
           <div className="mx-auto mt-8 flex max-w-[820px] flex-col items-center justify-center gap-2.5 text-center md:flex-row md:gap-7">
-            <Link href="/auth?mode=signup" className="btn">
+            <Link href={appUrl("/auth?mode=signup")} className="btn">
               Become a Teenovator <span>↗︎</span>
             </Link>
             <a

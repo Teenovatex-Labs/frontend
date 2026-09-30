@@ -1,5 +1,6 @@
 "use client";
 
+import { appUrl } from "@/lib/hosts";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -92,7 +93,7 @@ export default function Header() {
             ))}
 
             <Link
-              href="/auth?mode=login"
+              href={appUrl("/auth?mode=login")}
               onClick={close}
               style={{ transitionDelay: open ? `${NAV_LINKS.length * 60 + 80}ms` : "0ms" }}
               className={`flex items-center gap-3 py-2 text-sm font-semibold transition-all duration-300 ease-out lg:gap-2 lg:py-0 lg:transition-none ${
@@ -103,7 +104,7 @@ export default function Header() {
               <span className="hover:underline hover:underline-offset-8">Log in</span>
             </Link>
             <Link
-              href="/auth?mode=signup"
+              href={appUrl("/auth?mode=signup")}
               onClick={close}
               style={{ transitionDelay: open ? `${(NAV_LINKS.length + 1) * 60 + 80}ms` : "0ms" }}
               className={`btn mt-3 gap-5 !px-[18px] !py-3 text-sm transition-all duration-300 ease-out lg:mt-0 lg:transition-none ${

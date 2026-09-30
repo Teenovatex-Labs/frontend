@@ -1,3 +1,4 @@
+import { appUrl } from "@/lib/hosts";
 import Link from "next/link";
 
 export default function Join() {
@@ -27,13 +28,13 @@ export default function Join() {
             takes a minute.
           </p>
 
-          <Link href="/auth?mode=signup" className="btn mt-6">
+          <Link href={appUrl("/auth?mode=signup")} className="btn mt-6">
             Become a Teenovator <span>↗︎</span>
           </Link>
 
           <small className="mt-3.5 block text-xs text-muted">
             Already a Teenovator?{" "}
-            <Link href="/auth?mode=login" className="font-semibold text-ink underline underline-offset-4">
+            <Link href={appUrl("/auth?mode=login")} className="font-semibold text-ink underline underline-offset-4">
               Log in
             </Link>
           </small>
