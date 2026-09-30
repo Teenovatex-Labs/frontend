@@ -106,6 +106,7 @@ export type PublicProfile =
       following: number;
       lab_count: number;
       is_following: boolean;
+      follows_you: boolean;
     });
 
 export const peopleApi = {
@@ -211,7 +212,7 @@ export const communityApi = {
 
 // --- safety --------------------------------------------------------------------------------
 
-export type ReportTarget = "post" | "comment" | "lab" | "user";
+export type ReportTarget = "post" | "comment" | "lab" | "user" | "message";
 export type ReportReason = "bullying" | "inappropriate" | "spam" | "personal_info" | "self_harm" | "unsafe_contact" | "other";
 
 export const REPORT_REASONS: { value: ReportReason; label: string; hint: string }[] = [
@@ -279,4 +280,38 @@ export const adminApi = {
   setRole: (id: string, role: AdminUser["role"]) =>
     request<unknown>(`/admin/users/${id}/role`, { method: "POST", body: JSON.stringify({ role }) }, { auth: true, activity: false }),
   audit: (page = 1) => request<Paged<AuditItem>>(`/admin/audit${qs({ page })}`, {}, authed),
+};
+
+// --- messages ------------------------------------------------------------------------------
+
+export type ConversationSummary = {
+  id: string;
+  with: { username: string; avatar_url: string | null };
+  last_message: { body: string; from_me: boolean; created_at: string } | null;
+  unread: number;
+  updated_at: string;
+  can_message: boolean;
+};
+export type ChatMessage = { id: string; body: string; created_at: string; from_me: boolean; support?: string };
+export type Thread = {
+  with: { username: string; avatar_url: string | null };
+  can_message: boolean;
+  other_last_read_at: string | null;
+  has_more: boolean;
+  messages: ChatMessage[];
+};
+
+export const messagesApi = {
+  list: () => request<{ conversations: ConversationSummary[] }>("/messages/conversations", {}, authed),
+  unread: () => request<{ unread: number }>("/messages/unread-count", {}, authed),
+  open: (username: string) =>
+    request<{ id: string; with: { username: string; avatar_url: string | null } }>(
+      "/messages/conversations",
+      { method: "POST", body: JSON.stringify({ username }) },
+      { auth: true, activity: "Opening the chat" }
+    ),
+  thread: (id: string, params: { after?: string; before?: string } = {}) => request<Thread>(`/messages/conversations/${id}${qs(params)}`, {}, authed),
+  send: (id: string, body: string) =>
+    request<ChatMessage>(`/messages/conversations/${id}/messages`, { method: "POST", body: JSON.stringify({ body }) }, { auth: true, activity: false }),
+  unsend: (messageId: string) => request<unknown>(`/messages/messages/${messageId}`, { method: "DELETE" }, authed),
 };
