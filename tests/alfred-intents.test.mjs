@@ -41,6 +41,8 @@ test("reading things about you", () => {
   assert.equal(kind("upcoming events"), "events");
   assert.equal(kind("what's trending"), "trending");
   assert.equal(kind("what labs do I have"), "mylabs");
+  assert.equal(kind("what's due"), "due");
+  assert.equal(kind("show my tasks"), "due");
 });
 
 test("actions that change things are recognised", () => {

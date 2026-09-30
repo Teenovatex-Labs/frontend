@@ -14,6 +14,7 @@ export type Intent =
   | { kind: "events" }
   | { kind: "trending" }
   | { kind: "mylabs" }
+  | { kind: "due" }
   | { kind: "readall" }
   | { kind: "follow"; username: string; undo: boolean }
   | { kind: "vote"; query: string }
@@ -73,6 +74,7 @@ export function interpret(input: string): Intent {
   if (has(t, "whats new", "latest", "anything new", "what did i miss")) return { kind: "latest" };
   if (has(t, "upcoming events", "what events", "any events", "events this week", "whats on")) return { kind: "events" };
   if (has(t, "trending", "popular", "best labs", "top labs", "hot right now")) return { kind: "trending" };
+  if (has(t, "whats due", "what is due", "my tasks", "my deadlines", "deadlines", "what do i need to do", "whats next", "up next", "to do")) return { kind: "due" };
   if (has(t, "list my labs", "what labs do i have", "what have i built", "my projects") && !/^(go|open|take)/.test(t)) return { kind: "mylabs" };
 
   if (/^(go|open|show|take|bring|navigate|visit|jump|head)\b/.test(t) || /\b(take me|bring me|show me|go to|open up)\b/.test(t)) {

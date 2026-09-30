@@ -5,7 +5,7 @@
 
 import { ApiError } from "@/lib/api";
 import { PAGES, interpret, type Intent } from "@/lib/alfred-intents";
-import { eventsApi, inboxApi, labsApi, peopleApi, pointsApi, votesApi } from "@/lib/services";
+import { eventsApi, inboxApi, labsApi, labsDeepApi, peopleApi, votesApi } from "@/lib/services";
 
 // --- running an intent -----------------------------------------------------------------------
 
@@ -82,6 +82,13 @@ export async function run(intent: Intent, ctx: CommandContext): Promise<string> 
       case "mylabs": {
         const { projects } = await labsApi.mine();
         return projects.length ? `Your labs:\n${list(projects.map((p) => p.name))}` : "You haven't started a lab yet. Say “start a lab” and I'll take you there.";
+      }
+
+      case "due": {
+        const { tasks } = await labsDeepApi.myTasks();
+        if (tasks.length === 0) return "Nothing on your plate. Add tasks on a lab's Board and I'll keep track.";
+        const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+        return `Up next:\n${list(tasks.slice(0, 5).map((t) => `${t.title} (${t.lab.name}${t.due_at ? `, due ${day(t.due_at)}` : ""})`))}`;
       }
 
       case "readall": {
