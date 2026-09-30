@@ -27,6 +27,8 @@ export const PAGES = {
   newlab: { path: "/labs/new", name: "a new lab", words: ["new lab", "start a lab", "create a lab", "make a lab", "new project"] },
   leaderboard: { path: "/leaderboard", name: "the Leaderboard", words: ["leaderboard", "rankings", "top"] },
   notifications: { path: "/notifications", name: "your notifications", words: ["notifications", "inbox", "alerts", "updates"] },
+  community: { path: "/community", name: "Community", words: ["community", "spaces", "forums", "forum"] },
+  messages: { path: "/messages", name: "your messages", words: ["messages", "message", "chats", "chat", "dms"] },
   events: { path: "/events", name: "Events", words: ["events", "event", "calendar"] },
   learn: { path: "/learn", name: "Learn", words: ["learn", "lessons", "courses", "tracks"] },
   profile: { path: "/profile", name: "your profile", words: ["profile", "my profile"] },

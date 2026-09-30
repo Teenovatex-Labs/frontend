@@ -27,6 +27,9 @@ test("going to pages, and preferring the most specific match", () => {
   assert.equal(go("open settings"), "settings");
   assert.equal(go("events"), "events");
   assert.equal(go("take me home"), "home");
+  assert.equal(go("open community"), "community");
+  assert.equal(go("go to my messages"), "messages");
+  assert.equal(go("open notifications"), "notifications");
 });
 
 test("reading things about you", () => {
