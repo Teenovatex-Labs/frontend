@@ -4,9 +4,22 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { useAlfred } from "@/context/AlfredContext";
 import { SUGGESTIONS } from "@/lib/alfred-commands";
 
+function Typewriter({ text }: { text: string }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setShown(text.length);
+      return;
+    }
+    const id = window.setInterval(() => setShown((n) => (n >= text.length ? n : n + 2)), 22);
+    return () => window.clearInterval(id);
+  }, [text]);
+  return <>{text.slice(0, shown)}</>;
+}
+
 // The little box under Alfred where you type to him. The composer grows as you write, like a chat app.
 export default function AlfredChat() {
-  const { messages, busy, send, closeChat } = useAlfred();
+  const { messages, busy, send, closeChat, undo } = useAlfred();
   const [text, setText] = useState("");
   const input = useRef<HTMLTextAreaElement>(null);
   const log = useRef<HTMLDivElement>(null);
@@ -60,16 +73,26 @@ export default function AlfredChat() {
       </header>
 
       <div ref={log} className="max-h-[min(220px,28vh)] min-h-[64px] space-y-2 overflow-y-auto px-3 py-3" role="log" aria-live="polite">
-        {messages.map((m) => (
-          <p
-            key={m.id}
-            className={`max-w-[92%] whitespace-pre-line break-words rounded-xl px-3 py-2 text-[13px] leading-snug ${
-              m.from === "you" ? "ml-auto bg-ink text-cream" : "border border-line bg-white"
-            }`}
-          >
-            {m.text}
-          </p>
-        ))}
+        {messages.map((m, i) => {
+          // Alfred's newest message types itself out, like a person texting. Older ones just show.
+          const live = m.from === "alfred" && i === messages.length - 1 && Date.now() - m.at < 1500;
+          return (
+            <div key={m.id} className={`max-w-[92%] ${m.from === "you" ? "ml-auto" : ""}`}>
+              <p
+                className={`whitespace-pre-line break-words rounded-xl px-3 py-2 text-[13px] leading-snug ${
+                  m.from === "you" ? "bg-ink text-cream" : "border border-line bg-white"
+                }`}
+              >
+                {live ? <Typewriter text={m.text} /> : m.text}
+              </p>
+              {m.undoId && (
+                <button type="button" onClick={() => void undo(m.undoId!)} className="mt-1 text-[11px] text-rose underline underline-offset-4">
+                  Undo
+                </button>
+              )}
+            </div>
+          );
+        })}
         {busy && (
           <p className="w-fit rounded-xl border border-line bg-white px-3 py-2 text-[13px] text-muted" aria-label="Alfred is working on it">
             …

@@ -42,7 +42,7 @@ export type AlfredConsent = {
 
 export type AlfredNotice = { id: string; message: string; kind: AlfredNoticeKind };
 
-export type ChatMessage = { id: string; from: "you" | "alfred"; text: string; at: number };
+export type ChatMessage = { id: string; from: "you" | "alfred"; text: string; at: number; /** The log entry that can take back what this message says Alfred did. */ undoId?: string };
 
 export type TourStep = { message: string; path?: string };
 export type TourState = { index: number; total: number; step: TourStep };
@@ -420,13 +420,23 @@ export class AlfredController {
     this.emit({ chatOpen: value });
   }
 
-  private push(from: ChatMessage["from"], text: string): void {
-    const messages = [...this.snapshot.messages, { id: makeId(), from, text, at: Date.now() }].slice(-MAX_MESSAGES);
+  private push(from: ChatMessage["from"], text: string, undoId?: string): void {
+    const messages = [...this.snapshot.messages, { id: makeId(), from, text, at: Date.now(), ...(undoId ? { undoId } : {}) }].slice(-MAX_MESSAGES);
     this.emit({ messages });
   }
 
-  say(text: string): void {
-    this.push("alfred", text);
+  say(text: string, undoId?: string): void {
+    this.push("alfred", text, undoId);
+  }
+
+  /** Once something is undone (or too old to undo), the button should go away. */
+  clearUndo(undoId: string): void {
+    this.emit({ messages: this.snapshot.messages.map((m) => (m.undoId === undoId ? { ...m, undoId: undefined } : m)) });
+  }
+
+  /** Which "Always allow" permissions the member has granted (for the Settings screen). */
+  alwaysAllowed(): string[] {
+    return [...this.always];
   }
 
   hear(text: string): void {

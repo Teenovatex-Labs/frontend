@@ -32,6 +32,7 @@ type AlfredContextValue = AlfredSnapshot & {
   /** True while a typed command is being carried out. */
   busy: boolean;
   resolveConsent: (approved: boolean, always?: boolean) => void;
+  undo: (actionId: string) => Promise<void>;
   nextTour: () => void;
   skipTour: () => void;
   startTour: () => void;
@@ -159,26 +160,29 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
         const intent = interpret(clean);
 
         if (intent.kind !== "unknown") {
-          alfredController.say(await run(intent, ctx));
+          const out = await run(intent, ctx);
+          alfredController.say(out.text, out.undoId);
         } else if (!user.settings?.ai_chat) {
-          alfredController.say("I didn't catch that one. Try “help” to see what I can do. If you'd like me to understand more, you can turn on Alfred's AI in Settings.");
+          alfredController.say("didn't catch that one. try “help”. if you want me to understand more, you can turn on Alfred's AI in settings.");
         } else {
           // Not a command he knows: ask the AI brain what the member means. Whatever it suggests is
           // one of a short fixed list, and anything that changes something still asks first.
           try {
-            const thought = await petApi.brain(clean, pathname);
+            // The last few turns (before this message) so he keeps the thread.
+            const history = alfredController.getSnapshot().messages.slice(-7, -1).map((m) => ({ from: m.from, text: m.text.slice(0, 300) }));
+            const thought = await petApi.brain(clean, pathname, history);
             alfredController.say(thought.reply);
             const suggested = thought.intent as Intent | null;
             if (suggested) {
               const done = await run(suggested, ctx);
-              if (suggested.kind !== "go") alfredController.say(done);
+              if (suggested.kind !== "go") alfredController.say(done.text, done.undoId);
             }
           } catch (e) {
-            alfredController.say(e instanceof ApiError ? e.message : "I couldn't think that through just now. Try one of my quick commands.");
+            alfredController.say(e instanceof ApiError ? e.message : "my brain glitched. try one of my quick commands.");
           }
         }
       } catch {
-        alfredController.say("Something went wrong on my end. Try that again?");
+        alfredController.say("something broke on my end. try that again?");
       } finally {
         // The reply in the chat is the feedback, so no separate "All done" bubble.
         task.cancel();
@@ -193,6 +197,17 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
       ...snapshot,
       busy,
       resolveConsent: (approved, always) => alfredController.resolveConsent(approved, always),
+      undo: async (actionId) => {
+        try {
+          await petApi.undo(actionId);
+          alfredController.clearUndo(actionId);
+          alfredController.say("undone.");
+          void qc.invalidateQueries();
+        } catch (e) {
+          alfredController.clearUndo(actionId);
+          alfredController.say(e instanceof ApiError ? e.message : "couldn't undo that.");
+        }
+      },
       nextTour: () => {
         const step = alfredController.nextTour();
         if (step?.path) router.push(step.path);
