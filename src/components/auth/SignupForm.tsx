@@ -18,6 +18,7 @@ import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
 import VerifyCodeScreen from "@/components/auth/VerifyCodeScreen";
 import useIconHover from "@/lib/useIconHover";
 import { registerBaseSchema, fieldErrors } from "@/lib/validation";
+import { browserTimezone, todayIso } from "@/lib/age";
 
 const STEPS: Step[] = [
   { id: "you", label: "You", icon: UserIcon },
@@ -36,6 +37,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
 
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -63,8 +65,8 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
   const validateStep = (index: number) => {
     if (index === 0) {
       const result = registerBaseSchema
-        .pick({ full_name: true, username: true })
-        .safeParse({ full_name: fullName, username });
+        .pick({ full_name: true, username: true, birth_date: true })
+        .safeParse({ full_name: fullName, username, birth_date: birthDate });
       setErrors(fieldErrors(result));
       return result.success;
     }
@@ -107,6 +109,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
     const result = registerBaseSchema.safeParse({
       full_name: fullName,
       username,
+      birth_date: birthDate,
       email,
       password,
       confirm_password: confirmPassword,
@@ -125,6 +128,8 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
         username: result.data.username,
         email: result.data.email,
         password: result.data.password,
+        birth_date: result.data.birth_date,
+        timezone: browserTimezone(),
       });
       setVerifying(true);
     } catch (err) {
@@ -239,6 +244,19 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
                 autoComplete="username"
                 error={errors.username}
               />
+              <div>
+                <FormField
+                  label="Date of birth"
+                  type="date"
+                  name="birth_date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  autoComplete="bday"
+                  max={todayIso()}
+                  error={errors.birth_date}
+                />
+                <p className="mt-1.5 text-xs text-muted">TeenovateX is for ages 13 and up. We never show this on your profile.</p>
+              </div>
             </>
           )}
 
@@ -279,6 +297,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
             <div className="flex flex-col gap-2.5 rounded-md border border-ink bg-pink/30 p-3.5">
               <ReviewRow label="Name" value={fullName} onEdit={() => goTo(0, "back")} />
               <ReviewRow label="Username" value={`@${username}`} onEdit={() => goTo(0, "back")} />
+              <ReviewRow label="Date of birth" value={birthDate} onEdit={() => goTo(0, "back")} />
               <ReviewRow label="Email" value={email} onEdit={() => goTo(1, "back")} />
               <ReviewRow
                 label="Password"
