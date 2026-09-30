@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { ApiError } from "@/lib/api";
+import { ApiError, uploadsApi } from "@/lib/api";
 import { messagesApi, peopleApi, rewardsApi, safetyApi } from "@/lib/services";
 import Badge from "@/components/ui/Badge";
 import ReportButton from "@/components/safety/ReportDialog";
@@ -19,7 +19,7 @@ import { LabGridSkeleton } from "@/components/labs/LabGrid";
 
 export default function PersonPage() {
   const { username } = useParams<{ username: string }>();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const qc = useQueryClient();
   const router = useRouter();
   const toast = useToast();
@@ -34,6 +34,22 @@ export default function PersonPage() {
   });
 
   const myBadges = useQuery({ queryKey: keys.badges, queryFn: rewardsApi.badges, enabled: isMe });
+
+  const photo = useMutation({
+    mutationFn: (f: File) => uploadsApi.avatar(f),
+    onSuccess: async () => {
+      await refreshUser();
+      await qc.invalidateQueries({ queryKey: keys.person(username) });
+      toast.success("Photo updated.");
+    },
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : "Couldn't upload that photo."),
+  });
+  const pickPhoto = (f?: File) => {
+    if (!f) return;
+    if (!f.type.startsWith("image/")) return toast.error("That needs to be an image.");
+    if (f.size > 5 * 1024 * 1024) return toast.error("Keep photos under 5MB.");
+    photo.mutate(f);
+  };
 
   const message = useMutation({
     mutationFn: () => messagesApi.open(username),
@@ -96,7 +112,15 @@ export default function PersonPage() {
     <main className="mx-auto w-full max-w-[960px] px-5 py-10 md:px-10 md:py-14">
       <div className="flex flex-wrap items-center justify-between gap-5">
         <div className="flex items-center gap-5">
-          <Avatar name={p.username} src={p.avatar_url} size={96} />
+          <div className="flex flex-col items-center gap-2">
+            <Avatar name={p.username} src={p.avatar_url} size={96} />
+            {isMe && (
+              <label className="cursor-pointer text-xs underline underline-offset-4 hover:text-rose">
+                {photo.isPending ? "Uploading…" : p.avatar_url ? "Change photo" : "Add a photo"}
+                <input type="file" accept="image/*" className="sr-only" disabled={photo.isPending} onChange={(e) => { pickPhoto(e.target.files?.[0]); e.target.value = ""; }} />
+              </label>
+            )}
+          </div>
           <div>
             <h1 className="text-[32px] leading-tight tracking-[-0.03em] md:text-[44px]">{p.full_name}</h1>
             <p className="mt-1 text-muted">
