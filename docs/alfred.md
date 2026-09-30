@@ -33,7 +33,25 @@ Anything that changes something asks first (Allow / Not now; **Always allow** on
 self-only actions such as marking notifications read): "mark all notifications read",
 "follow @name", "vote for <lab>", "sign out".
 
-This runs with no AI. A model can later sit in front of `interpret()` and return the same intents.
+By default this runs with no AI, on the member's device.
+
+### The AI brain (opt-in)
+
+When a member has switched on **Settings → Alfred's AI brain**, anything `interpret()` doesn't
+recognise is sent to `POST /pet/brain`, which asks Gemini and then Groq (free tiers, several keys
+each, with cooldowns and fallback) what the member means. The server:
+
+- sends only the typed message, the username and the current page (never email or other members' content),
+- accepts back only an intent from a fixed whitelist (`backend/src/lib/pet/brain.ts`): no sign-out,
+  deletes, settings or sending messages; anything else is dropped and only Alfred's words are kept,
+- checks Alfred's reply like any other public text (no links or contact details),
+- enforces a per-member daily allowance and a global off switch (`PET_AI_ENABLED=false`).
+
+Any suggested action that changes something still shows the Allow / Not now card on the member's device.
+
+Keys are server environment variables, never committed: `GEMINI_API_KEYS`, `GROQ_API_KEYS`
+(comma-separated), optionally `GEMINI_MODEL`, `GROQ_MODEL`, `PET_PROVIDER_ORDER`, `PET_DAILY_LIMIT`.
+With no keys set, the brain answers "I'm having a little nap" and the quick commands keep working.
 
 ## Art
 
