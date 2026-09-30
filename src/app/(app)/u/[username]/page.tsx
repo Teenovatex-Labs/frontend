@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
-import { messagesApi, peopleApi, safetyApi } from "@/lib/services";
+import { messagesApi, peopleApi, rewardsApi, safetyApi } from "@/lib/services";
+import Badge from "@/components/ui/Badge";
 import ReportButton from "@/components/safety/ReportDialog";
 import { keys } from "@/lib/labs";
 import Avatar from "@/components/ui/Avatar";
@@ -31,6 +32,8 @@ export default function PersonPage() {
     queryFn: () => peopleApi.labs(username),
     enabled: !!isPublic,
   });
+
+  const myBadges = useQuery({ queryKey: keys.badges, queryFn: rewardsApi.badges, enabled: isMe });
 
   const follow = useMutation({
     mutationFn: (following: boolean) => (following ? peopleApi.unfollow(username) : peopleApi.follow(username)),
@@ -145,10 +148,21 @@ export default function PersonPage() {
       )}
 
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatTile label="Points" value={p.points.toLocaleString()} tone="yellow" />
-        <StatTile label="Day streak" value={p.streak} tone="pink" />
-        <StatTile label="Rank" value={`#${p.rank}`} />
+        <StatTile label="Level" value={p.level.level} hint={p.level.title} tone="yellow" />
+        <StatTile label="Points" value={p.points.toLocaleString()} hint={`#${p.rank} overall`} tone="pink" />
+        <StatTile label="Day streak" value={p.streak} />
         <StatTile label="Followers" value={p.followers} hint={`${p.following} following`} tone="white" />
+      </div>
+
+      <h2 className="mt-12 text-[26px] tracking-[-0.03em]">
+        Badges <span className="font-serif font-normal italic">({p.badges.length})</span>
+      </h2>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        {isMe && myBadges.data
+          ? myBadges.data.badges.map((b, i) => <Badge key={b.key} title={b.title} description={b.description} symbol={b.symbol} earned={b.earned} index={i} />)
+          : p.badges.length === 0
+            ? <p className="text-sm text-muted sm:col-span-2">No badges yet.</p>
+            : p.badges.map((b, i) => <Badge key={b.key} title={b.title} description={b.description} symbol={b.symbol} index={i} />)}
       </div>
 
       <h2 className="mt-12 text-[26px] tracking-[-0.03em]">
