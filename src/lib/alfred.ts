@@ -1,24 +1,34 @@
+// Alfred's brain: a small state machine with no React in it, so it can be tested on its own.
+//
+// The rule that shapes everything here: Alfred is STILL unless something specific is happening.
+// From strongest to weakest, what makes him move is:
+//   1. he is asking your permission
+//   2. he is working on something
+//   3. he has an update for you
+//   4. a one-off reaction is playing (greeting you, finishing a job, hitting a snag)
+//   5. you are dragging him
+//   6. you are hovering over him, or did within the last few seconds
+// When none of those is true he stands in one still pose and nothing on screen changes.
+
 export const ALFRED_STATES = {
+  idle: { label: "Here", animation: null },
+  curious: { label: "Looking at you", animation: "curious" },
   greeting: { label: "Saying hello", animation: "greeting" },
-  reading: { label: "Reading", animation: "reading" },
-  curious: { label: "Curious", animation: "curious" },
-  playful: { label: "Playing", animation: "playful" },
-  offline: { label: "Offline", animation: "offline" },
+  playful: { label: "Being carried", animation: "playful" },
+  offline: { label: "Offline", animation: null },
   operating: { label: "Working", animation: "operating" },
   planning: { label: "Planning", animation: "planning" },
   thinking: { label: "Thinking", animation: "thinking" },
   consent: { label: "Needs your say", animation: "consent" },
   alerting: { label: "Has an update", animation: "alerting" },
-  resting: { label: "Taking a breather", animation: "resting" },
-  waking: { label: "Waking up", animation: "waking" },
   failed: { label: "Hit a snag", animation: "failed" },
   celebrating: { label: "Celebrating", animation: "celebrating" },
   done: { label: "Done", animation: "done" },
 } as const;
 
 export type AlfredState = keyof typeof ALFRED_STATES;
+export type AlfredAnimation = NonNullable<(typeof ALFRED_STATES)[AlfredState]["animation"]>;
 export type AlfredTaskState = "operating" | "planning" | "thinking";
-export type AlfredActivityState = AlfredTaskState | "reading" | "curious";
 export type AlfredNoticeKind = "info" | "success" | "warning" | "error";
 
 export type AlfredConsent = {
@@ -26,21 +36,28 @@ export type AlfredConsent = {
   title: string;
   message: string;
   requestedAt: number;
+  /** Low-risk, self-only actions can offer "Always allow". */
+  actionId?: string;
 };
 
-export type AlfredNotice = {
-  id: string;
-  message: string;
-  kind: AlfredNoticeKind;
-};
+export type AlfredNotice = { id: string; message: string; kind: AlfredNoticeKind };
+
+export type ChatMessage = { id: string; from: "you" | "alfred"; text: string; at: number };
 
 export type AlfredSnapshot = {
   state: AlfredState;
+  /** What the sprite should play, or null for the still pose. */
+  animation: AlfredAnimation | null;
+  /** Changes every time an animation should start over, even if it is the same one. */
+  runKey: number;
+  /** What the speech bubble says when there is something to say. */
   message: string;
+  bubble: boolean;
   consent: AlfredConsent | null;
   notice: AlfredNotice | null;
   minimized: boolean;
-  hidden: boolean;
+  chatOpen: boolean;
+  messages: ChatMessage[];
 };
 
 export type AlfredTaskHandle = {
@@ -52,21 +69,23 @@ export type AlfredTaskHandle = {
 };
 
 type Task = { id: string; message: string; state: AlfredTaskState; sequence: number };
+type Transient = { state: "greeting" | "done" | "failed" | "celebrating"; message: string; until: number };
 type Listener = () => void;
 
 const MINIMIZED_KEY = "tx_alfred_minimized";
-const HIDDEN_KEY = "tx_alfred_hidden";
-const IDLE_AFTER_MS = 45_000;
-const DONE_MS = 3_000;
-const CELEBRATING_MS = 3_200;
-const FAILED_MS = 2_400;
-const GREETING_MS = 3_400;
-const WAKING_MS = 3_400;
-const PLAYFUL_MS = 3_600;
-const CURIOUS_MS = 1_200;
-const NOTICE_MS = 5_000;
+const ALWAYS_KEY = "tx_alfred_always_allow";
 
-function readPreference(key: string): boolean {
+/** How long he keeps reacting after your pointer leaves him, and after you let go of him. */
+export const HOVER_LINGER_MS = 3_000;
+export const DRAG_LINGER_MS = 900;
+const GREETING_MS = 2_600;
+const DONE_MS = 2_000;
+const CELEBRATE_MS = 2_600;
+const FAILED_MS = 2_800;
+const NOTICE_MS = 6_000;
+const MAX_MESSAGES = 60;
+
+function readFlag(key: string): boolean {
   try {
     return typeof window !== "undefined" && window.localStorage.getItem(key) === "true";
   } catch {
@@ -74,11 +93,21 @@ function readPreference(key: string): boolean {
   }
 }
 
-function writePreference(key: string, value: boolean): void {
+function writeFlag(key: string, value: boolean): void {
   try {
     if (typeof window !== "undefined") window.localStorage.setItem(key, String(value));
   } catch {
-    // Storage can be disabled or unavailable in private browsing contexts.
+    // Storage can be blocked (private browsing); the preference just won't stick.
+  }
+}
+
+function readAlways(): Set<string> {
+  try {
+    const raw = typeof window !== "undefined" ? window.localStorage.getItem(ALWAYS_KEY) : null;
+    const list = raw ? (JSON.parse(raw) as unknown) : [];
+    return new Set(Array.isArray(list) ? list.filter((x): x is string => typeof x === "string") : []);
+  } catch {
+    return new Set();
   }
 }
 
@@ -88,34 +117,38 @@ function makeId(): string {
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-/** Framework-independent state machine used by the React provider and API client. */
 export class AlfredController {
   private listeners = new Set<Listener>();
   private tasks = new Map<string, Task>();
-  private pendingFailures: string[] = [];
   private sequence = 0;
-  private idleTimer: ReturnType<typeof setTimeout> | undefined;
-  private transientTimer: ReturnType<typeof setTimeout> | undefined;
+  private runKey = 0;
+  private timer: ReturnType<typeof setTimeout> | undefined;
   private noticeTimer: ReturnType<typeof setTimeout> | undefined;
-  private visible = true;
-  private reducedMotion = false;
+  private hovering = false;
+  private hoverUntil = 0;
+  private dragging = false;
+  private dragUntil = 0;
   private offline = false;
+  private transient: Transient | null = null;
   private sessionGeneration = 0;
+  private always: Set<string>;
   private consentResolver: ((approved: boolean) => void) | undefined;
   private snapshot: AlfredSnapshot = {
-    state: "resting",
-    message: "I’m here when you need me.",
+    state: "idle",
+    animation: null,
+    runKey: 0,
+    message: "",
+    bubble: false,
     consent: null,
     notice: null,
     minimized: false,
-    hidden: false,
+    chatOpen: false,
+    messages: [],
   };
 
   constructor(readPreferences = true) {
-    if (readPreferences) {
-      this.snapshot.minimized = readPreference(MINIMIZED_KEY);
-      this.snapshot.hidden = readPreference(HIDDEN_KEY);
-    }
+    this.always = readPreferences ? readAlways() : new Set();
+    if (readPreferences) this.snapshot.minimized = readFlag(MINIMIZED_KEY);
   }
 
   getSnapshot = (): AlfredSnapshot => this.snapshot;
@@ -126,267 +159,251 @@ export class AlfredController {
     return () => this.listeners.delete(listener);
   };
 
-  private publish(patch: Partial<AlfredSnapshot>): void {
+  private emit(patch: Partial<AlfredSnapshot>): void {
     this.snapshot = { ...this.snapshot, ...patch };
     this.listeners.forEach((listener) => listener());
-  }
-
-  private clearIdleTimer(): void {
-    if (this.idleTimer) clearTimeout(this.idleTimer);
-    this.idleTimer = undefined;
-  }
-
-  private clearTransientTimer(): void {
-    if (this.transientTimer) clearTimeout(this.transientTimer);
-    this.transientTimer = undefined;
-  }
-
-  private scheduleNoticeExpiry(): void {
-    if (this.noticeTimer) clearTimeout(this.noticeTimer);
-    this.noticeTimer = setTimeout(() => {
-      this.publish({ notice: null });
-      this.restore();
-    }, NOTICE_MS);
-  }
-
-  private scheduleIdle(): void {
-    this.clearIdleTimer();
-    if (!this.visible || this.tasks.size || this.snapshot.consent || this.snapshot.notice || this.offline) return;
-    this.idleTimer = setTimeout(() => {
-      if (this.tasks.size || this.snapshot.consent || this.snapshot.notice || !this.visible || this.offline) return;
-      this.publish({ state: "resting", message: "Taking a little rest." });
-    }, IDLE_AFTER_MS);
   }
 
   private activeTask(): Task | undefined {
     return [...this.tasks.values()].sort((a, b) => b.sequence - a.sequence)[0];
   }
 
-  private showFailure(message: string): void {
-    this.clearTransientTimer();
-    this.publish({ state: "failed", message });
-    this.transientTimer = setTimeout(() => this.restore(), FAILED_MS);
+  /** Works out what he should be doing right now and publishes it if anything changed. */
+  private refresh(): void {
+    const now = Date.now();
+    if (this.transient && now >= this.transient.until) this.transient = null;
+
+    let state: AlfredState = "idle";
+    let message = "";
+    let bubble = false;
+    const { consent, notice } = this.snapshot;
+    const task = this.activeTask();
+
+    if (consent) {
+      state = "consent";
+      message = consent.message;
+      bubble = true;
+    } else if (task) {
+      state = task.state;
+      message = task.message;
+      bubble = true;
+    } else if (notice) {
+      state = "alerting";
+      message = notice.message;
+      bubble = true;
+    } else if (this.transient) {
+      state = this.transient.state;
+      message = this.transient.message;
+      bubble = this.transient.state !== "greeting";
+    } else if (this.dragging || now < this.dragUntil) {
+      state = "playful";
+    } else if (this.hovering || now < this.hoverUntil) {
+      state = "curious";
+    } else if (this.offline) {
+      state = "offline";
+      message = "You're offline. I'll be here when you're back.";
+      bubble = true;
+    }
+
+    const previous = this.snapshot;
+    const changed = state !== previous.state;
+    if (changed || message !== previous.message || bubble !== previous.bubble) {
+      if (changed) this.runKey += 1;
+      this.emit({
+        state,
+        animation: ALFRED_STATES[state].animation,
+        runKey: this.runKey,
+        message,
+        bubble,
+      });
+    }
+    this.scheduleNext(now);
   }
 
-  private restore(): void {
-    if (this.snapshot.consent) {
-      this.publish({ state: "consent", message: this.snapshot.consent.message });
-      return;
-    }
-    if (this.offline) {
-      this.publish({ state: "offline", message: "I’ll be ready when you’re back online." });
-      return;
-    }
-    const active = this.activeTask();
-    if (active) {
-      this.publish({ state: active.state, message: active.message });
-      return;
-    }
-    if (this.snapshot.notice) {
-      this.publish({ state: "alerting", message: this.snapshot.notice.message });
-      return;
-    }
-    const pendingFailure = this.pendingFailures.shift();
-    if (pendingFailure) {
-      this.showFailure(pendingFailure);
-      return;
-    }
-    this.publish({ state: "curious", message: "Ready for your next idea." });
-    this.scheduleIdle();
+  /** Wakes the machine at the next moment something on a timer would change. */
+  private scheduleNext(now: number): void {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = undefined;
+    const deadlines = [this.transient?.until, this.hovering ? undefined : this.hoverUntil, this.dragging ? undefined : this.dragUntil]
+      .filter((t): t is number => typeof t === "number" && t > now);
+    if (deadlines.length === 0) return;
+    this.timer = setTimeout(() => this.refresh(), Math.min(...deadlines) - now + 20);
+  }
+
+  private startTransient(state: Transient["state"], message: string, ms: number): void {
+    this.transient = { state, message, until: Date.now() + ms };
+    this.runKey += 1; // replays even if the same reaction is already showing
+    this.snapshot = { ...this.snapshot, runKey: this.runKey };
+    this.refresh();
+    // A same-state replay does not change `state`, so publish the new key explicitly.
+    this.emit({ runKey: this.runKey });
+  }
+
+  // --- what the app can tell him ---------------------------------------------------------
+
+  setHover(value: boolean): void {
+    this.hovering = value;
+    if (value) this.hoverUntil = 0;
+    else this.hoverUntil = Date.now() + HOVER_LINGER_MS;
+    this.refresh();
+  }
+
+  setDragging(value: boolean): void {
+    this.dragging = value;
+    if (!value) this.dragUntil = Date.now() + DRAG_LINGER_MS;
+    this.refresh();
   }
 
   beginTask(message: string, state: AlfredTaskState = "operating"): AlfredTaskHandle {
     const id = makeId();
     const generation = this.sessionGeneration;
-    const task: Task = { id, message, state, sequence: ++this.sequence };
-    this.tasks.set(id, task);
-    this.clearIdleTimer();
-    this.clearTransientTimer();
-    if (!this.snapshot.consent && !this.snapshot.notice && !this.offline) this.publish({ state, message });
+    this.tasks.set(id, { id, message, state, sequence: ++this.sequence });
+    this.refresh();
+    const live = () => generation === this.sessionGeneration;
     return {
       id,
       update: (nextMessage, nextState) => {
-        if (generation !== this.sessionGeneration) return;
         const current = this.tasks.get(id);
-        if (!current) return;
+        if (!live() || !current) return;
         current.sequence = ++this.sequence;
         if (nextMessage) current.message = nextMessage;
         if (nextState) current.state = nextState;
-        if (!this.snapshot.consent && !this.snapshot.notice && !this.offline && this.activeTask()?.id === id) {
-          this.publish({ state: current.state, message: current.message });
-        }
+        this.refresh();
       },
       done: (completionMessage) => {
-        if (generation !== this.sessionGeneration) return;
-        if (!this.tasks.delete(id)) return;
-        if (this.snapshot.consent || this.snapshot.notice || this.offline) return;
-        this.clearTransientTimer();
-        const next = this.activeTask();
-        if (next) {
-          this.publish({ state: next.state, message: next.message });
-          return;
-        }
-        this.publish({ state: "done", message: completionMessage ?? "All done." });
-        this.transientTimer = setTimeout(() => {
-          if (!this.tasks.size && !this.snapshot.consent && !this.snapshot.notice) {
-            this.publish({ state: "celebrating", message: completionMessage ?? "Nice work!" });
-            this.transientTimer = setTimeout(() => this.restore(), CELEBRATING_MS);
-          }
-        }, DONE_MS);
+        if (!live() || !this.tasks.delete(id)) return;
+        if (this.tasks.size === 0) this.startTransient("done", completionMessage ?? "All done.", DONE_MS);
+        else this.refresh();
       },
       fail: (failureMessage) => {
-        if (generation !== this.sessionGeneration) return;
-        if (!this.tasks.delete(id)) return;
-        this.pendingFailures.push(failureMessage ?? "That didn’t work. You can try again.");
-        this.restore();
+        if (!live() || !this.tasks.delete(id)) return;
+        this.startTransient("failed", failureMessage ?? "That didn't work. You can try again.", FAILED_MS);
       },
       cancel: () => {
-        if (generation !== this.sessionGeneration) return;
-        if (!this.tasks.delete(id)) return;
-        this.clearTransientTimer();
-        this.restore();
+        if (!live() || !this.tasks.delete(id)) return;
+        this.refresh();
       },
     };
   }
 
-  notePresence(): void {
-    if (
-      !this.visible || this.snapshot.hidden || this.snapshot.consent || this.snapshot.notice ||
-      this.offline || this.tasks.size
-    ) return;
-
-    if (this.snapshot.state === "resting") {
-      this.wake();
-      return;
-    }
-    if (this.snapshot.state === "curious" || this.snapshot.state === "reading") {
-      this.scheduleIdle();
-    }
-  }
-
-  setActivity(state: AlfredActivityState, message: string = ALFRED_STATES[state].label): void {
-    this.clearIdleTimer();
-    this.clearTransientTimer();
-    if (!this.snapshot.consent && !this.snapshot.notice && !this.offline && !this.tasks.size) {
-      this.publish({ state, message });
-      if (state === "curious") {
-        this.transientTimer = setTimeout(() => this.restore(), CURIOUS_MS);
-      }
-      this.scheduleIdle();
-    }
-  }
-
-  requestConsent(input: { title: string; message: string }): Promise<boolean> {
+  requestConsent(input: { title: string; message: string; actionId?: string }): Promise<boolean> {
+    if (input.actionId && this.always.has(input.actionId)) return Promise.resolve(true);
     if (this.snapshot.consent) return Promise.resolve(false);
-    this.clearIdleTimer();
-    this.clearTransientTimer();
     return new Promise((resolve) => {
       this.consentResolver = resolve;
-      const consent = { id: makeId(), ...input, requestedAt: Date.now() };
-      this.publish({ consent, state: "consent", message: consent.message });
+      this.snapshot = { ...this.snapshot, consent: { id: makeId(), requestedAt: Date.now(), ...input } };
+      this.refresh();
+      this.emit({ consent: this.snapshot.consent });
     });
   }
 
-  resolveConsent(approved: boolean): void {
-    if (!this.snapshot.consent || !this.consentResolver) return;
+  resolveConsent(approved: boolean, always = false): void {
+    const { consent } = this.snapshot;
     const resolve = this.consentResolver;
+    if (!consent || !resolve) return;
+    if (approved && always && consent.actionId) {
+      this.always.add(consent.actionId);
+      try {
+        window.localStorage.setItem(ALWAYS_KEY, JSON.stringify([...this.always]));
+      } catch {
+        // Not remembered, but this one time still goes ahead.
+      }
+    }
     this.consentResolver = undefined;
-    this.publish({ consent: null });
+    this.snapshot = { ...this.snapshot, consent: null };
+    this.emit({ consent: null });
+    this.refresh();
     resolve(approved);
-    if (this.snapshot.notice) this.scheduleNoticeExpiry();
-    this.restore();
+  }
+
+  /** Forget every "Always allow" the member has granted. */
+  revokeAlwaysAllowed(): void {
+    this.always.clear();
+    try {
+      window.localStorage.removeItem(ALWAYS_KEY);
+    } catch {
+      // Nothing stored that we could clear.
+    }
   }
 
   notify(message: string, kind: AlfredNoticeKind = "info"): void {
+    if (this.noticeTimer) clearTimeout(this.noticeTimer);
     const notice = { id: makeId(), message, kind };
-    if (this.snapshot.consent || this.offline) {
-      this.publish({ notice });
-      this.scheduleNoticeExpiry();
-      return;
-    }
-    this.clearIdleTimer();
-    this.clearTransientTimer();
-    this.publish({ notice, state: "alerting", message });
-    this.scheduleNoticeExpiry();
+    this.snapshot = { ...this.snapshot, notice };
+    this.runKey += 1;
+    this.refresh();
+    this.emit({ notice, runKey: this.runKey });
+    this.noticeTimer = setTimeout(() => {
+      this.noticeTimer = undefined;
+      this.snapshot = { ...this.snapshot, notice: null };
+      this.emit({ notice: null });
+      this.refresh();
+    }, NOTICE_MS);
   }
 
-  wake(): void {
-    this.clearIdleTimer();
-    if (this.snapshot.hidden || this.snapshot.consent || this.offline) return;
-    if (this.snapshot.state === "resting" || this.snapshot.state === "curious" || this.snapshot.state === "done" || this.snapshot.state === "failed") {
-      this.clearTransientTimer();
-      this.publish({ state: "waking", message: "I’m back with you." });
-      this.transientTimer = setTimeout(() => this.restore(), WAKING_MS);
-    }
+  /** "Yo": he greets you back and opens the chat. */
+  yo(reply = "Yo! What's up?"): void {
+    this.setChatOpen(true);
+    this.startTransient("greeting", reply, GREETING_MS);
+    this.say(reply);
   }
 
-  greet(): void {
-    if (this.snapshot.hidden || this.snapshot.consent || this.tasks.size || this.offline) return;
-    this.clearIdleTimer();
-    this.clearTransientTimer();
-    this.publish({ state: "greeting", message: "Hi! Good to see you." });
-    this.transientTimer = setTimeout(() => this.restore(), GREETING_MS);
-  }
-
-  play(): void {
-    if (this.snapshot.hidden || this.snapshot.consent || this.tasks.size || this.offline) return;
-    this.clearIdleTimer();
-    this.clearTransientTimer();
-    this.publish({ state: "playful", message: "Hehe!" });
-    this.transientTimer = setTimeout(() => this.restore(), PLAYFUL_MS);
+  celebrate(message = "Nice work!"): void {
+    this.startTransient("celebrating", message, CELEBRATE_MS);
   }
 
   setOffline(value: boolean): void {
     this.offline = value;
-    this.clearTransientTimer();
-    if (this.snapshot.consent) return;
-    if (value) this.publish({ state: "offline", message: "I’ll be ready when you’re back online." });
-    else this.restore();
+    this.refresh();
   }
 
   setMinimized(value: boolean): void {
-    writePreference(MINIMIZED_KEY, value);
-    this.publish({ minimized: value });
+    writeFlag(MINIMIZED_KEY, value);
+    this.emit({ minimized: value, ...(value ? { chatOpen: false } : {}) });
   }
 
-  setHidden(value: boolean): void {
-    writePreference(HIDDEN_KEY, value);
-    this.publish({ hidden: value });
-    if (!value) this.wake();
+  // --- chat -----------------------------------------------------------------------------
+
+  setChatOpen(value: boolean): void {
+    this.emit({ chatOpen: value });
   }
 
-  setVisible(value: boolean): void {
-    this.visible = value;
-    if (!value) this.clearIdleTimer();
-    else this.scheduleIdle();
+  private push(from: ChatMessage["from"], text: string): void {
+    const messages = [...this.snapshot.messages, { id: makeId(), from, text, at: Date.now() }].slice(-MAX_MESSAGES);
+    this.emit({ messages });
   }
 
-  setReducedMotion(value: boolean): void {
-    this.reducedMotion = value;
+  say(text: string): void {
+    this.push("alfred", text);
   }
 
+  hear(text: string): void {
+    this.push("you", text);
+  }
+
+  clearChat(): void {
+    this.emit({ messages: [] });
+  }
+
+  // --- lifecycle ------------------------------------------------------------------------
+
+  /** Called when the signed-in member changes: nothing from the last person may carry over. */
   resetSession(): void {
     this.sessionGeneration += 1;
     this.tasks.clear();
-    this.pendingFailures = [];
-    this.clearIdleTimer();
-    this.clearTransientTimer();
+    this.transient = null;
     if (this.noticeTimer) clearTimeout(this.noticeTimer);
     this.noticeTimer = undefined;
     const resolve = this.consentResolver;
     this.consentResolver = undefined;
-    this.publish({
-      state: this.offline ? "offline" : "resting",
-      message: this.offline ? "I’ll be ready when you’re back online." : "I’m here when you need me.",
-      consent: null,
-      notice: null,
-    });
+    this.snapshot = { ...this.snapshot, consent: null, notice: null };
+    this.emit({ consent: null, notice: null, messages: [], chatOpen: false });
+    this.refresh();
     resolve?.(false);
   }
 
   destroy(): void {
-    this.clearIdleTimer();
-    this.clearTransientTimer();
+    if (this.timer) clearTimeout(this.timer);
     if (this.noticeTimer) clearTimeout(this.noticeTimer);
     this.listeners.clear();
   }
