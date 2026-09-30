@@ -106,7 +106,7 @@ export default function PrivacyPolicyPage() {
               <li>See and revoke individual login sessions from settings.</li>
               <li>Delete your account and its data from settings, at any time.</li>
               <li>
-                Email <a href="mailto:hello@teenovatex.com" className="text-rose underline underline-offset-4">hello@teenovatex.com</a> for
+                Email <a href="mailto:hello@teenovatex.org" className="text-rose underline underline-offset-4">hello@teenovatex.org</a> for
                 anything settings can&rsquo;t do yet.
               </li>
             </ul>
@@ -144,8 +144,8 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-semibold">Contact</h2>
             <p className="mt-2 text-muted">
               Questions about this policy or your data:{" "}
-              <a href="mailto:hello@teenovatex.com" className="text-rose underline underline-offset-4">
-                hello@teenovatex.com
+              <a href="mailto:hello@teenovatex.org" className="text-rose underline underline-offset-4">
+                hello@teenovatex.org
               </a>
             </p>
           </section>

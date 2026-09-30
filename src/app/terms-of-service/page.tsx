@@ -115,8 +115,8 @@ export default function TermsOfServicePage() {
             <h2 className="text-xl font-semibold">10. Contact</h2>
             <p className="mt-2 text-muted">
               Questions about these terms:{" "}
-              <a href="mailto:hello@teenovatex.com" className="text-rose underline underline-offset-4">
-                hello@teenovatex.com
+              <a href="mailto:hello@teenovatex.org" className="text-rose underline underline-offset-4">
+                hello@teenovatex.org
               </a>
             </p>
           </section>
