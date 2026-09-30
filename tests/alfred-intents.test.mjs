@@ -43,6 +43,8 @@ test("reading things about you", () => {
   assert.equal(kind("what labs do I have"), "mylabs");
   assert.equal(kind("what's due"), "due");
   assert.equal(kind("show my tasks"), "due");
+  assert.equal(kind("what level am I"), "level");
+  assert.equal(kind("what's my daily quest"), "quest");
 });
 
 test("actions that change things are recognised", () => {

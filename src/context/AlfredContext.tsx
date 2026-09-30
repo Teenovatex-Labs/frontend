@@ -120,7 +120,7 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
       const task = alfredController.beginTask("Working on it", "thinking");
       try {
         const ctx = {
-          me: { username: user.username, points: user.points, streak: user.streak, rank: user.rank },
+          me: { username: user.username, points: user.points, streak: user.streak, rank: user.rank, level: user.level },
           navigate: (path: string) => router.push(path),
           ask: (input: { title: string; message: string; actionId?: string }) => alfredController.requestConsent(input),
           signOut: logout,

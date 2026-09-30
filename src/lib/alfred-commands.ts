@@ -5,13 +5,13 @@
 
 import { ApiError } from "@/lib/api";
 import { PAGES, interpret, type Intent } from "@/lib/alfred-intents";
-import { eventsApi, inboxApi, labsApi, labsDeepApi, peopleApi, votesApi } from "@/lib/services";
+import { eventsApi, inboxApi, labsApi, labsDeepApi, peopleApi, rewardsApi, votesApi } from "@/lib/services";
 
 // --- running an intent -----------------------------------------------------------------------
 
 export type CommandContext = {
   /** The signed-in member. */
-  me: { username: string; points: number; streak: number; rank?: number };
+  me: { username: string; points: number; streak: number; rank?: number; level: { level: number; title: string; points: number; next_at: number | null } };
   navigate: (path: string) => void;
   ask: (input: { title: string; message: string; actionId?: string }) => Promise<boolean>;
   signOut: () => Promise<void>;
@@ -89,6 +89,21 @@ export async function run(intent: Intent, ctx: CommandContext): Promise<string> 
         if (tasks.length === 0) return "Nothing on your plate. Add tasks on a lab's Board and I'll keep track.";
         const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
         return `Up next:\n${list(tasks.slice(0, 5).map((t) => `${t.title} (${t.lab.name}${t.due_at ? `, due ${day(t.due_at)}` : ""})`))}`;
+      }
+
+      case "level": {
+        const l = ctx.me.level;
+        return l.next_at
+          ? `You're a ${l.title} (level ${l.level}). ${l.next_at - l.points} more points to reach the next level.`
+          : `You're a ${l.title}, the top level. Legendary.`;
+      }
+
+      case "quest": {
+        const q = await rewardsApi.quest();
+        if (q.claimed) return `Today's quest (${q.title}) is done and claimed. Come back tomorrow!`;
+        return q.complete
+          ? `You finished "${q.title}". Claim your ${q.points} points on Home!`
+          : `Today's quest: ${q.title}. ${q.description} (${q.progress} of ${q.goal})`;
       }
 
       case "readall": {
