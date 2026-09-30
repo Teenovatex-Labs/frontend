@@ -265,7 +265,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
                 onMouseEnter={backIcon.onMouseEnter}
                 onMouseLeave={backIcon.onMouseLeave}
                 aria-label="Back"
-                className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-md border border-ink transition-colors hover:bg-pink"
+                className="btn-secondary btn-icon shrink-0"
               >
                 <ArrowLeftIcon ref={backIcon.ref} size={18} />
               </button>
