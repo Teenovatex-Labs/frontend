@@ -1,0 +1,11 @@
+Use case: full-body 4×4 animation atlas for Alfred, the TeenovateX Labs companion.
+
+Make one square transparent image with exactly 16 sequential, complete character drawings in four equal columns and four equal rows, read left-to-right and top-to-bottom. Each drawing shows Alfred completely from curls to polished shoes. Use the same scale, center, feet baseline, slightly-right-facing three-quarter camera, palette, lighting, and character proportions in every cell. Leave generous empty transparent space around each full figure. The cell spacing is even and invisible. No grid lines, borders, labels, backdrop, floor, shadows, reflections, or effects.
+
+Use the attached approved Alfred portrait as the identity reference: warm medium-brown skin, rose eyes, dense natural black curls, expressive face, charcoal three-piece suit, white shirt, black tie, rose pocket square, black shoes. Preserve his exact identity and style. Soft polished 3D anime character art with tactile curls and refined suit details.
+
+Alfred stands quietly and patiently, full body visible. He holds one small closed rose notebook down at his side. He glances gently to one side, then forward again, with relaxed shoulders and a calm, understanding expression. His other hand rests naturally at his side. The notebook remains in the same hand and location in all frames.
+
+Show 16 distinct, subtle poses in one seamless loop: a small relaxed weight shift between feet, slight head and shoulder movement, a gentle glance and return, and one natural blink. Keep the shoes near a fixed baseline and Alfred centered. Frame 16 returns close to frame 1. All anatomy remains connected and natural; five fingers per hand; no missing or extra limbs. Keep the outfit neat in every frame.
+
+True transparent pixels. No icons, notification symbols, text, watermark, extra props, detached parts, or cropped hair or shoes.
