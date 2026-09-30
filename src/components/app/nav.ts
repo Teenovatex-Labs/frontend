@@ -27,7 +27,7 @@ export const MAIN: NavItem[] = [
   { id: "home", label: "Home", href: "/home", icon: HouseIcon },
   {
     id: "projects",
-    label: "Projects",
+    label: "Labs",
     icon: RocketIcon,
     soon: true,
     children: [
