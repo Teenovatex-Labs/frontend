@@ -54,6 +54,12 @@ export const labsApi = {
     request<Lab>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(data) }, { auth: true, activity: "Saving your lab" }),
   remove: (id: string) =>
     request<{ message: string }>(`/projects/${id}`, { method: "DELETE" }, { auth: true, activity: "Deleting your lab" }),
+  setCover: (id: string, file: File) => {
+    const form = new FormData();
+    form.append("cover_image", file);
+    return request<{ cover_url: string }>(`/projects/${id}/cover`, { method: "PUT", body: form }, { auth: true, activity: "Uploading your cover" });
+  },
+  clearCover: (id: string) => request<{ cover_url: null }>(`/projects/${id}/cover`, { method: "DELETE" }, { auth: true, activity: false }),
 };
 
 export type VoteResult = { new_vote_count: number; points_awarded?: number; votes_remaining_today?: number };
@@ -75,8 +81,8 @@ export type PointsSummary = {
 };
 
 export const pointsApi = {
-  leaderboard: (page = 1, limit = 20) =>
-    request<{ leaderboard: LeaderboardEntry[] }>(`/leaderboard${qs({ page, limit })}`, {}, authed),
+  leaderboard: (page = 1, limit = 20, period: "all" | "week" = "all") =>
+    request<{ leaderboard: LeaderboardEntry[] }>(`/leaderboard${qs({ page, limit, period })}`, {}, authed),
   mine: () => request<PointsSummary>("/points/me", {}, authed),
 };
 
@@ -438,3 +444,31 @@ export type SearchResults = {
 };
 
 export const searchApi = { find: (q: string) => request<SearchResults>(`/search${qs({ q })}`, {}, authed) };
+
+// --- admin: analytics and Learn content -------------------------------------------------------
+
+export type DayPoint = { day: string; count: number };
+export type Analytics = {
+  days: number;
+  signups: DayPoint[];
+  active_members: DayPoint[];
+  labs_started: DayPoint[];
+  posts: DayPoint[];
+  messages: DayPoint[];
+  votes: DayPoint[];
+  adoption: { users: number; started_a_lab_pct: number; voted_pct: number; finished_a_lesson_pct: number; posted_or_commented_pct: number };
+};
+export type AdminTrack = { id: string; slug: string; title: string; description: string; published: boolean; position: number; lessons: { id: string; slug: string; title: string; summary: string; minutes: number; position: number }[] };
+export type AdminLesson = { id: string; track_id: string; slug: string; title: string; summary: string; body: string; minutes: number; position: number };
+
+export const adminContentApi = {
+  analytics: (days = 30) => request<Analytics>(`/admin/analytics${qs({ days })}`, {}, authed),
+  tracks: () => request<{ tracks: AdminTrack[] }>("/admin/learn/tracks", {}, authed),
+  lesson: (id: string) => request<AdminLesson>(`/admin/learn/lessons/${id}`, {}, authed),
+  createTrack: (data: { slug: string; title: string; description: string; published?: boolean }) => request<AdminTrack>("/admin/learn/tracks", { method: "POST", body: json(data) }, write()),
+  updateTrack: (id: string, data: Partial<{ slug: string; title: string; description: string; published: boolean; position: number }>) => request<AdminTrack>(`/admin/learn/tracks/${id}`, { method: "PATCH", body: json(data) }, write()),
+  deleteTrack: (id: string) => request<unknown>(`/admin/learn/tracks/${id}`, { method: "DELETE" }, write()),
+  createLesson: (trackId: string, data: { slug: string; title: string; summary: string; body: string; minutes?: number }) => request<AdminLesson>(`/admin/learn/tracks/${trackId}/lessons`, { method: "POST", body: json(data) }, write()),
+  updateLesson: (id: string, data: Partial<{ slug: string; title: string; summary: string; body: string; minutes: number; position: number }>) => request<AdminLesson>(`/admin/learn/lessons/${id}`, { method: "PATCH", body: json(data) }, write()),
+  deleteLesson: (id: string) => request<unknown>(`/admin/learn/lessons/${id}`, { method: "DELETE" }, write()),
+};
