@@ -363,3 +363,14 @@
   }
 
 }
+
+/* Air-mail edge for the contact postcard. */
+.airmail {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--pink) 0 14px,
+    var(--cream) 14px 28px,
+    var(--rose) 28px 42px,
+    var(--cream) 42px 56px
+  );
+}
