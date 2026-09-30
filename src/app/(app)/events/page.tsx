@@ -11,10 +11,15 @@ import Tabs from "@/components/ui/Tabs";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
 import RsvpButton from "@/components/events/RsvpButton";
+import MonthCalendar from "@/components/events/MonthCalendar";
 
 export default function EventsPage() {
+  const [view, setView] = useState<"list" | "calendar">("list");
   const [when, setWhen] = useState<"upcoming" | "past">("upcoming");
   const events = useQuery({ queryKey: keys.events(when), queryFn: () => eventsApi.list(when) });
+  // The calendar shows both what is coming and what just happened.
+  const upcoming = useQuery({ queryKey: keys.events("upcoming"), queryFn: () => eventsApi.list("upcoming"), enabled: view === "calendar" });
+  const past = useQuery({ queryKey: keys.events("past"), queryFn: () => eventsApi.list("past"), enabled: view === "calendar" });
 
   return (
     <main className="mx-auto w-full max-w-[860px] px-5 py-10 md:px-10 md:py-14">
@@ -22,7 +27,9 @@ export default function EventsPage() {
         Lab nights, workshops and meetups. Save your spot and we&rsquo;ll remind you.
       </PageHeader>
 
-      <div className="mt-8">
+      <div className="mt-8 flex flex-wrap items-center gap-4">
+        <Tabs label="View" options={[{ id: "list", label: "List" }, { id: "calendar", label: "Calendar" }]} value={view} onChange={setView} />
+        {view === "list" && (
         <Tabs
           label="When"
           options={[
@@ -32,9 +39,20 @@ export default function EventsPage() {
           value={when}
           onChange={setWhen}
         />
+        )}
       </div>
 
-      <div className="mt-8">
+      {view === "calendar" && (
+        <div className="mt-8">
+          {upcoming.isPending || past.isPending ? (
+            <Skeleton className="h-96 w-full" />
+          ) : (
+            <MonthCalendar events={[...(upcoming.data?.events ?? []), ...(past.data?.events ?? [])]} />
+          )}
+        </div>
+      )}
+
+      <div className={`mt-8 ${view === "calendar" ? "hidden" : ""}`}>
         {events.isPending ? (
           <div className="space-y-4" aria-busy="true">
             {[0, 1, 2].map((i) => (
