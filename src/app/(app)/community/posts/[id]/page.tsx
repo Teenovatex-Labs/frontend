@@ -13,6 +13,7 @@ import Dialog from "@/components/ui/Dialog";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
 import ReportButton from "@/components/safety/ReportDialog";
+import RichText from "@/components/ui/RichText";
 import { useToast } from "@/components/ui/Toast";
 
 export default function PostPage() {
@@ -89,7 +90,7 @@ export default function PostPage() {
         <Link href={`/u/${p.author.username}`} className="font-medium text-ink hover:underline">@{p.author.username}</Link>
         <span>· {timeAgo(p.created_at)}</span>
       </div>
-      <p className="mt-6 whitespace-pre-line text-[17px] leading-relaxed">{p.body}</p>
+      <p className="mt-6 whitespace-pre-line text-[17px] leading-relaxed"><RichText text={p.body} /></p>
 
       <div className="mt-6 flex flex-wrap items-center gap-4">
         <button
@@ -124,7 +125,7 @@ export default function PostPage() {
                 )}
               </span>
             </div>
-            <p className="mt-2 whitespace-pre-line text-[15px]">{c.body}</p>
+            <p className="mt-2 whitespace-pre-line text-[15px]"><RichText text={c.body} /></p>
           </li>
         ))}
       </ul>

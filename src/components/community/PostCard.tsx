@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
 import { timeAgo } from "@/lib/labs";
+import RichText from "@/components/ui/RichText";
 import type { PostSummary } from "@/lib/services";
 
 export default function PostCard({ post, showSpace = false }: { post: PostSummary; showSpace?: boolean }) {
@@ -15,7 +16,7 @@ export default function PostCard({ post, showSpace = false }: { post: PostSummar
       <h3 className="mt-2 text-[20px] leading-tight tracking-[-0.02em]">
         <Link href={`/community/posts/${post.id}`} className="hover:underline">{post.title}</Link>
       </h3>
-      <p className="mt-1.5 whitespace-pre-line text-sm text-muted">{post.body}</p>
+      <p className="mt-1.5 whitespace-pre-line text-sm text-muted"><RichText text={post.body} /></p>
       <p className="mt-3 text-xs text-ink/75">
         ♥ {post.reaction_count} · {post.comment_count} comment{post.comment_count === 1 ? "" : "s"}
       </p>

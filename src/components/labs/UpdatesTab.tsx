@@ -12,6 +12,7 @@ import Skeleton from "@/components/ui/Skeleton";
 import FormField from "@/components/FormField";
 import TextAreaField from "@/components/TextAreaField";
 import { useToast } from "@/components/ui/Toast";
+import RichText from "@/components/ui/RichText";
 
 export default function UpdatesTab({ lab, isTeam, isOwner, me }: { lab: string; isTeam: boolean; isOwner: boolean; me?: string }) {
   const qc = useQueryClient();
@@ -71,7 +72,7 @@ export default function UpdatesTab({ lab, isTeam, isOwner, me }: { lab: string; 
                 {(isOwner || u.author?.username === me) && <button type="button" onClick={() => del.mutate(u.id)} className="ml-auto text-rose underline underline-offset-4">Delete</button>}
               </div>
               <h3 className="mt-1 text-[19px] tracking-[-0.02em]">{u.title}</h3>
-              <p className="mt-1 whitespace-pre-line text-[15px] text-muted">{u.body}</p>
+              <p className="mt-1 whitespace-pre-line text-[15px] text-muted"><RichText text={u.body} /></p>
             </li>
           ))}
         </ol>
