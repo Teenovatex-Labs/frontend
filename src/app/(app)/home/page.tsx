@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { eventsApi, inboxApi, labsApi, learnApi, votesApi } from "@/lib/services";
+import { eventsApi, inboxApi, labsApi, labsDeepApi, learnApi, votesApi } from "@/lib/services";
 import { keys, timeAgo } from "@/lib/labs";
 import { eventDay, eventTime } from "@/lib/dates";
 import StatTile from "@/components/ui/StatTile";
@@ -39,6 +39,7 @@ export default function HomePage() {
   const events = useQuery({ queryKey: keys.events("upcoming"), queryFn: () => eventsApi.list("upcoming"), enabled: !!user });
   const mine = useQuery({ queryKey: keys.myLabs, queryFn: labsApi.mine, enabled: !!user });
   const inbox = useQuery({ queryKey: keys.inbox, queryFn: inboxApi.list, enabled: !!user });
+  const tasks = useQuery({ queryKey: keys.myTasks, queryFn: labsDeepApi.myTasks, enabled: !!user });
   const tracks = useQuery({ queryKey: keys.tracks, queryFn: learnApi.tracks, enabled: !!user });
 
   if (!user) return null;
@@ -79,6 +80,31 @@ export default function HomePage() {
                 <span className="text-muted">{remaining === 0 ? "They come back tomorrow." : "Back a lab you love."}</span>
               </p>
             </div>
+          )}
+        </Panel>
+
+        <Panel title="Up next" href="/labs/mine" cta="My labs">
+          {tasks.isPending ? (
+            <Loading />
+          ) : tasks.data && tasks.data.tasks.length > 0 ? (
+            <ul className="space-y-3">
+              {tasks.data.tasks.slice(0, 4).map((t) => {
+                const late = !!t.due_at && new Date(t.due_at) < new Date();
+                return (
+                  <li key={t.id}>
+                    <Link href={`/labs/${t.lab.slug}?tab=board`} className="block hover:underline">
+                      <span className="font-medium">{t.title}</span>
+                      <span className="block text-sm text-muted">
+                        {t.lab.name}
+                        {t.due_at && <span className={late ? "font-semibold text-rose" : ""}> · due {new Date(t.due_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}</span>}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <Nothing>No open tasks. Plan your next step on a lab&rsquo;s Board.</Nothing>
           )}
         </Panel>
 
