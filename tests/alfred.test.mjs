@@ -1,212 +1,232 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { AlfredController } from "../src/lib/alfred.ts";
+import { AlfredController, HOVER_LINGER_MS, DRAG_LINGER_MS } from "../src/lib/alfred.ts";
 
-const makeController = () => new AlfredController(false);
+// Time is faked so "a few seconds later" doesn't make the suite slow or flaky.
+const clock = (t) => t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 1_000_000 });
+const make = () => new AlfredController(false);
 
-test("concurrent tasks keep the latest activity until each task settles", () => {
-  const alfred = makeController();
-  const first = alfred.beginTask("Saving draft");
-  const second = alfred.beginTask("Loading ideas", "thinking");
+test("he starts out standing still", () => {
+  const alfred = make();
+  const s = alfred.getSnapshot();
+  assert.equal(s.state, "idle");
+  assert.equal(s.animation, null);
+  assert.equal(s.bubble, false);
+  alfred.destroy();
+});
+
+test("nothing moves him on its own, however long we wait", (t) => {
+  clock(t);
+  const alfred = make();
+  t.mock.timers.tick(10 * 60_000);
+  assert.equal(alfred.getSnapshot().animation, null);
+  alfred.destroy();
+});
+
+test("hovering makes him look at you, and he settles a few seconds after you leave", (t) => {
+  clock(t);
+  const alfred = make();
+  alfred.setHover(true);
+  assert.equal(alfred.getSnapshot().animation, "curious");
+  t.mock.timers.tick(60_000); // hovering for a long time keeps him looking
+  assert.equal(alfred.getSnapshot().animation, "curious");
+
+  alfred.setHover(false);
+  t.mock.timers.tick(HOVER_LINGER_MS - 200);
+  assert.equal(alfred.getSnapshot().animation, "curious");
+  t.mock.timers.tick(400);
+  assert.equal(alfred.getSnapshot().animation, null);
+  alfred.destroy();
+});
+
+test("being dragged makes him playful, then he settles quickly after you let go", (t) => {
+  clock(t);
+  const alfred = make();
+  alfred.setDragging(true);
+  assert.equal(alfred.getSnapshot().animation, "playful");
+  alfred.setDragging(false);
+  assert.equal(alfred.getSnapshot().animation, "playful");
+  t.mock.timers.tick(DRAG_LINGER_MS + 100);
+  assert.equal(alfred.getSnapshot().animation, null);
+  alfred.destroy();
+});
+
+test("while working he works; when the job ends he reacts once and goes still", (t) => {
+  clock(t);
+  const alfred = make();
+  const task = alfred.beginTask("Saving your lab", "operating");
+  assert.equal(alfred.getSnapshot().animation, "operating");
+  assert.equal(alfred.getSnapshot().bubble, true);
+  task.done("Saved");
+  assert.equal(alfred.getSnapshot().state, "done");
+  t.mock.timers.tick(5_000);
+  assert.equal(alfred.getSnapshot().animation, null);
+  assert.equal(alfred.getSnapshot().bubble, false);
+  alfred.destroy();
+});
+
+test("overlapping jobs keep him working until the last one finishes", (t) => {
+  clock(t);
+  const alfred = make();
+  const a = alfred.beginTask("One");
+  const b = alfred.beginTask("Two", "thinking");
   assert.equal(alfred.getSnapshot().state, "thinking");
-  first.done("Draft saved");
+  a.done();
   assert.equal(alfred.getSnapshot().state, "thinking");
-  second.done("Ideas loaded");
+  b.done();
   assert.equal(alfred.getSnapshot().state, "done");
   alfred.destroy();
 });
 
-test("pending consent stays on screen through activity, notices, and offline changes", async () => {
-  const alfred = makeController();
-  const approval = alfred.requestConsent({ title: "Share profile?", message: "May I share this?" });
-  const task = alfred.beginTask("Loading your profile");
-  alfred.notify("Your profile is ready");
-  alfred.setOffline(true);
+test("a failed job shows a snag, then he goes still", (t) => {
+  clock(t);
+  const alfred = make();
+  alfred.beginTask("Saving").fail("Couldn't save");
+  assert.equal(alfred.getSnapshot().state, "failed");
+  assert.equal(alfred.getSnapshot().message, "Couldn't save");
+  t.mock.timers.tick(5_000);
+  assert.equal(alfred.getSnapshot().animation, null);
+  alfred.destroy();
+});
+
+test("asking permission beats everything else and waits for an answer", async (t) => {
+  clock(t);
+  const alfred = make();
+  alfred.beginTask("Working");
+  alfred.setHover(true);
+  const answer = alfred.requestConsent({ title: "Delete it?", message: "This removes your lab." });
   assert.equal(alfred.getSnapshot().state, "consent");
-  assert.equal(alfred.getSnapshot().consent?.title, "Share profile?");
-  task.done();
+  t.mock.timers.tick(60_000); // no timeout: he keeps waiting
+  assert.equal(alfred.getSnapshot().state, "consent");
+  alfred.resolveConsent(true);
+  assert.equal(await answer, true);
+  assert.equal(alfred.getSnapshot().consent, null);
+  assert.equal(alfred.getSnapshot().state, "operating"); // back to the job underneath
+  alfred.destroy();
+});
+
+test("denying returns false, and only one question is asked at a time", async () => {
+  const alfred = make();
+  const first = alfred.requestConsent({ title: "A", message: "a" });
+  assert.equal(await alfred.requestConsent({ title: "B", message: "b" }), false);
   alfred.resolveConsent(false);
-  assert.equal(await approval, false);
-  assert.equal(alfred.getSnapshot().state, "offline");
-  alfred.setOffline(false);
+  assert.equal(await first, false);
+  alfred.destroy();
+});
+
+test("'Always allow' is remembered for that action only, and can be revoked", async () => {
+  const alfred = make();
+  const asked = alfred.requestConsent({ title: "Mark read?", message: "m", actionId: "notifications.read-all" });
+  alfred.resolveConsent(true, true);
+  assert.equal(await asked, true);
+
+  assert.equal(await alfred.requestConsent({ title: "Mark read?", message: "m", actionId: "notifications.read-all" }), true);
+  assert.equal(alfred.getSnapshot().consent, null, "no card is shown the second time");
+
+  const other = alfred.requestConsent({ title: "Follow?", message: "f", actionId: "follow" });
+  assert.equal(alfred.getSnapshot().state, "consent", "a different action still asks");
+  alfred.resolveConsent(false);
+  await other;
+
+  alfred.revokeAlwaysAllowed();
+  const again = alfred.requestConsent({ title: "Mark read?", message: "m", actionId: "notifications.read-all" });
+  assert.equal(alfred.getSnapshot().state, "consent");
+  alfred.resolveConsent(false);
+  await again;
+  alfred.destroy();
+});
+
+test("'Always allow' does nothing for a one-off action", async () => {
+  const alfred = make();
+  const asked = alfred.requestConsent({ title: "Sign out?", message: "s" });
+  alfred.resolveConsent(true, true); // no actionId, so nothing to remember
+  await asked;
+  const next = alfred.requestConsent({ title: "Sign out?", message: "s" });
+  assert.equal(alfred.getSnapshot().state, "consent");
+  alfred.resolveConsent(false);
+  await next;
+  alfred.destroy();
+});
+
+test("an update makes him alert once, then it fades", (t) => {
+  clock(t);
+  const alfred = make();
+  alfred.notify("Sam voted for your lab");
   assert.equal(alfred.getSnapshot().state, "alerting");
-  assert.equal(alfred.getSnapshot().notice?.message, "Your profile is ready");
-  alfred.destroy();
-});
-
-test("a failed task settles without leaving the controller stuck", () => {
-  const alfred = makeController();
-  const task = alfred.beginTask("Sending a message");
-  task.fail("Message could not be sent");
-  assert.equal(alfred.getSnapshot().state, "failed");
-  task.done("This is ignored after failure");
-  assert.equal(alfred.getSnapshot().state, "failed");
-  alfred.destroy();
-});
-
-test("offline holds active tasks without marking them failed and restores them online", () => {
-  const alfred = makeController();
-  const task = alfred.beginTask("Loading your profile");
-  alfred.setOffline(true);
-  assert.equal(alfred.getSnapshot().state, "offline");
-  alfred.setOffline(false);
-  assert.equal(alfred.getSnapshot().state, "operating");
-  task.done();
-  alfred.destroy();
-});
-
-test("cancel removes a task without claiming completion", (t) => {
-  const clock = fakeTimers(t);
-  const alfred = makeController();
-  const task = alfred.beginTask("Previewing an outline", "planning");
-  task.cancel();
-
-  assert.equal(alfred.getSnapshot().state, "curious");
-  assert.equal(clock.latestDelay(), 45_000);
-  clock.advance(3_000);
-  assert.notEqual(alfred.getSnapshot().state, "done");
-  assert.notEqual(alfred.getSnapshot().state, "celebrating");
-  task.done("This completion is ignored after cancellation");
-  assert.equal(alfred.getSnapshot().state, "curious");
-  alfred.destroy();
-});
-
-function fakeTimers(t) {
-  const originalSetTimeout = globalThis.setTimeout;
-  const originalClearTimeout = globalThis.clearTimeout;
-  let now = 0;
-  const timers = [];
-  globalThis.setTimeout = (callback, delay = 0) => {
-    const timer = { callback, delay: Number(delay), at: now + Number(delay), cancelled: false };
-    timers.push(timer);
-    return timer;
-  };
-  globalThis.clearTimeout = (timer) => {
-    if (timer) timer.cancelled = true;
-  };
-  t.after(() => {
-    globalThis.setTimeout = originalSetTimeout;
-    globalThis.clearTimeout = originalClearTimeout;
-  });
-  return {
-    latestDelay: () => timers.filter((timer) => !timer.cancelled).at(-1)?.delay,
-    advance: (amount) => {
-      const end = now + amount;
-      while (true) {
-        const next = timers.filter((timer) => !timer.cancelled && timer.at <= end).sort((a, b) => a.at - b.at)[0];
-        if (!next) break;
-        next.cancelled = true;
-        now = next.at;
-        next.callback();
-      }
-      now = end;
-    },
-  };
-}
-
-test("full state durations remain readable with reduced motion enabled", (t) => {
-  const clock = fakeTimers(t);
-  const alfred = makeController();
-  alfred.setReducedMotion(true);
-
-  const task = alfred.beginTask("Saving");
-  task.done("Saved");
-  assert.equal(clock.latestDelay(), 3_000);
-  clock.advance(3_000);
-  assert.equal(alfred.getSnapshot().state, "celebrating");
-  assert.equal(clock.latestDelay(), 3_200);
-  clock.advance(3_200);
-  assert.deepEqual([alfred.getSnapshot().state, alfred.getSnapshot().message], ["curious", "Ready for your next idea."]);
-  assert.equal(clock.latestDelay(), 45_000);
-
-  alfred.greet();
-  assert.equal(clock.latestDelay(), 3_400);
-  clock.advance(3_400);
-  alfred.wake();
-  assert.equal(clock.latestDelay(), 3_400);
-  clock.advance(3_400);
-  alfred.play();
-  assert.equal(clock.latestDelay(), 3_600);
-
-  alfred.notify("A new note");
-  assert.equal(clock.latestDelay(), 5_000);
-  clock.advance(4_999);
-  assert.equal(alfred.getSnapshot().notice?.message, "A new note");
-  clock.advance(1);
+  assert.equal(alfred.getSnapshot().message, "Sam voted for your lab");
+  t.mock.timers.tick(7_000);
+  assert.equal(alfred.getSnapshot().animation, null);
   assert.equal(alfred.getSnapshot().notice, null);
   alfred.destroy();
 });
 
-test("reading activity returns to rest after the idle interval", (t) => {
-  const clock = fakeTimers(t);
-  const alfred = makeController();
-  alfred.setActivity("reading", "Reading along");
-  assert.equal(clock.latestDelay(), 45_000);
-  clock.advance(45_000);
-  assert.equal(alfred.getSnapshot().state, "resting");
+test("saying yo greets you, opens the chat, and goes still again", (t) => {
+  clock(t);
+  const alfred = make();
+  alfred.yo();
+  const s = alfred.getSnapshot();
+  assert.equal(s.state, "greeting");
+  assert.equal(s.chatOpen, true);
+  assert.equal(s.messages.at(-1)?.from, "alfred");
+  t.mock.timers.tick(4_000);
+  assert.equal(alfred.getSnapshot().animation, null);
+  assert.equal(alfred.getSnapshot().chatOpen, true, "the chat stays open");
   alfred.destroy();
 });
 
-test("presence resets inactivity and wakes only a resting companion", (t) => {
-  const clock = fakeTimers(t);
-  const alfred = makeController();
-  alfred.setActivity("reading", "Reading along");
-
-  clock.advance(30_000);
-  alfred.notePresence();
-  assert.deepEqual([alfred.getSnapshot().state, clock.latestDelay()], ["reading", 45_000]);
-  clock.advance(44_999);
-  assert.equal(alfred.getSnapshot().state, "reading");
-  clock.advance(1);
-  assert.equal(alfred.getSnapshot().state, "resting");
-
-  alfred.notePresence();
-  assert.equal(alfred.getSnapshot().state, "waking");
-  assert.equal(clock.latestDelay(), 3_400);
-  clock.advance(3_400);
-  assert.equal(alfred.getSnapshot().state, "curious");
-  assert.equal(clock.latestDelay(), 45_000);
-
+test("saying yo again replays the greeting", (t) => {
+  clock(t);
+  const alfred = make();
+  alfred.yo();
+  const first = alfred.getSnapshot().runKey;
+  alfred.yo();
+  assert.notEqual(alfred.getSnapshot().runKey, first);
   alfred.destroy();
 });
 
-test("presence does not interrupt active work or failure feedback", () => {
-  const alfred = makeController();
-  const task = alfred.beginTask("Saving your work");
-  alfred.notePresence();
-  assert.deepEqual([alfred.getSnapshot().state, alfred.getSnapshot().message], ["operating", "Saving your work"]);
-
-  task.fail("Saving your work failed");
-  alfred.notePresence();
-  assert.deepEqual([alfred.getSnapshot().state, alfred.getSnapshot().message], ["failed", "Saving your work failed"]);
+test("being offline shows a message but he stays still", () => {
+  const alfred = make();
+  alfred.setOffline(true);
+  const s = alfred.getSnapshot();
+  assert.equal(s.state, "offline");
+  assert.equal(s.animation, null);
+  assert.equal(s.bubble, true);
+  alfred.setOffline(false);
+  assert.equal(alfred.getSnapshot().state, "idle");
   alfred.destroy();
 });
 
-test("session reset denies pending consent and makes old task handles inert", async () => {
-  const alfred = makeController();
-  const approval = alfred.requestConsent({ title: "Share?", message: "May I share?" });
-  const staleTask = alfred.beginTask("Sending a message");
+test("minimizing closes the chat", () => {
+  const alfred = make();
+  alfred.setChatOpen(true);
+  alfred.setMinimized(true);
+  assert.equal(alfred.getSnapshot().minimized, true);
+  assert.equal(alfred.getSnapshot().chatOpen, false);
+  alfred.destroy();
+});
+
+test("the chat keeps what was said, capped, and can be cleared", () => {
+  const alfred = make();
+  for (let i = 0; i < 80; i++) alfred.hear(`msg ${i}`);
+  assert.equal(alfred.getSnapshot().messages.length, 60);
+  assert.equal(alfred.getSnapshot().messages.at(-1)?.text, "msg 79");
+  alfred.clearChat();
+  assert.equal(alfred.getSnapshot().messages.length, 0);
+  alfred.destroy();
+});
+
+test("a new session forgets the last person's job, question and chat", async () => {
+  const alfred = make();
+  const task = alfred.beginTask("Old job");
+  const asked = alfred.requestConsent({ title: "Old?", message: "o" });
+  alfred.hear("secret");
   alfred.resetSession();
-  assert.equal(await approval, false);
-  staleTask.done("This must not restore old session data");
-  staleTask.fail("This must not restore old session data");
-  assert.equal(alfred.getSnapshot().state, "resting");
-  assert.equal(alfred.getSnapshot().consent, null);
-  alfred.destroy();
-});
-
-test("failed work waits for active work and consent before showing the error", async (t) => {
-  const clock = fakeTimers(t);
-  const alfred = makeController();
-  const first = alfred.beginTask("Saving draft");
-  const second = alfred.beginTask("Loading ideas");
-  first.fail("Saving the draft failed");
-  assert.equal(alfred.getSnapshot().state, "operating");
-  const approval = alfred.requestConsent({ title: "Continue?", message: "Can I continue?" });
-  second.done("Ideas loaded");
-  alfred.resolveConsent(true);
-  await approval;
-  assert.deepEqual([alfred.getSnapshot().state, alfred.getSnapshot().message], ["failed", "Saving the draft failed"]);
-  assert.equal(clock.latestDelay(), 2_400);
+  const s = alfred.getSnapshot();
+  assert.equal(s.state, "idle");
+  assert.equal(s.consent, null);
+  assert.equal(s.messages.length, 0);
+  assert.equal(await asked, false);
+  task.done("late"); // from the old session: must be ignored
+  assert.equal(alfred.getSnapshot().state, "idle");
   alfred.destroy();
 });
