@@ -106,7 +106,7 @@ export default function Donate() {
                   key={o.topic}
                   type="button"
                   onClick={() => openContact(o.topic)}
-                  className="rounded-full border border-cream/40 px-4 py-1.5 text-sm font-semibold transition-all hover:-translate-y-0.5 hover:border-yellow hover:text-yellow"
+                  className="btn-secondary btn-sm on-dark"
                 >
                   {o.label} <span aria-hidden="true">↗︎</span>
                 </button>
