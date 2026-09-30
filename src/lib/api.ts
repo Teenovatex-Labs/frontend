@@ -34,6 +34,13 @@ export type UserProfile = {
   // is the one that should be prompted to add a password.
   has_password: boolean;
   has_google: boolean;
+  // YYYY-MM-DD, or null for an account that hasn't confirmed its age yet.
+  birth_date: string | null;
+  age_confirmed: boolean;
+  // False for a Google sign-up that hasn't picked a username yet (it has a placeholder).
+  username_set: boolean;
+  timezone: string | null;
+  role: "member" | "mentor" | "moderator" | "admin";
 };
 
 // "Remember me" decides *where* the refresh token lives: localStorage
@@ -148,7 +155,14 @@ function apiActivityLabel(path: string, method: string): string {
 export const authApi = {
   // No tokens yet — the account exists but is unverified until the code
   // from verifyEmail() is confirmed.
-  register: (data: { full_name: string; username: string; email: string; password: string }) =>
+  register: (data: {
+    full_name: string;
+    username: string;
+    email: string;
+    password: string;
+    birth_date: string;
+    timezone?: string;
+  }) =>
     request<{ message: string; email: string; require_verification: boolean }>("/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
@@ -255,4 +269,25 @@ export type AppNotification = {
 
 export const notificationsApi = {
   list: () => request<AppNotification[]>("/notifications", {}, { auth: true, activity: false }),
+};
+
+export const usersApi = {
+  // Age can be set once. Under 13 the account is deleted server-side and the
+  // response carries `account_removed: true` (surfaced as ApiError code AGE_TOO_YOUNG).
+  setBirthDate: (birth_date: string) =>
+    request<{ message?: string }>(
+      "/users/me/birth-date",
+      { method: "POST", body: JSON.stringify({ birth_date }) },
+      { auth: true }
+    ),
+
+  setUsername: (username: string) =>
+    request<{ username: string }>(
+      "/users/me/username",
+      { method: "POST", body: JSON.stringify({ username }) },
+      { auth: true }
+    ),
+
+  updateMe: (data: { timezone?: string }) =>
+    request<unknown>("/users/me", { method: "PATCH", body: JSON.stringify(data) }, { auth: true, activity: false }),
 };

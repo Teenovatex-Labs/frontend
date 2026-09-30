@@ -13,6 +13,8 @@ type AuthContextValue = {
     username: string;
     email: string;
     password: string;
+    birth_date: string;
+    timezone?: string;
   }) => Promise<{ email: string; require_verification: boolean }>;
   verifyEmail: (email: string, code: string) => Promise<void>;
   resendVerification: (email: string) => Promise<void>;
