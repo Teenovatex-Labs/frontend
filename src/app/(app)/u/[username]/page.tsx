@@ -35,12 +35,6 @@ export default function PersonPage() {
 
   const myBadges = useQuery({ queryKey: keys.badges, queryFn: rewardsApi.badges, enabled: isMe });
 
-  const follow = useMutation({
-    mutationFn: (following: boolean) => (following ? peopleApi.unfollow(username) : peopleApi.follow(username)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.person(username) }),
-    onError: (err) => toast.error(err instanceof ApiError ? err.message : "That didn't work. Try again."),
-  });
-
   const message = useMutation({
     mutationFn: () => messagesApi.open(username),
     onSuccess: (c) => router.push(`/messages/${c.id}`),
@@ -114,16 +108,7 @@ export default function PersonPage() {
           <Link href="/settings" className="btn-secondary">Edit profile</Link>
         ) : (
           <div className="flex flex-col items-end gap-2">
-            <button className={p.is_following ? "btn-secondary" : "btn"} disabled={follow.isPending} onClick={() => follow.mutate(p.is_following)}>
-              {p.is_following ? "Following" : "Follow"}
-            </button>
-            {p.is_following && p.follows_you ? (
-              <button className="btn-secondary btn-sm" disabled={message.isPending} onClick={() => message.mutate()}>Message</button>
-            ) : (
-              <span className="max-w-[200px] text-right text-xs text-muted">
-                {p.is_following ? "You can message once they follow you back." : "You can message each other once you both follow."}
-              </span>
-            )}
+            <button className="btn" disabled={message.isPending} onClick={() => message.mutate()}>Message</button>
             <span className="flex items-center gap-3">
               <ReportButton targetType="user" targetId={p.username} what={`@${p.username}`} />
               <button type="button" onClick={() => block.mutate()} disabled={block.isPending} className="text-xs text-muted underline underline-offset-4 hover:text-rose">
@@ -151,7 +136,7 @@ export default function PersonPage() {
         <StatTile label="Level" value={p.level.level} hint={p.level.title} tone="yellow" />
         <StatTile label="Points" value={p.points.toLocaleString()} hint={`#${p.rank} overall`} tone="pink" />
         <StatTile label="Day streak" value={p.streak} />
-        <StatTile label="Followers" value={p.followers} hint={`${p.following} following`} tone="white" />
+        <StatTile label="Labs" value={p.lab_count} tone="white" />
       </div>
 
       <h2 className="mt-12 text-[26px] tracking-[-0.03em]">

@@ -110,20 +110,12 @@ export type PublicProfile =
       rank: number;
       level: LevelInfo;
       badges: EarnedBadge[];
-      followers: number;
-      following: number;
       lab_count: number;
-      is_following: boolean;
-      follows_you: boolean;
     });
 
 export const peopleApi = {
   get: (username: string) => request<PublicProfile>(`/users/${encodeURIComponent(username)}`, {}, authed),
   labs: (username: string) => request<{ projects: Lab[] }>(`/users/${encodeURIComponent(username)}/projects`, {}, authed),
-  follow: (username: string) =>
-    request<{ message: string }>(`/users/${encodeURIComponent(username)}/follow`, { method: "POST" }, { auth: true, activity: "Following" }),
-  unfollow: (username: string) =>
-    request<{ message: string }>(`/users/${encodeURIComponent(username)}/follow`, { method: "DELETE" }, { auth: true, activity: "Unfollowing" }),
 };
 
 export type NotificationSettings = { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile?: boolean; ai_chat?: boolean };
@@ -387,7 +379,7 @@ export const petApi = {
 
   // What Alfred did for the member, and taking it back.
   actions: () => request<{ actions: PetActionItem[]; undo_window_minutes: number }>("/pet/actions", {}, authed),
-  logAction: (data: { kind: "follow" | "unfollow" | "vote" | "readall"; summary: string; payload: Record<string, unknown> }) =>
+  logAction: (data: { kind: "vote" | "readall"; summary: string; payload: Record<string, unknown> }) =>
     request<PetActionItem>("/pet/actions", { method: "POST", body: json(data) }, { auth: true, activity: false }),
   undo: (id: string) => request<{ message: string }>(`/pet/actions/${id}/undo`, { method: "POST" }, { auth: true, activity: false }),
 
