@@ -7,6 +7,7 @@ import AddPasswordPrompt from "./AddPasswordPrompt";
 import SigningIn from "@/components/auth/SigningIn";
 import AppShell from "./AppShell";
 import SetupGate from "./SetupGate";
+import SuspensionBanner from "@/components/safety/SuspensionBanner";
 import { usersApi } from "@/lib/api";
 import { browserTimezone } from "@/lib/age";
 
@@ -33,6 +34,7 @@ export default function AppGate({ children }: { children: ReactNode }) {
 
   return (
     <AppShell>
+      <SuspensionBanner />
       <AddPasswordPrompt />
       {children}
     </AppShell>
