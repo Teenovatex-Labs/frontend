@@ -69,10 +69,7 @@ export default function Hero() {
             <Link href={appUrl("/auth?mode=signup")} className="btn">
               Become a Teenovator <span>↗︎</span>
             </Link>
-            <a
-              href="#explore"
-              className="inline-flex items-center gap-3 border-0 py-3 text-[13px] hover:underline hover:underline-offset-4"
-            >
+            <a href="#explore" className="btn-secondary">
               See what happens here <span>↓</span>
             </a>
           </div>
