@@ -57,7 +57,7 @@ export default function Milestones({ lab, isTeam }: { lab: string; isTeam: boole
               )}
               <span className={`flex-1 ${m.done ? "text-muted line-through" : ""}`}>{m.title}</span>
               {m.due_at && <span className={`text-xs ${!m.done && new Date(m.due_at) < new Date() ? "font-semibold text-rose" : "text-muted"}`}>{when(m.due_at)}</span>}
-              {isTeam && <button type="button" onClick={() => remove.mutate(m.id)} aria-label={`Delete "${m.title}"`} className="text-ink/40 hover:text-ink">×</button>}
+              {isTeam && <button type="button" onClick={() => remove.mutate(m.id)} aria-label={`Delete "${m.title}"`} className="text-ink/70 hover:text-ink">×</button>}
             </li>
           ))}
         </ul>

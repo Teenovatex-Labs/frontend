@@ -80,7 +80,7 @@ function Floating({
 
 function SoonChip() {
   return (
-    <span className="ml-auto shrink-0 rounded-full bg-cream/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-cream/60">
+    <span className="ml-auto shrink-0 rounded-full bg-cream/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-cream/75">
       Soon
     </span>
   );
@@ -112,7 +112,7 @@ function Tree({
           </>
         );
         const cls = `relative flex h-10 items-center gap-2 rounded-xl px-3 text-[14px] transition-colors ${
-          active ? "bg-cream/[0.12] font-semibold text-cream" : "text-cream/65 hover:bg-cream/[0.07] hover:text-cream"
+          active ? "bg-cream/[0.12] font-semibold text-cream" : "text-cream/80 hover:bg-cream/[0.07] hover:text-cream"
         }`;
         return (
           <li key={leaf.id} className="ml-[22px] pl-1.5">
@@ -277,7 +277,7 @@ function NavRow({
         <Floating rect={hover.rect} onEnter={hover.keep} onLeave={hover.hide}>
           {hasChildren ? (
             <div className="min-w-[210px] rounded-2xl border border-cream/10 bg-ink p-3 pl-4 text-cream shadow-[4px_4px_0_var(--rose)]">
-              <p className="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-cream/50">
+              <p className="mb-1.5 flex items-center gap-2 px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-cream/75">
                 {item.label}
               </p>
               <Tree items={item.children!} isActive={isLeafActive} onNavigate={onNavigate} />
@@ -285,7 +285,7 @@ function NavRow({
           ) : (
             <div className="whitespace-nowrap rounded-xl bg-ink px-3.5 py-2 text-[13px] font-medium text-cream shadow-[3px_3px_0_var(--rose)]">
               {item.label}
-              {item.soon && <span className="ml-2 text-[10px] uppercase tracking-[0.12em] text-cream/50">Soon</span>}
+              {item.soon && <span className="ml-2 text-[10px] uppercase tracking-[0.12em] text-cream/75">Soon</span>}
             </div>
           )}
         </Floating>
@@ -411,7 +411,7 @@ export default function Sidebar({
     .toUpperCase();
 
   const section = (label: string) => (
-    <p className="mb-1.5 mt-5 px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-cream/40">{label}</p>
+    <p className="mb-1.5 mt-5 px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-cream/70">{label}</p>
   );
 
   const renderRow = (item: NavItem) => (
@@ -485,7 +485,7 @@ export default function Sidebar({
             placeholder="Search"
             aria-label="Search the app"
             tabIndex={isCollapsed ? -1 : 0}
-            className={`ml-3 min-w-0 flex-1 bg-transparent text-[15px] text-cream placeholder:text-cream/45 focus:outline-none transition-opacity duration-200 ${
+            className={`ml-3 min-w-0 flex-1 bg-transparent text-[15px] text-cream placeholder:text-cream/70 focus:outline-none transition-opacity duration-200 ${
               isCollapsed ? "pointer-events-none opacity-0" : "opacity-100 delay-75"
             }`}
           />
@@ -493,8 +493,8 @@ export default function Sidebar({
             aria-hidden="true"
             className={`ml-2 flex shrink-0 gap-1 transition-opacity duration-200 ${isCollapsed ? "opacity-0" : "opacity-100 delay-75"}`}
           >
-            <kbd className="rounded-md border border-cream/20 bg-cream/[0.06] px-1.5 py-0.5 text-[11px] font-medium text-cream/70">{mod}</kbd>
-            <kbd className="rounded-md border border-cream/20 bg-cream/[0.06] px-1.5 py-0.5 text-[11px] font-medium text-cream/70">K</kbd>
+            <kbd className="rounded-md border border-cream/20 bg-cream/[0.06] px-1.5 py-0.5 text-[11px] font-medium text-cream/80">{mod}</kbd>
+            <kbd className="rounded-md border border-cream/20 bg-cream/[0.06] px-1.5 py-0.5 text-[11px] font-medium text-cream/80">K</kbd>
           </span>
         </label>
       </div>
@@ -514,7 +514,7 @@ export default function Sidebar({
           </>
         )}
         {nothing && (
-          <p className="mt-8 px-4 text-sm text-cream/50">
+          <p className="mt-8 px-4 text-sm text-cream/75">
             Nothing matches <span className="text-cream">&ldquo;{query}&rdquo;</span> yet.
           </p>
         )}
@@ -614,10 +614,10 @@ export default function Sidebar({
             className={`ml-3 min-w-0 flex-1 leading-tight transition-opacity duration-200 ${isCollapsed ? "opacity-0" : "opacity-100 delay-75"}`}
           >
             <span className="block truncate text-[14px] font-semibold">{user?.full_name}</span>
-            <span className="block truncate text-[12px] text-cream/50">@{user?.username}</span>
+            <span className="block truncate text-[12px] text-cream/75">@{user?.username}</span>
           </span>
           <span
-            className={`mr-1 inline-flex shrink-0 text-cream/50 transition-all duration-300 ${menuOpen ? "" : "rotate-180"} ${isCollapsed ? "opacity-0" : ""}`}
+            className={`mr-1 inline-flex shrink-0 text-cream/75 transition-all duration-300 ${menuOpen ? "" : "rotate-180"} ${isCollapsed ? "opacity-0" : ""}`}
           >
             <ChevronDownIcon ref={cardChevron.ref} size={16} />
           </span>

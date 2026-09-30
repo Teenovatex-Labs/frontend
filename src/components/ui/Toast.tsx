@@ -57,7 +57,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               className={`pointer-events-auto flex max-w-[380px] items-start gap-3 border border-ink px-4 py-3 text-sm font-medium shadow-[4px_4px_0_var(--ink)] ${TONES[t.tone]}`}
             >
               <span className="flex-1">{t.message}</span>
-              <button type="button" onClick={() => dismiss(t.id)} aria-label="Dismiss" className="-mr-1 text-ink/60 hover:text-ink">
+              <button type="button" onClick={() => dismiss(t.id)} aria-label="Dismiss" className="-mr-1 text-ink/75 hover:text-ink">
                 ×
               </button>
             </motion.div>

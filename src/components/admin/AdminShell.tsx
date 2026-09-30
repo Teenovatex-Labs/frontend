@@ -74,7 +74,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <div className="mx-auto max-w-[1100px] px-5 py-8 md:px-10 md:py-10">{children}</div>
+      <main className="mx-auto max-w-[1100px] px-5 py-8 md:px-10 md:py-10">{children}</main>
     </div>
   );
 }

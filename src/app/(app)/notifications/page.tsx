@@ -73,13 +73,13 @@ export default function NotificationsPage() {
                 </span>
                 <button type="button" onClick={() => open(n)} className="min-w-0 flex-1 text-left">
                   <span className={`block text-[15px] ${n.read ? "text-muted" : "font-medium"}`}>{n.message}</span>
-                  <span className="mt-1 block text-xs text-ink/50">{timeAgo(n.created_at)}</span>
+                  <span className="mt-1 block text-xs text-ink/70">{timeAgo(n.created_at)}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => remove.mutate(n.id)}
                   aria-label="Delete notification"
-                  className="text-ink/40 hover:text-ink"
+                  className="text-ink/70 hover:text-ink"
                 >
                   ×
                 </button>

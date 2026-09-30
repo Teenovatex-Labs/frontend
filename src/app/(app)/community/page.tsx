@@ -29,8 +29,8 @@ export default function CommunityPage() {
             {spaces.data.spaces.map((s, i) => (
               <Link key={s.id} href={`/community/${s.slug}`} className={`flex flex-col border border-ink p-6 shadow-[5px_5px_0_var(--ink)] transition-transform hover:-translate-y-1 ${TONES[i % TONES.length]}`}>
                 <h2 className="text-[24px] leading-tight tracking-[-0.03em]">{s.name}</h2>
-                <p className="mt-2 flex-1 text-sm text-ink/70">{s.description}</p>
-                <p className="mt-4 text-xs text-ink/60">{s.post_count} post{s.post_count === 1 ? "" : "s"}</p>
+                <p className="mt-2 flex-1 text-sm text-ink/80">{s.description}</p>
+                <p className="mt-4 text-xs text-ink/75">{s.post_count} post{s.post_count === 1 ? "" : "s"}</p>
               </Link>
             ))}
           </div>

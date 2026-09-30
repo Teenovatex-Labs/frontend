@@ -149,7 +149,7 @@ export default function ThreadPage() {
                 )}
                 <p className={`max-w-[78%] whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-[15px] leading-snug ${m.from_me ? "rounded-br-sm bg-ink text-cream" : "rounded-bl-sm border border-line bg-white"} ${pending ? "opacity-60" : ""}`}>
                   {m.body}
-                  <span className={`ml-2 inline-block text-[10px] ${m.from_me ? "text-cream/60" : "text-muted"}`}>{clock(m.created_at)}</span>
+                  <span className={`ml-2 inline-block text-[10px] ${m.from_me ? "text-cream/75" : "text-muted"}`}>{clock(m.created_at)}</span>
                 </p>
                 {!m.from_me && (
                   <span className="mb-1 hidden group-hover:block"><ReportButton targetType="message" targetId={m.id} what="this message" className="text-[11px]" /></span>

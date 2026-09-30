@@ -198,7 +198,7 @@ export default function HomePage() {
               {inbox.data.slice(0, 3).map((n) => (
                 <li key={n.id} className="text-sm">
                   <span className={n.read ? "text-muted" : "font-medium"}>{n.message}</span>
-                  <span className="ml-2 text-xs text-ink/40">{timeAgo(n.created_at)}</span>
+                  <span className="ml-2 text-xs text-ink/70">{timeAgo(n.created_at)}</span>
                 </li>
               ))}
             </ul>

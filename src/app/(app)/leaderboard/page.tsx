@@ -59,11 +59,11 @@ export default function LeaderboardPage() {
                       <Avatar name={r.username} src={r.avatar_url} size={40} />
                       <span className="min-w-0 flex-1 truncate font-medium">
                         @{r.username}
-                        {me && <span className="ml-2 text-xs font-normal text-ink/60">(you)</span>}
+                        {me && <span className="ml-2 text-xs font-normal text-ink/75">(you)</span>}
                       </span>
                       <span className="text-right">
                         <span className="block text-lg font-semibold tabular-nums">{r.points.toLocaleString()}</span>
-                        <span className="block text-[11px] uppercase tracking-wide text-ink/50">points</span>
+                        <span className="block text-[11px] uppercase tracking-wide text-ink/70">points</span>
                       </span>
                     </Link>
                   </li>

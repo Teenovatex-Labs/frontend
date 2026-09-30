@@ -24,16 +24,16 @@ export function LabCover({ lab, className = "" }: { lab: Pick<Lab, "name" | "cov
 export default function LabCard({ lab, mine = false }: { lab: Lab; mine?: boolean }) {
   return (
     <article className="flex flex-col border border-ink bg-white shadow-[5px_5px_0_var(--ink)] transition-transform hover:-translate-y-1">
-      <Link href={`/labs/${lab.slug}`} className="block border-b border-ink">
+      <Link href={`/labs/${lab.slug}`} aria-label={`Open ${lab.name}`} className="block border-b border-ink">
         <LabCover lab={lab} className="aspect-[16/10]" />
       </Link>
       <div className="flex flex-1 flex-col p-4">
         <p className="eyebrow text-rose">{categoryLabel(lab.category)}</p>
-        <h3 className="mt-1.5 text-[20px] leading-tight tracking-[-0.02em]">
+        <h2 className="mt-1.5 text-[20px] leading-tight tracking-[-0.02em]">
           <Link href={`/labs/${lab.slug}`} className="hover:underline">
             {lab.name}
           </Link>
-        </h3>
+        </h2>
         <p className="mt-1.5 line-clamp-2 flex-1 text-sm text-muted">{lab.short_description}</p>
         <div className="mt-4 flex items-center justify-between gap-3">
           <Link href={`/u/${lab.user.username}`} className="flex min-w-0 items-center gap-2 text-sm hover:underline">

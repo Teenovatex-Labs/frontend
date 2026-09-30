@@ -16,7 +16,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
   const list = useQuery({ queryKey: keys.inboxChats, queryFn: messagesApi.list, refetchInterval: 15_000 });
 
   return (
-    <div className="mx-auto flex h-[calc(100svh-0px)] w-full max-w-[1100px] gap-0 px-0 md:px-6 md:py-6 lg:h-screen">
+    <main className="mx-auto flex h-[calc(100svh-0px)] w-full max-w-[1100px] gap-0 px-0 md:px-6 md:py-6 lg:h-screen">
       <aside className={`${inThread ? "hidden md:flex" : "flex"} w-full flex-col border-ink bg-cream md:w-[320px] md:shrink-0 md:border md:bg-white`} aria-label="Conversations">
         <h1 className="border-b border-ink px-5 py-4 text-[24px] tracking-[-0.03em]">Messages</h1>
         <div className="flex-1 overflow-y-auto">
@@ -56,6 +56,6 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <section className={`${inThread ? "flex" : "hidden md:flex"} min-w-0 flex-1 flex-col md:border-y md:border-r md:border-ink`}>{children}</section>
-    </div>
+    </main>
   );
 }

@@ -16,7 +16,7 @@ export default function PostCard({ post, showSpace = false }: { post: PostSummar
         <Link href={`/community/posts/${post.id}`} className="hover:underline">{post.title}</Link>
       </h3>
       <p className="mt-1.5 whitespace-pre-line text-sm text-muted">{post.body}</p>
-      <p className="mt-3 text-xs text-ink/60">
+      <p className="mt-3 text-xs text-ink/75">
         ♥ {post.reaction_count} · {post.comment_count} comment{post.comment_count === 1 ? "" : "s"}
       </p>
     </article>

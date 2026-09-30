@@ -134,7 +134,7 @@ export default function BoardTab({ lab, team }: { lab: string; team: TeamInfo["m
                       onChange={(e) => patch.mutate({ id: t.id, data: { due_at: e.target.value ? new Date(`${e.target.value}T23:59:00`).toISOString() : null } })}
                       className="w-[104px] rounded border border-line bg-white px-1 py-0.5 text-[11px]"
                     />
-                    <button type="button" onClick={() => remove.mutate(t.id)} aria-label={`Delete "${t.title}"`} className="ml-auto text-ink/40 hover:text-ink">×</button>
+                    <button type="button" onClick={() => remove.mutate(t.id)} aria-label={`Delete "${t.title}"`} className="ml-auto text-ink/70 hover:text-ink">×</button>
                   </div>
                 </li>
               ))}

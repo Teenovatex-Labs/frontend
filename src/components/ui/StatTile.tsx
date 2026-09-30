@@ -17,9 +17,9 @@ export default function StatTile({
 }) {
   return (
     <div className={`${TONES[tone]} border border-ink p-5 shadow-[5px_5px_0_var(--ink)] transition-transform hover:-translate-y-1 md:p-6 ${className}`}>
-      <p className="eyebrow text-ink/60">{label}</p>
+      <p className="eyebrow text-ink/75">{label}</p>
       <p className="mt-3 text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums md:text-[44px]">{value}</p>
-      {hint && <p className="mt-2 text-xs text-ink/60">{hint}</p>}
+      {hint && <p className="mt-2 text-xs text-ink/75">{hint}</p>}
     </div>
   );
 }

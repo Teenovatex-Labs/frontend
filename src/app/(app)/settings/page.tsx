@@ -104,7 +104,7 @@ function ProfileSection() {
           <button type="button" className="btn-secondary btn-sm" onClick={() => file.current?.click()} disabled={photo.isPending}>
             {photo.isPending ? "Uploading…" : "Change photo"}
           </button>
-          <input ref={file} type="file" accept="image/*" className="sr-only" onChange={(e) => pickPhoto(e.target.files?.[0])} />
+          <input ref={file} type="file" accept="image/*" aria-label="Choose a new profile photo" className="sr-only" onChange={(e) => pickPhoto(e.target.files?.[0])} />
           <p className="mt-1.5 text-xs text-muted">JPG or PNG, up to 5MB.</p>
         </div>
       </div>
