@@ -41,6 +41,7 @@ export type UserProfile = {
   username_set: boolean;
   timezone: string | null;
   role: "member" | "mentor" | "moderator" | "admin";
+  settings: { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile: boolean } | null;
 };
 
 // "Remember me" decides *where* the refresh token lives: localStorage
@@ -92,20 +93,30 @@ async function tryRefresh(): Promise<boolean> {
   }
 }
 
+// Alfred only reacts to work you can feel: a write (or anything explicitly labelled) that is still
+// going after a moment. Quick calls and background reads never make him move.
+const ACTIVITY_DELAY_MS = 700;
+
 export async function request<T>(
   path: string,
   init: RequestInit = {},
   opts: { auth?: boolean; retry?: boolean; activity?: string | false } = {}
 ): Promise<T> {
-  const activity = opts.activity === false ? null : alfredController.beginTask(
-    opts.activity ?? apiActivityLabel(path, init.method ?? "GET")
-  );
+  const method = (init.method ?? "GET").toUpperCase();
+  const label = opts.activity === false ? null : opts.activity ?? (method === "GET" ? null : apiActivityLabel(path, method));
+
+  let task: ReturnType<typeof alfredController.beginTask> | null = null;
+  const timer = label ? setTimeout(() => (task = alfredController.beginTask(label)), ACTIVITY_DELAY_MS) : undefined;
   try {
     const result = await performRequest<T>(path, init, opts);
-    activity?.done();
+    clearTimeout(timer);
+    (task as ReturnType<typeof alfredController.beginTask> | null)?.done();
     return result;
   } catch (error) {
-    activity?.fail(error instanceof ApiError ? error.message : "I couldn’t reach the service.");
+    clearTimeout(timer);
+    // A failure is worth showing even if it came back quickly, but only for things he was tracking.
+    const failing = task ?? (label ? alfredController.beginTask(label) : null);
+    failing?.fail(error instanceof ApiError ? error.message : "I couldn’t reach the service.");
     throw error;
   }
 }
