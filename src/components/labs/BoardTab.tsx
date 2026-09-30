@@ -79,7 +79,7 @@ export default function BoardTab({ lab, team }: { lab: string; team: TeamInfo["m
         <button type="submit" className="btn" disabled={add.isPending || title.trim().length < 2}>Add</button>
       </form>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 min-[1500px]:grid-cols-4">
         {TASK_COLUMNS.map((col) => (
           <section
             key={col.id}
@@ -108,7 +108,7 @@ export default function BoardTab({ lab, team }: { lab: string; team: TeamInfo["m
                     {t.due_at && <span className={overdue(t) ? "font-semibold text-rose" : ""}>Due {dueLabel(t.due_at)}</span>}
                     {t.assignee && <span>@{t.assignee}</span>}
                   </div>
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
                     {/* The keyboard- and phone-friendly way to move a card; dragging is a bonus on desktop. */}
                     <select
                       value={t.status}
@@ -122,7 +122,7 @@ export default function BoardTab({ lab, team }: { lab: string; team: TeamInfo["m
                       value={t.assignee ?? ""}
                       aria-label={`Assign "${t.title}"`}
                       onChange={(e) => patch.mutate({ id: t.id, data: { assignee: e.target.value || null } })}
-                      className="max-w-[110px] rounded border border-line bg-white px-1.5 py-1 text-[11px]"
+                      className="min-w-0 max-w-[130px] rounded border border-line bg-white px-1.5 py-1 text-[11px]"
                     >
                       <option value="">Unassigned</option>
                       {team.map((m) => <option key={m.username} value={m.username}>@{m.username}</option>)}
@@ -132,7 +132,7 @@ export default function BoardTab({ lab, team }: { lab: string; team: TeamInfo["m
                       value={t.due_at ? t.due_at.slice(0, 10) : ""}
                       aria-label={`Due date for "${t.title}"`}
                       onChange={(e) => patch.mutate({ id: t.id, data: { due_at: e.target.value ? new Date(`${e.target.value}T23:59:00`).toISOString() : null } })}
-                      className="w-[96px] rounded border border-line bg-white px-1 py-0.5 text-[11px]"
+                      className="w-[104px] rounded border border-line bg-white px-1 py-0.5 text-[11px]"
                     />
                     <button type="button" onClick={() => remove.mutate(t.id)} aria-label={`Delete "${t.title}"`} className="ml-auto text-ink/40 hover:text-ink">×</button>
                   </div>
