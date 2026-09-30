@@ -41,6 +41,8 @@ export type UserProfile = {
   username_set: boolean;
   timezone: string | null;
   role: "member" | "mentor" | "moderator" | "admin";
+  suspended_until: string | null;
+  suspended_reason: string | null;
   settings: { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile: boolean } | null;
 };
 

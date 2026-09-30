@@ -175,3 +175,108 @@ export const learnApi = {
   complete: (lessonId: string) =>
     request<{ completed: boolean; points_awarded: number }>(`/learn/lessons/${lessonId}/complete`, { method: "POST" }, { auth: true, activity: "Saving your progress" }),
 };
+
+// --- community -----------------------------------------------------------------------------
+
+export type Space = { id: string; slug: string; name: string; description: string; post_count: number };
+export type PostAuthor = { username: string; avatar_url: string | null };
+export type PostSummary = {
+  id: string;
+  title: string;
+  body: string;
+  created_at: string;
+  comment_count: number;
+  reaction_count: number;
+  author: PostAuthor;
+  space?: { slug: string; name: string };
+  has_reacted: boolean;
+};
+export type CommentItem = { id: string; body: string; created_at: string; author: PostAuthor };
+export type PostDetail = PostSummary & { comments: CommentItem[] };
+export type Feed = { space: { slug: string; name: string; description: string }; posts: PostSummary[]; total: number; page: number; pages: number };
+
+export const communityApi = {
+  spaces: () => request<{ spaces: Space[] }>("/community/spaces", {}, authed),
+  feed: (slug: string, page = 1) => request<Feed>(`/community/spaces/${slug}/posts${qs({ page })}`, {}, authed),
+  post: (id: string) => request<PostDetail>(`/community/posts/${id}`, {}, authed),
+  createPost: (slug: string, data: { title: string; body: string }) =>
+    request<PostSummary>(`/community/spaces/${slug}/posts`, { method: "POST", body: JSON.stringify(data) }, { auth: true, activity: "Posting" }),
+  deletePost: (id: string) => request<unknown>(`/community/posts/${id}`, { method: "DELETE" }, { auth: true, activity: "Deleting your post" }),
+  comment: (id: string, body: string) =>
+    request<CommentItem>(`/community/posts/${id}/comments`, { method: "POST", body: JSON.stringify({ body }) }, { auth: true, activity: "Posting your comment" }),
+  deleteComment: (id: string) => request<unknown>(`/community/comments/${id}`, { method: "DELETE" }, authed),
+  react: (id: string, on: boolean) =>
+    request<{ reaction_count: number; has_reacted: boolean }>(`/community/posts/${id}/react`, { method: on ? "POST" : "DELETE" }, authed),
+};
+
+// --- safety --------------------------------------------------------------------------------
+
+export type ReportTarget = "post" | "comment" | "lab" | "user";
+export type ReportReason = "bullying" | "inappropriate" | "spam" | "personal_info" | "self_harm" | "unsafe_contact" | "other";
+
+export const REPORT_REASONS: { value: ReportReason; label: string; hint: string }[] = [
+  { value: "bullying", label: "Bullying or unkind", hint: "Picking on someone, insults, harassment" },
+  { value: "inappropriate", label: "Not appropriate for teens", hint: "Content that doesn't belong here" },
+  { value: "unsafe_contact", label: "Makes me feel unsafe", hint: "Asking to talk elsewhere, pressure, or anything that feels off" },
+  { value: "personal_info", label: "Shares personal details", hint: "Phone numbers, addresses, or private info" },
+  { value: "self_harm", label: "Someone may be hurting themselves", hint: "We treat these first and reach out with care" },
+  { value: "spam", label: "Spam or scam", hint: "Ads, junk, or links that look suspicious" },
+  { value: "other", label: "Something else", hint: "Tell us in your own words" },
+];
+
+export const safetyApi = {
+  report: (data: { target_type: ReportTarget; target_id: string; reason: ReportReason; details?: string }) =>
+    request<{ message: string }>("/reports", { method: "POST", body: JSON.stringify(data) }, { auth: true, activity: "Sending your report" }),
+  block: (username: string) =>
+    request<{ message: string }>(`/blocks/${encodeURIComponent(username)}`, { method: "POST" }, { auth: true, activity: "Blocking" }),
+  unblock: (username: string) =>
+    request<{ message: string }>(`/blocks/${encodeURIComponent(username)}`, { method: "DELETE" }, { auth: true, activity: "Unblocking" }),
+  blocks: () => request<{ blocks: { username: string; avatar_url: string | null; blocked_at: string }[] }>("/blocks", {}, authed),
+};
+
+// --- admin ---------------------------------------------------------------------------------
+
+export type Paged<T> = { items: T[]; total: number; page: number; pages: number };
+export type AdminReport = {
+  id: string;
+  target_type: string;
+  target_id: string;
+  reason: ReportReason;
+  details: string | null;
+  status: "open" | "actioned" | "dismissed";
+  created_at: string;
+  handled_at: string | null;
+  note: string | null;
+  reporter: string;
+  target: { exists: boolean; title?: string; excerpt?: string; author?: string; hidden?: boolean; slug?: string };
+  reports_on_target: number;
+  reports_on_member: number;
+  target_user_id: string | null;
+};
+export type AdminUser = {
+  id: string;
+  username: string;
+  full_name: string;
+  email: string;
+  role: "member" | "mentor" | "moderator" | "admin";
+  points: number;
+  created_at: string;
+  suspended_until: string | null;
+  suspended_reason: string | null;
+  reports_against: number;
+};
+export type AuditItem = { id: string; actor: string | null; action: string; target_type: string | null; target_id: string | null; meta: unknown; created_at: string };
+
+export const adminApi = {
+  stats: () => request<{ users: number; new_users_7d: number; labs: number; posts: number; open_reports: number; suspended: number }>("/admin/stats", {}, authed),
+  reports: (status: "open" | "actioned" | "dismissed", page = 1) => request<Paged<AdminReport>>(`/admin/reports${qs({ status, page })}`, {}, authed),
+  resolve: (id: string, data: { action: "dismiss" | "warn" | "remove" | "suspend"; note?: string; days?: number }) =>
+    request<{ message: string }>(`/admin/reports/${id}/resolve`, { method: "POST", body: JSON.stringify(data) }, { auth: true, activity: false }),
+  users: (search: string, page = 1) => request<Paged<AdminUser>>(`/admin/users${qs({ search, page })}`, {}, authed),
+  suspend: (id: string, data: { days: number; reason: string }) =>
+    request<unknown>(`/admin/users/${id}/suspend`, { method: "POST", body: JSON.stringify(data) }, { auth: true, activity: false }),
+  unsuspend: (id: string) => request<unknown>(`/admin/users/${id}/unsuspend`, { method: "POST" }, { auth: true, activity: false }),
+  setRole: (id: string, role: AdminUser["role"]) =>
+    request<unknown>(`/admin/users/${id}/role`, { method: "POST", body: JSON.stringify({ role }) }, { auth: true, activity: false }),
+  audit: (page = 1) => request<Paged<AuditItem>>(`/admin/audit${qs({ page })}`, {}, authed),
+};
