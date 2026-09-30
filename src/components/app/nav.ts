@@ -1,7 +1,7 @@
 import type { ComponentType, RefAttributes } from "react";
 import type { IconHandle } from "@animateicons/react";
+import { BookOpenIcon } from "@animateicons/react/lucide/book-open-icon";
 import { BellIcon } from "@animateicons/react/lucide/bell-icon";
-import { UserRoundIcon } from "@animateicons/react/lucide/user-round-icon";
 import { ChartBarIncreasingIcon } from "@animateicons/react/lucide/chart-bar-increasing-icon";
 import { HeartIcon } from "@animateicons/react/lucide/heart-icon";
 import { HouseIcon } from "@animateicons/react/lucide/house-icon";
@@ -26,12 +26,10 @@ export type NavItem = NavLeaf & { icon: AnimatedIcon; children?: NavLeaf[] };
 
 export const MAIN: NavItem[] = [
   { id: "home", label: "Home", href: "/home", icon: HouseIcon },
-  { id: "alfred", label: "Meet Alfred", href: "/alfred", icon: UserRoundIcon },
   {
     id: "projects",
     label: "Labs",
     icon: RocketIcon,
-    href: "/labs",
     children: [
       { id: "showcase", label: "Showcase", href: "/labs" },
       { id: "my-projects", label: "My labs", href: "/labs/mine" },
@@ -42,16 +40,16 @@ export const MAIN: NavItem[] = [
     id: "community",
     label: "Community",
     icon: UsersIcon,
-    soon: true,
     children: [
       { id: "forums", label: "Forums", soon: true },
       { id: "mentorship", label: "Mentorship", soon: true },
-      { id: "events", label: "Events", soon: true },
+      { id: "events", label: "Events", href: "/events" },
     ],
   },
+  { id: "learn", label: "Learn", href: "/learn", icon: BookOpenIcon },
   { id: "messages", label: "Messages", icon: MessageCircleIcon, soon: true },
-  { id: "leaderboard", label: "Leaderboard", icon: ChartBarIncreasingIcon, soon: true },
-  { id: "notifications", label: "Notifications", icon: BellIcon, soon: true },
+  { id: "leaderboard", label: "Leaderboard", href: "/leaderboard", icon: ChartBarIncreasingIcon },
+  { id: "notifications", label: "Notifications", href: "/notifications", icon: BellIcon },
 ];
 
 export const LINKS: NavItem[] = [

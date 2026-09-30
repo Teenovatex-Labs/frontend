@@ -17,6 +17,9 @@ import useIconHover from "@/lib/useIconHover";
 import { useAuth } from "@/context/AuthContext";
 import { siteUrl } from "@/lib/hosts";
 import { LINKS, MAIN, type NavItem, type NavLeaf } from "./nav";
+import { useQuery } from "@tanstack/react-query";
+import { inboxApi } from "@/lib/services";
+import { keys } from "@/lib/labs";
 
 const OUT = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 
@@ -156,6 +159,13 @@ function NavRow({
   const accessory = useIconHover();
   const hasChildren = Boolean(item.children?.length);
   const Icon = item.icon;
+  // Only the Notifications row asks; the query is shared with the Notifications page.
+  const unread = useQuery({
+    queryKey: keys.unread,
+    queryFn: inboxApi.unread,
+    enabled: item.id === "notifications",
+    refetchInterval: 60_000,
+  }).data?.unread ?? 0;
 
   const content = (
     <>
@@ -176,6 +186,14 @@ function NavRow({
           {item.label}
         </span>
         {!collapsed && item.soon && !hasChildren && <SoonChip />}
+        {item.id === "notifications" && unread > 0 && (
+          <span
+            aria-label={`${unread} unread`}
+            className={`shrink-0 rounded-full bg-pink px-2 py-0.5 text-[11px] font-semibold tabular-nums text-ink ${collapsed ? "absolute right-2 top-2 px-1.5" : ""}`}
+          >
+            {unread > 99 ? "99+" : unread}
+          </span>
+        )}
         {hasChildren && (
           <span
             className={`inline-flex shrink-0 transition-all duration-300 ${collapsed ? "opacity-0" : "opacity-60"} ${open ? "rotate-180" : ""}`}
@@ -507,28 +525,34 @@ export default function Sidebar({
               transition={{ duration: 0.16 }}
               className="absolute bottom-[calc(100%-6px)] left-4 z-30 w-[232px] origin-bottom-left rounded-2xl border border-cream/10 bg-ink p-2 shadow-[4px_4px_0_var(--pink)]"
             >
-              <span
+              <Link
                 role="menuitem"
-                aria-disabled="true"
+                href="/profile"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onNavigate?.();
+                }}
                 onMouseEnter={profileIcon.onMouseEnter}
                 onMouseLeave={profileIcon.onMouseLeave}
-                className="flex h-10 cursor-default items-center gap-3 rounded-xl px-3 text-sm text-cream/60"
+                className="flex h-10 items-center gap-3 rounded-xl px-3 text-sm text-cream/80 hover:bg-cream/[0.08] hover:text-cream"
               >
                 <UserIcon ref={profileIcon.ref} size={18} />
                 Profile
-                <SoonChip />
-              </span>
-              <span
+              </Link>
+              <Link
                 role="menuitem"
-                aria-disabled="true"
+                href="/settings"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onNavigate?.();
+                }}
                 onMouseEnter={settingsIcon.onMouseEnter}
                 onMouseLeave={settingsIcon.onMouseLeave}
-                className="flex h-10 cursor-default items-center gap-3 rounded-xl px-3 text-sm text-cream/60"
+                className="flex h-10 items-center gap-3 rounded-xl px-3 text-sm text-cream/80 hover:bg-cream/[0.08] hover:text-cream"
               >
                 <SettingsIcon ref={settingsIcon.ref} size={18} />
                 Settings
-                <SoonChip />
-              </span>
+              </Link>
               <a
                 role="menuitem"
                 href={siteUrl("/")}
