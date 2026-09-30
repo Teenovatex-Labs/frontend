@@ -65,16 +65,22 @@ async function tryRefresh(): Promise<boolean> {
   const refresh_token = getRefreshToken();
   if (!refresh_token) return false;
 
-  const res = await fetch(`${API_URL}/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token }),
-  });
-  if (!res.ok) return false;
+  try {
+    const res = await fetch(`${API_URL}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token }),
+    });
+    if (!res.ok) return false;
 
-  const data = (await res.json()) as { access_token: string };
-  accessToken = data.access_token;
-  return true;
+    const data = (await res.json()) as { access_token: string };
+    accessToken = data.access_token;
+    return true;
+  } catch {
+    // API unreachable: treat as "not signed in" so AuthProvider still
+    // finishes loading instead of hanging on an unhandled rejection.
+    return false;
+  }
 }
 
 async function request<T>(
