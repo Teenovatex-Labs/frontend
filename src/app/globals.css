@@ -394,3 +394,19 @@
     transform: translateY(0);
   }
 }
+
+@keyframes icon-wiggle {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-14deg); }
+  45% { transform: rotate(11deg); }
+  70% { transform: rotate(-6deg); }
+}
+.icon-wiggle {
+  animation: icon-wiggle 0.6s ease-in-out;
+  transform-origin: 50% 60%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .icon-wiggle {
+    animation: none;
+  }
+}
