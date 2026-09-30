@@ -15,6 +15,7 @@ import Skeleton from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
 import { LabCover } from "@/components/labs/LabCard";
 import VoteButton from "@/components/labs/VoteButton";
+import ReportButton from "@/components/safety/ReportDialog";
 
 export default function LabPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -113,6 +114,12 @@ export default function LabPage() {
               {l.label} <span aria-hidden="true">↗︎</span>
             </a>
           ))}
+        </div>
+      )}
+
+      {!isOwner && (
+        <div className="mt-12 border-t border-line pt-6">
+          <ReportButton targetType="lab" targetId={data.id} what="this lab" />
         </div>
       )}
 

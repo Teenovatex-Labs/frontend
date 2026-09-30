@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
-import { peopleApi } from "@/lib/services";
+import { peopleApi, safetyApi } from "@/lib/services";
+import ReportButton from "@/components/safety/ReportDialog";
 import { keys } from "@/lib/labs";
 import Avatar from "@/components/ui/Avatar";
 import EmptyState from "@/components/ui/EmptyState";
@@ -33,6 +34,15 @@ export default function PersonPage() {
   const follow = useMutation({
     mutationFn: (following: boolean) => (following ? peopleApi.unfollow(username) : peopleApi.follow(username)),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.person(username) }),
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : "That didn't work. Try again."),
+  });
+
+  const block = useMutation({
+    mutationFn: () => safetyApi.block(username),
+    onSuccess: async (r) => {
+      toast.success(r.message);
+      await qc.invalidateQueries();
+    },
     onError: (err) => toast.error(err instanceof ApiError ? err.message : "That didn't work. Try again."),
   });
 
@@ -93,9 +103,17 @@ export default function PersonPage() {
         {isMe ? (
           <Link href="/settings" className="btn-secondary">Edit profile</Link>
         ) : (
-          <button className={p.is_following ? "btn-secondary" : "btn"} disabled={follow.isPending} onClick={() => follow.mutate(p.is_following)}>
-            {p.is_following ? "Following" : "Follow"}
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            <button className={p.is_following ? "btn-secondary" : "btn"} disabled={follow.isPending} onClick={() => follow.mutate(p.is_following)}>
+              {p.is_following ? "Following" : "Follow"}
+            </button>
+            <span className="flex items-center gap-3">
+              <ReportButton targetType="user" targetId={p.username} what={`@${p.username}`} />
+              <button type="button" onClick={() => block.mutate()} disabled={block.isPending} className="text-xs text-muted underline underline-offset-4 hover:text-rose">
+                Block
+              </button>
+            </span>
+          </div>
         )}
       </div>
 

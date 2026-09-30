@@ -4,7 +4,7 @@ import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError, settingsApi, uploadsApi } from "@/lib/api";
-import { accountApi } from "@/lib/services";
+import { accountApi, safetyApi } from "@/lib/services";
 import { keys, timeAgo } from "@/lib/labs";
 import { fieldErrors, newPasswordSchema } from "@/lib/validation";
 import PageHeader from "@/components/ui/PageHeader";
@@ -263,6 +263,36 @@ function DevicesSection() {
   );
 }
 
+function BlockedSection() {
+  const qc = useQueryClient();
+  const toast = useToast();
+  const blocks = useQuery({ queryKey: keys.blocks, queryFn: safetyApi.blocks });
+  const unblock = useMutation({
+    mutationFn: safetyApi.unblock,
+    onSuccess: () => qc.invalidateQueries(),
+    onError: () => toast.error("Couldn't unblock them."),
+  });
+
+  return (
+    <Section title="Blocked members" hint="You won't see each other's posts or comments.">
+      {blocks.isPending ? (
+        <Skeleton className="h-10 w-full" />
+      ) : !blocks.data || blocks.data.blocks.length === 0 ? (
+        <p className="text-sm text-muted">You haven&rsquo;t blocked anyone.</p>
+      ) : (
+        <ul className="divide-y divide-line">
+          {blocks.data.blocks.map((b) => (
+            <li key={b.username} className="flex items-center justify-between gap-4 py-3">
+              <span className="flex items-center gap-3"><Avatar name={b.username} src={b.avatar_url} size={32} />@{b.username}</span>
+              <button type="button" className="text-sm text-rose underline underline-offset-4" onClick={() => unblock.mutate(b.username)} disabled={unblock.isPending}>Unblock</button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  );
+}
+
 function DangerSection() {
   const { user, logout } = useAuth();
   const toast = useToast();
@@ -330,6 +360,7 @@ export default function SettingsPage() {
         <PreferencesSection />
         <PasswordSection />
         <DevicesSection />
+        <BlockedSection />
         <DangerSection />
       </div>
     </main>
