@@ -8,6 +8,7 @@ import SigningIn from "@/components/auth/SigningIn";
 import AppShell from "./AppShell";
 import SetupGate from "./SetupGate";
 import SuspensionBanner from "@/components/safety/SuspensionBanner";
+import AnnouncementBanner from "@/components/announcements/AnnouncementBanner";
 import { usersApi } from "@/lib/api";
 import { browserTimezone } from "@/lib/age";
 
@@ -35,6 +36,7 @@ export default function AppGate({ children }: { children: ReactNode }) {
   return (
     <AppShell>
       <SuspensionBanner />
+      <AnnouncementBanner />
       <AddPasswordPrompt />
       {children}
     </AppShell>
