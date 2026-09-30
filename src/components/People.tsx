@@ -257,7 +257,7 @@ export default function People() {
           <div className="mt-10 flex flex-col items-start gap-4 border-t border-line pt-6 text-sm">
             <p>Want to help shape the community?</p>
             <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center">
-              <Link href="/teenovators" className="inline-flex items-center gap-4 border-b border-ink pb-1 font-bold hover:text-rose">
+              <Link href="/#story" className="inline-flex items-center gap-4 border-b border-ink pb-1 font-bold hover:text-rose">
                 View the Teenovators and what they&rsquo;ve done <span aria-hidden="true">↗</span>
               </Link>
               <a
