@@ -32,7 +32,7 @@ export const MAIN: NavItem[] = [
     soon: true,
     children: [
       { id: "showcase", label: "Showcase", soon: true },
-      { id: "my-projects", label: "My projects", soon: true },
+      { id: "my-projects", label: "My labs", soon: true },
       { id: "collabs", label: "Collabs", soon: true },
     ],
   },
