@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRightIcon } from "@animateicons/react/lucide/arrow-up-right-icon";
 import { ChevronDownIcon } from "@animateicons/react/lucide/chevron-down-icon";
@@ -329,6 +329,7 @@ export default function Sidebar({
   const { user, logout } = useAuth();
   const isCollapsed = collapsed && !mobile;
 
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>("community");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -481,7 +482,18 @@ export default function Sidebar({
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Escape" && (setQuery(""), e.currentTarget.blur())}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setQuery("");
+                e.currentTarget.blur();
+              } else if (e.key === "Enter" && query.trim().length >= 2) {
+                // Enter searches the whole app; typing alone only filters this menu.
+                router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                onNavigate?.();
+                setQuery("");
+                e.currentTarget.blur();
+              }
+            }}
             placeholder="Search"
             aria-label="Search the app"
             tabIndex={isCollapsed ? -1 : 0}
@@ -515,7 +527,7 @@ export default function Sidebar({
         )}
         {nothing && (
           <p className="mt-8 px-4 text-sm text-cream/75">
-            Nothing matches <span className="text-cream">&ldquo;{query}&rdquo;</span> yet.
+            Nothing in the menu matches <span className="text-cream">&ldquo;{query}&rdquo;</span>. Press Enter to search labs, people and posts.
           </p>
         )}
       </nav>
