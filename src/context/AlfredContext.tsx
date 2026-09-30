@@ -21,6 +21,7 @@ import {
   type AlfredTaskState,
 } from "@/lib/alfred";
 import { interpret, type Intent } from "@/lib/alfred-intents";
+import { TOUR, tourKey } from "@/lib/alfred-tour";
 import { run } from "@/lib/alfred-commands";
 import { inboxApi, petApi } from "@/lib/services";
 import { ApiError } from "@/lib/api";
@@ -31,6 +32,9 @@ type AlfredContextValue = AlfredSnapshot & {
   /** True while a typed command is being carried out. */
   busy: boolean;
   resolveConsent: (approved: boolean, always?: boolean) => void;
+  nextTour: () => void;
+  skipTour: () => void;
+  startTour: () => void;
   yo: () => void;
   send: (text: string) => Promise<void>;
   closeChat: () => void;
@@ -111,6 +115,29 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
       .catch(() => {});
   }, [unreadCount, qc]);
 
+  const markTourDone = useCallback(() => {
+    if (!user) return;
+    try {
+      window.localStorage.setItem(tourKey(user.id), "1");
+    } catch {
+      // The tour may show again on another visit; that's harmless.
+    }
+  }, [user]);
+
+  // First visit: Alfred offers to show the member around, once.
+  useEffect(() => {
+    if (loading || !user || !user.age_confirmed || !user.username_set) return;
+    let seen = false;
+    try {
+      seen = window.localStorage.getItem(tourKey(user.id)) === "1";
+    } catch {
+      seen = true; // can't remember it, so don't pester
+    }
+    if (seen) return;
+    const t = window.setTimeout(() => alfredController.startTour(TOUR), 1800);
+    return () => window.clearTimeout(t);
+  }, [loading, user]);
+
   const send = useCallback(
     async (text: string) => {
       const clean = text.trim();
@@ -124,6 +151,7 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
           navigate: (path: string) => router.push(path),
           ask: (input: { title: string; message: string; actionId?: string }) => alfredController.requestConsent(input),
           signOut: logout,
+          startTour: () => alfredController.startTour(TOUR),
           changed: () => {
             void qc.invalidateQueries();
           },
@@ -165,6 +193,16 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
       ...snapshot,
       busy,
       resolveConsent: (approved, always) => alfredController.resolveConsent(approved, always),
+      nextTour: () => {
+        const step = alfredController.nextTour();
+        if (step?.path) router.push(step.path);
+        if (!step) markTourDone();
+      },
+      skipTour: () => {
+        alfredController.endTour();
+        markTourDone();
+      },
+      startTour: () => alfredController.startTour(TOUR),
       yo: () => alfredController.yo(),
       send,
       closeChat: () => alfredController.setChatOpen(false),
@@ -174,7 +212,7 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
       beginTask: (m, s) => alfredController.beginTask(m, s),
       notify: (m, k) => alfredController.notify(m, k),
     }),
-    [snapshot, busy, send]
+    [snapshot, busy, send, router, markTourDone]
   );
 
   return <AlfredContext.Provider value={value}>{children}</AlfredContext.Provider>;

@@ -44,7 +44,7 @@ function loadPosition(): Point {
 }
 
 export default function AlfredCompanion() {
-  const { state, animation, runKey, message, bubble, consent, minimized, chatOpen, setMinimized, setHover, setDragging, resolveConsent, yo } = useAlfred();
+  const { state, animation, runKey, message, bubble, consent, tour, minimized, chatOpen, setMinimized, setHover, setDragging, resolveConsent, nextTour, skipTour, yo } = useAlfred();
 
   const root = useRef<HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -261,9 +261,20 @@ export default function AlfredCompanion() {
             >
               <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-rose">
                 <span className="h-1.5 w-1.5 rounded-full bg-rose" aria-hidden="true" />
-                {consent?.title ?? ALFRED_STATES[state].label}
+                {consent?.title ?? (tour ? "Quick tour" : ALFRED_STATES[state].label)}
               </p>
               <p className="mt-1.5 whitespace-pre-line break-words">{message}</p>
+              {tour && !consent && (
+                <div className="mt-3 flex items-center gap-2" role="group" aria-label="Tour">
+                  <span className="text-[11px] text-muted tabular-nums">{tour.index + 1} of {tour.total}</span>
+                  <button type="button" onClick={skipTour} className="ml-auto rounded-md border border-ink px-3 py-1.5 text-xs font-semibold hover:bg-cream">
+                    {tour.index === tour.total - 1 ? "Close" : "Skip"}
+                  </button>
+                  <button type="button" onClick={nextTour} className="rounded-md border border-ink bg-pink px-3 py-1.5 text-xs font-semibold hover:bg-yellow">
+                    {tour.index === 0 ? "Show me" : tour.index === tour.total - 1 ? "Done" : "Next"}
+                  </button>
+                </div>
+              )}
               {consent && (
                 <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Permission">
                   <button type="button" onClick={() => resolveConsent(false)} className="flex-1 rounded-md border border-ink px-3 py-1.5 text-xs font-semibold hover:bg-cream">
