@@ -269,7 +269,7 @@ export default function Contact() {
                     <p className="mt-4 max-w-[420px] text-muted">
                       Your message reached the team, and we&rsquo;ve emailed you a copy. Expect a reply within a few days.
                     </p>
-                    <button type="button" onClick={reset} className="mt-7 border-b border-ink pb-1 text-sm font-bold hover:text-rose">
+                    <button type="button" onClick={reset} className="btn-secondary btn-sm mt-7">
                       Send another <span aria-hidden="true">↗</span>
                     </button>
                   </motion.div>
