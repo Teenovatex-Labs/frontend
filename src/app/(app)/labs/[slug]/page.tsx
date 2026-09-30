@@ -41,6 +41,24 @@ export default function LabPage() {
     if (wanted === "updates" || wanted === "board" || wanted === "team") setTab(wanted);
   }, []);
 
+  const cover = useMutation({
+    mutationFn: async (file: File | null) => {
+      if (file) await labsApi.setCover(lab.data!.id, file);
+      else await labsApi.clearCover(lab.data!.id);
+    },
+    onSuccess: (_r, file) => {
+      toast.success(file ? "Cover updated." : "Cover removed.");
+      void qc.invalidateQueries({ queryKey: keys.labs });
+    },
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : "Couldn't change the cover. Try again."),
+  });
+  const pickCover = (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return toast.error("That needs to be an image.");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Keep it under 5MB.");
+    cover.mutate(file);
+  };
+
   const remove = useMutation({
     mutationFn: (id: string) => labsApi.remove(id),
     onSuccess: () => {
@@ -93,6 +111,15 @@ export default function LabPage() {
       <div className="mt-5 overflow-hidden border border-ink shadow-[6px_6px_0_var(--ink)]">
         <LabCover lab={data} className="aspect-[16/8]" />
       </div>
+      {isOwner && (
+        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
+          <label className="cursor-pointer underline underline-offset-4 hover:text-rose">
+            {cover.isPending ? "Uploading…" : data.cover_url ? "Change cover" : "Add a cover"}
+            <input type="file" accept="image/*" className="sr-only" disabled={cover.isPending} onChange={(e) => { pickCover(e.target.files?.[0]); e.target.value = ""; }} />
+          </label>
+          {data.cover_url && <button type="button" className="text-muted underline underline-offset-4 hover:text-rose" disabled={cover.isPending} onClick={() => cover.mutate(null)}>Remove cover</button>}
+        </div>
+      )}
 
       <div className="mt-8 flex flex-wrap items-start justify-between gap-4">
         <div>
