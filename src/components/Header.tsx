@@ -100,18 +100,17 @@ export default function Header() {
                 href={appUrl("/auth?mode=login")}
                 onClick={close}
                 style={{ transitionDelay: open ? `${NAV_LINKS.length * 60 + 80}ms` : "0ms" }}
-                className={`flex items-center gap-3 py-2 text-sm font-semibold transition-all duration-300 ease-out lg:gap-2 lg:py-0 lg:transition-none ${
-                  open ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0 lg:translate-x-0 lg:opacity-100"
+                className={`btn-secondary btn-sm mt-3 transition-all duration-300 ease-out lg:mt-0 ${
+                  open ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0 lg:translate-y-0 lg:opacity-100"
                 }`}
               >
-                <span className="h-2 w-2 shrink-0 rounded-full border border-ink bg-line lg:hidden" aria-hidden="true" />
-                <span className="hover:underline hover:underline-offset-8">Log in</span>
+                Log in
               </Link>
               <Link
                 href={appUrl("/auth?mode=signup")}
                 onClick={close}
                 style={{ transitionDelay: open ? `${(NAV_LINKS.length + 1) * 60 + 80}ms` : "0ms" }}
-                className={`btn mt-3 gap-5 !px-[18px] !py-3 text-sm transition-all duration-300 ease-out lg:mt-0 lg:transition-none ${
+                className={`btn btn-sm mt-1 transition-all duration-300 ease-out lg:mt-0 ${
                   open ? "translate-y-0 scale-100 opacity-100" : "translate-y-1 scale-95 opacity-0 lg:translate-y-0 lg:scale-100 lg:opacity-100"
                 }`}
               >
