@@ -5,7 +5,7 @@ import type { ComponentType, RefAttributes } from "react";
 import { InstagramIcon } from "@animateicons/react/lucide/instagram-icon";
 import { TwitterIcon } from "@animateicons/react/lucide/twitter-icon";
 import { LinkedinIcon } from "@animateicons/react/lucide/linkedin-icon";
-import { MessageCircleIcon } from "@animateicons/react/lucide/message-circle-icon";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import type { IconHandle } from "@animateicons/react";
 import useIconHover from "@/lib/useIconHover";
 
@@ -18,7 +18,7 @@ const SOCIALS: {
 }[] = [
   { href: "https://www.instagram.com/teenovatexlabs/", label: "Instagram", Icon: InstagramIcon },
   { href: "https://x.com/teenovatex40605", label: "X", Icon: TwitterIcon },
-  { href: "https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW", label: "WhatsApp", Icon: MessageCircleIcon },
+  { href: "https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW", label: "WhatsApp", Icon: WhatsAppIcon },
   { href: "https://www.linkedin.com/company/teenovatex-labs/", label: "LinkedIn", Icon: LinkedinIcon },
 ];
 
