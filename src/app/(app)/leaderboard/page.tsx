@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { pointsApi } from "@/lib/services";
 import { keys } from "@/lib/labs";
 import PageHeader from "@/components/ui/PageHeader";
+import Tabs from "@/components/ui/Tabs";
 import Avatar from "@/components/ui/Avatar";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
@@ -15,9 +17,10 @@ const MEDALS = ["bg-yellow", "bg-pink", "bg-cream"];
 
 export default function LeaderboardPage() {
   const { user } = useAuth();
+  const [period, setPeriod] = useState<"all" | "week">("week");
   const board = useInfiniteQuery({
-    queryKey: keys.leaderboard,
-    queryFn: ({ pageParam }) => pointsApi.leaderboard(pageParam, PAGE),
+    queryKey: [...keys.leaderboard, period],
+    queryFn: ({ pageParam }) => pointsApi.leaderboard(pageParam, PAGE, period),
     initialPageParam: 1,
     getNextPageParam: (last, all) => (last.leaderboard.length === PAGE ? all.length + 1 : undefined),
   });
@@ -29,6 +32,11 @@ export default function LeaderboardPage() {
         Points come from votes on your labs, finishing lessons and showing up every day.
       </PageHeader>
 
+      <div className="mt-6">
+        <Tabs label="Time range" value={period} onChange={setPeriod} options={[{ id: "week", label: "This week" }, { id: "all", label: "All time" }]} />
+        {period === "week" && <p className="mt-2 text-xs text-muted">A fresh race every week: points from the last 7 days. Anyone can climb it.</p>}
+      </div>
+
       <div className="mt-8">
         {board.isPending ? (
           <div className="space-y-3" aria-busy="true">
@@ -39,7 +47,7 @@ export default function LeaderboardPage() {
         ) : board.isError ? (
           <EmptyState title="That didn't load." action={<button className="btn-secondary" onClick={() => board.refetch()}>Try again</button>} />
         ) : rows.length === 0 ? (
-          <EmptyState title="Nobody's on the board yet.">Earn the first points and you&rsquo;ll be number one.</EmptyState>
+          <EmptyState title={period === "week" ? "A fresh week. Nobody's scored yet." : "Nobody's on the board yet."}>Earn the first points and you&rsquo;ll be number one.</EmptyState>
         ) : (
           <>
             <ol className="space-y-3">
