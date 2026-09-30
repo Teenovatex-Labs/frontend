@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
 import FormField from "@/components/FormField";
 import StepRail, { type Step } from "@/components/auth/StepRail";
+import SigningIn from "./SigningIn";
 import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
 import VerifyCodeScreen from "@/components/auth/VerifyCodeScreen";
 import ForgotPasswordFlow from "@/components/auth/ForgotPasswordFlow";
@@ -44,6 +45,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
   const [submitting, setSubmitting] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   const backIcon = useIconHover();
   const nextIcon = useIconHover();
@@ -117,13 +119,8 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
 
   // Still checking a persisted session, or already have one — skip the form
   // entirely instead of flashing it before the redirect effect above fires.
-  if (loading || user) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-16 text-sm text-muted">
-        <span className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-rose" />
-        Taking you in…
-      </div>
-    );
+  if (loading || user || googleBusy) {
+    return <SigningIn label={googleBusy ? "Signing you in with Google" : user ? "Taking you in" : "Checking your session"} />;
   }
 
   if (needsVerification) {
@@ -177,10 +174,12 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
             onSuccess={async (credentialResponse) => {
               if (!credentialResponse.credential) return;
               setFormError(null);
+              setGoogleBusy(true);
               try {
                 await loginWithGoogle(credentialResponse.credential);
                 router.push("/home");
               } catch (err) {
+                setGoogleBusy(false);
                 setFormError(err instanceof Error ? err.message : "Google sign-in failed");
               }
             }}

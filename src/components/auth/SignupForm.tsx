@@ -13,6 +13,7 @@ import { PencilIcon } from "@animateicons/react/lucide/pencil-icon";
 import { useAuth } from "@/context/AuthContext";
 import FormField from "@/components/FormField";
 import StepRail, { type Step } from "@/components/auth/StepRail";
+import SigningIn from "./SigningIn";
 import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
 import VerifyCodeScreen from "@/components/auth/VerifyCodeScreen";
 import useIconHover from "@/lib/useIconHover";
@@ -43,6 +44,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
   const [submitting, setSubmitting] = useState(false);
 
   const [verifying, setVerifying] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   const backIcon = useIconHover();
   const nextIcon = useIconHover();
@@ -134,6 +136,10 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
 
   const panelClass = direction === "back" ? "step-panel-back" : "step-panel-forward";
 
+  if (googleBusy || (!loading && user && !verifying)) {
+    return <SigningIn label={googleBusy ? "Creating your space with Google" : "Taking you in"} />;
+  }
+
   if (verifying) {
     return (
       <VerifyCodeScreen
@@ -190,10 +196,12 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
             onSuccess={async (credentialResponse) => {
               if (!credentialResponse.credential) return;
               setFormError(null);
+              setGoogleBusy(true);
               try {
                 await loginWithGoogle(credentialResponse.credential);
                 router.push("/home");
               } catch (err) {
+                setGoogleBusy(false);
                 setFormError(err instanceof Error ? err.message : "Google sign-in failed");
               }
             }}

@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import AddPasswordPrompt from "./AddPasswordPrompt";
+import SigningIn from "@/components/auth/SigningIn";
 import AppShell from "./AppShell";
 
 export default function AppGate({ children }: { children: ReactNode }) {
@@ -15,12 +16,7 @@ export default function AppGate({ children }: { children: ReactNode }) {
   }, [loading, user, router]);
 
   if (loading || !user) {
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <img src="/assets/logo-nobg.svg" alt="" className="h-14 w-14 animate-pulse" />
-        <span className="sr-only">Loading</span>
-      </main>
-    );
+    return <SigningIn label="Loading your space" />;
   }
 
   return (
