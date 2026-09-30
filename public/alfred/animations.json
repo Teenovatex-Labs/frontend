@@ -1,0 +1,99 @@
+{
+  "version": 2,
+  "cellWidth": 256,
+  "cellHeight": 320,
+  "columns": 4,
+  "animations": {
+    "greeting": {
+      "source": "/alfred/sprites/greeting.webp",
+      "frames": 16,
+      "fps": 12,
+      "loop": true
+    },
+    "reading": {
+      "source": "/alfred/sprites/reading.webp",
+      "frames": 16,
+      "fps": 8,
+      "loop": true
+    },
+    "curious": {
+      "source": "/alfred/sprites/curious.webp",
+      "frames": 16,
+      "fps": 8,
+      "loop": true
+    },
+    "playful": {
+      "source": "/alfred/sprites/playful.webp",
+      "frames": 16,
+      "fps": 12,
+      "loop": true
+    },
+    "offline": {
+      "source": "/alfred/sprites/offline.webp",
+      "frames": 16,
+      "fps": 12,
+      "loop": true
+    },
+    "operating": {
+      "source": "/alfred/sprites/operating.webp",
+      "frames": 16,
+      "fps": 20,
+      "loop": true
+    },
+    "planning": {
+      "source": "/alfred/sprites/planning.webp",
+      "frames": 16,
+      "fps": 12,
+      "loop": true
+    },
+    "thinking": {
+      "source": "/alfred/sprites/thinking.webp",
+      "frames": 16,
+      "fps": 8,
+      "loop": true
+    },
+    "consent": {
+      "source": "/alfred/sprites/offline.webp",
+      "frames": 16,
+      "fps": 8,
+      "loop": true,
+      "sharesArtworkWith": "offline"
+    },
+    "alerting": {
+      "source": "/alfred/sprites/alerting.webp",
+      "frames": 16,
+      "fps": 12,
+      "loop": true
+    },
+    "resting": {
+      "source": "/alfred/sprites/resting.webp",
+      "frames": 16,
+      "fps": 8,
+      "loop": true
+    },
+    "waking": {
+      "source": "/alfred/sprites/waking.webp",
+      "frames": 16,
+      "fps": 12,
+      "loop": false
+    },
+    "failed": {
+      "source": "/alfred/sprites/failed.webp",
+      "frames": 16,
+      "fps": 12,
+      "loop": false
+    },
+    "celebrating": {
+      "source": "/alfred/sprites/celebrating.webp",
+      "frames": 16,
+      "fps": 12,
+      "loop": true
+    },
+    "done": {
+      "source": "/alfred/sprites/done.webp",
+      "frames": 16,
+      "fps": 12,
+      "loop": false
+    }
+  }
+}
