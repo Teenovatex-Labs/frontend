@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useAlfred } from "@/context/AlfredContext";
-import { SUGGESTIONS } from "@/lib/alfred-commands";
 
 function Typewriter({ text }: { text: string }) {
   const [shown, setShown] = useState(0);
@@ -36,7 +35,7 @@ export default function AlfredChat() {
     const el = input.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 96)}px`;
+    el.style.height = `${Math.min(el.scrollHeight, 80)}px`;
   };
 
   const submit = (value: string) => {
@@ -60,62 +59,30 @@ export default function AlfredChat() {
     }
   };
 
-  return (
-    <section
-      aria-label="Chat with Alfred"
-      className="flex w-full flex-col border border-ink bg-cream shadow-[4px_4px_0_var(--ink)]"
-    >
-      <header className="flex items-center justify-between border-b border-ink bg-yellow px-3 py-1.5">
-        <span className="text-xs font-semibold">Alfred</span>
-        <button type="button" onClick={closeChat} aria-label="Close chat" className="-mr-1 px-1.5 text-lg leading-none text-ink/70 hover:text-ink">
-          ×
-        </button>
-      </header>
+  // Just a pill to type in. Alfred's latest answer floats above it as a small bubble; there is no
+  // header, history panel or suggestion chips.
+  const last = messages[messages.length - 1];
+  const reply = last?.from === "alfred" ? last : undefined;
+  const live = reply ? Date.now() - reply.at < 1500 : false;
 
-      <div ref={log} className="max-h-[min(220px,28vh)] min-h-[64px] space-y-2 overflow-y-auto px-3 py-3" role="log" aria-live="polite">
-        {messages.map((m, i) => {
-          // Alfred's newest message types itself out, like a person texting. Older ones just show.
-          const live = m.from === "alfred" && i === messages.length - 1 && Date.now() - m.at < 1500;
-          return (
-            <div key={m.id} className={`max-w-[92%] ${m.from === "you" ? "ml-auto" : ""}`}>
-              <p
-                className={`whitespace-pre-line break-words rounded-xl px-3 py-2 text-[13px] leading-snug ${
-                  m.from === "you" ? "bg-ink text-cream" : "border border-line bg-white"
-                }`}
-              >
-                {live ? <Typewriter text={m.text} /> : m.text}
-              </p>
-              {m.undoId && (
-                <button type="button" onClick={() => void undo(m.undoId!)} className="mt-1 text-[11px] text-rose underline underline-offset-4">
-                  Undo
-                </button>
-              )}
-            </div>
-          );
-        })}
-        {busy && (
-          <p className="w-fit rounded-xl border border-line bg-white px-3 py-2 text-[13px] text-muted" aria-label="Alfred is working on it">
-            …
-          </p>
+  return (
+    <section aria-label="Chat with Alfred" className="flex w-full flex-col items-stretch gap-2">
+      <div ref={log} role="log" aria-live="polite" className="contents">
+        {(busy || reply) && (
+          <div className="max-w-[92%] self-start">
+            <p className="max-h-[120px] overflow-y-auto whitespace-pre-line break-words rounded-2xl border border-ink bg-white px-3 py-2 text-[13px] leading-snug shadow-[2px_2px_0_var(--ink)]">
+              {busy ? <span aria-label="Alfred is working on it">…</span> : live ? <Typewriter text={reply!.text} /> : reply!.text}
+            </p>
+            {!busy && reply?.undoId && (
+              <button type="button" onClick={() => void undo(reply.undoId!)} className="mt-1 text-[11px] text-rose underline underline-offset-4">
+                Undo
+              </button>
+            )}
+          </div>
         )}
       </div>
 
-      {messages.length <= 1 && (
-        <div className="flex flex-wrap gap-1.5 px-3 pb-2">
-          {SUGGESTIONS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => submit(s)}
-              className="rounded-full border border-ink px-2.5 py-1 text-[11px] font-semibold transition-colors hover:bg-yellow"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <form onSubmit={onSubmit} className="flex items-end gap-2 border-t border-ink p-2">
+      <form onSubmit={onSubmit} className="flex items-center gap-1.5 rounded-full border border-ink bg-white py-1 pl-4 pr-1 shadow-[2px_2px_0_var(--ink)] focus-within:ring-2 focus-within:ring-rose">
         <textarea
           ref={input}
           value={text}
@@ -127,15 +94,15 @@ export default function AlfredChat() {
           onKeyDown={onKey}
           placeholder="Tell me what to do…"
           aria-label="Message Alfred"
-          className="max-h-24 min-h-[36px] flex-1 resize-none rounded-md border border-ink bg-white px-3 py-2 text-[13px] leading-snug outline-none focus:ring-2 focus:ring-rose"
+          className="max-h-20 min-h-[28px] flex-1 resize-none bg-transparent py-1 text-[13px] leading-snug outline-none"
         />
         <button
           type="submit"
           disabled={busy || !text.trim()}
           aria-label="Send"
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-ink bg-pink text-ink transition-opacity disabled:opacity-40"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink text-cream transition-opacity disabled:opacity-30"
         >
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M5 12h14M13 6l6 6-6 6" />
           </svg>
         </button>
