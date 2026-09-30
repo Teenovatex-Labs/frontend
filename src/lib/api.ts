@@ -92,7 +92,7 @@ async function tryRefresh(): Promise<boolean> {
   }
 }
 
-async function request<T>(
+export async function request<T>(
   path: string,
   init: RequestInit = {},
   opts: { auth?: boolean; retry?: boolean; activity?: string | false } = {}
@@ -116,7 +116,8 @@ async function performRequest<T>(
   opts: { auth?: boolean; retry?: boolean; activity?: string | false }
 ): Promise<T> {
   const headers = new Headers(init.headers);
-  headers.set("Content-Type", "application/json");
+  // FormData sets its own multipart boundary; forcing JSON here would break uploads.
+  if (!(init.body instanceof FormData)) headers.set("Content-Type", "application/json");
   if (opts.auth && accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
 
   const res = await fetch(`${API_URL}${path}`, { ...init, headers });
@@ -290,4 +291,16 @@ export const usersApi = {
 
   updateMe: (data: { timezone?: string }) =>
     request<unknown>("/users/me", { method: "PATCH", body: JSON.stringify(data) }, { auth: true, activity: false }),
+};
+
+export const uploadsApi = {
+  avatar: (file: File) => {
+    const form = new FormData();
+    form.append("avatar", file);
+    return request<{ avatar_url: string }>(
+      "/users/me/avatar",
+      { method: "POST", body: form },
+      { auth: true, activity: "Uploading your photo" }
+    );
+  },
 };
