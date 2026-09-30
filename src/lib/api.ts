@@ -73,7 +73,18 @@ function clearTokens() {
   }
 }
 
-async function tryRefresh(): Promise<boolean> {
+// Several requests can hit a 401 at the same moment; they should share ONE refresh, because each
+// refresh replaces the refresh token and a second concurrent call would otherwise race the first.
+let refreshing: Promise<boolean> | null = null;
+
+function tryRefresh(): Promise<boolean> {
+  refreshing ??= doRefresh().finally(() => {
+    refreshing = null;
+  });
+  return refreshing;
+}
+
+async function doRefresh(): Promise<boolean> {
   const refresh_token = getRefreshToken();
   if (!refresh_token) return false;
 
@@ -85,8 +96,14 @@ async function tryRefresh(): Promise<boolean> {
     });
     if (!res.ok) return false;
 
-    const data = (await res.json()) as { access_token: string };
+    const data = (await res.json()) as { access_token: string; refresh_token?: string };
     accessToken = data.access_token;
+    // The server swaps in a new refresh token every time. Save it where the old one lived, so
+    // "remember me" (localStorage) versus this-session-only (sessionStorage) is respected.
+    if (data.refresh_token && typeof window !== "undefined") {
+      const remembered = window.localStorage.getItem(REFRESH_TOKEN_KEY) !== null;
+      (remembered ? window.localStorage : window.sessionStorage).setItem(REFRESH_TOKEN_KEY, data.refresh_token);
+    }
     return true;
   } catch {
     // API unreachable: treat as "not signed in" so AuthProvider still
