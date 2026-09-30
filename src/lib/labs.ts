@@ -25,6 +25,11 @@ export const keys = {
   unread: ["inbox", "unread"] as const,
   person: (username: string) => ["people", username] as const,
   sessions: ["sessions"] as const,
+  events: (when: string) => ["events", when] as const,
+  event: (id: string) => ["events", "detail", id] as const,
+  tracks: ["learn", "tracks"] as const,
+  track: (slug: string) => ["learn", "track", slug] as const,
+  lesson: (track: string, lesson: string) => ["learn", "lesson", track, lesson] as const,
 };
 
 export const timeAgo = (iso: string, now = Date.now()) => {

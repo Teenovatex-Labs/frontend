@@ -97,10 +97,16 @@ export const inboxApi = {
   remove: (id: string) => request<unknown>(`/notifications/${id}`, { method: "DELETE" }, authed),
 };
 
-export type PublicProfile = Pick<
-  UserProfile,
-  "id" | "username" | "full_name" | "avatar_url" | "bio" | "points" | "streak" | "social_links" | "created_at"
-> & { followers?: number; following?: number; is_following?: boolean };
+export type PublicProfile =
+  | { private: true; username: string; avatar_url: string | null }
+  | (Pick<UserProfile, "id" | "username" | "full_name" | "avatar_url" | "bio" | "points" | "streak" | "social_links" | "created_at"> & {
+      private: false;
+      rank: number;
+      followers: number;
+      following: number;
+      lab_count: number;
+      is_following: boolean;
+    });
 
 export const peopleApi = {
   get: (username: string) => request<PublicProfile>(`/users/${encodeURIComponent(username)}`, {}, authed),
@@ -123,4 +129,49 @@ export const accountApi = {
   revokeSession: (id: string) => request<unknown>(`/settings/sessions/${id}`, { method: "DELETE" }, { auth: true, activity: "Signing that device out" }),
   deleteAccount: (data: { password?: string; id_token?: string }) =>
     request<{ message: string }>("/settings/account", { method: "DELETE", body: JSON.stringify(data) }, { auth: true, activity: "Deleting your account" }),
+};
+
+export type EventItem = {
+  id: string;
+  title: string;
+  description: string;
+  starts_at: string;
+  ends_at: string | null;
+  location: string | null;
+  cover_url: string | null;
+  capacity: number | null;
+  rsvp_count: number;
+  has_rsvped: boolean;
+  is_full: boolean;
+};
+
+export const eventsApi = {
+  list: (when: "upcoming" | "past" = "upcoming") => request<{ events: EventItem[] }>(`/events${qs({ when })}`, {}, authed),
+  get: (id: string) => request<EventItem>(`/events/${id}`, {}, authed),
+  rsvp: (id: string) => request<{ rsvp_count: number }>(`/events/${id}/rsvp`, { method: "POST" }, { auth: true, activity: "Saving your spot" }),
+  cancel: (id: string) => request<{ rsvp_count: number }>(`/events/${id}/rsvp`, { method: "DELETE" }, { auth: true, activity: "Cancelling your spot" }),
+};
+
+export type TrackSummary = { id: string; slug: string; title: string; description: string; lesson_count: number; minutes: number; completed_count: number };
+export type LessonSummary = { id: string; slug: string; title: string; summary: string; minutes: number; completed: boolean };
+export type TrackDetail = { id: string; slug: string; title: string; description: string; lessons: LessonSummary[] };
+export type LessonDetail = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  body: string;
+  minutes: number;
+  completed: boolean;
+  track: { slug: string; title: string };
+  prev: { slug: string; title: string } | null;
+  next: { slug: string; title: string } | null;
+};
+
+export const learnApi = {
+  tracks: () => request<{ tracks: TrackSummary[] }>("/learn/tracks", {}, authed),
+  track: (slug: string) => request<TrackDetail>(`/learn/tracks/${slug}`, {}, authed),
+  lesson: (track: string, lesson: string) => request<LessonDetail>(`/learn/tracks/${track}/lessons/${lesson}`, {}, authed),
+  complete: (lessonId: string) =>
+    request<{ completed: boolean; points_awarded: number }>(`/learn/lessons/${lessonId}/complete`, { method: "POST" }, { auth: true, activity: "Saving your progress" }),
 };
