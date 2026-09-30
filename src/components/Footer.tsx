@@ -37,7 +37,7 @@ export default function Footer() {
         </p>
 
         <div className="flex items-center gap-5 md:justify-end">
-          <a href="mailto:hello@teenovatex.com" className="text-sm hover:text-rose">
+          <a href="mailto:hello@teenovatex.org" className="text-sm hover:text-rose">
             Say hello ↗︎
           </a>
           {SOCIALS.map(({ href, label, Icon }) => (

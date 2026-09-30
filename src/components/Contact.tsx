@@ -123,8 +123,8 @@ export default function Contact() {
             </li>
             <li className="grid grid-cols-[110px_1fr] gap-3">
               <span className="eyebrow text-muted">Prefer email</span>
-              <a href="mailto:hello@teenovatex.com" className="font-semibold underline underline-offset-4 hover:text-rose">
-                hello@teenovatex.com
+              <a href="mailto:hello@teenovatex.org" className="font-semibold underline underline-offset-4 hover:text-rose">
+                hello@teenovatex.org
               </a>
             </li>
             <li className="grid grid-cols-[110px_1fr] gap-3">
