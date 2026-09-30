@@ -40,7 +40,7 @@ export default function HomePage() {
 
       <div className="mt-10 border border-dashed border-ink p-6 md:p-8">
         <p className="eyebrow text-rose">What&rsquo;s next</p>
-        <p className="mt-3 font-serif text-[26px] italic leading-tight">Projects, Community and the Leaderboard are on their way.</p>
+        <p className="mt-3 font-serif text-[26px] italic leading-tight">Labs, Community and the Leaderboard are on their way.</p>
         <p className="mt-3 max-w-[520px] text-sm text-muted">
           They&rsquo;re already in the sidebar, marked <span className="font-semibold text-ink">Soon</span>, and will
           light up as they ship.
