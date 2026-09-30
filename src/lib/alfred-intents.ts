@@ -16,6 +16,7 @@ export type Intent =
   | { kind: "mylabs" }
   | { kind: "due" }
   | { kind: "level" }
+  | { kind: "tour" }
   | { kind: "quest" }
   | { kind: "readall" }
   | { kind: "follow"; username: string; undo: boolean }
@@ -58,6 +59,7 @@ export function interpret(input: string): Intent {
   if (!t) return { kind: "unknown" };
 
   if (/^(hi|hey|hello|yo|sup|hiya|howdy|good (morning|afternoon|evening))\b/.test(t) && t.split(" ").length <= 3) return { kind: "greet" };
+  if (has(t, "show me around", "give me a tour", "take a tour", "tour", "how does this work", "how do i use this")) return { kind: "tour" };
   if (has(t, "help", "what can you do", "commands", "what do you do")) return { kind: "help" };
 
   if (has(t, "sign out", "log out", "logout", "signout")) return { kind: "signout" };

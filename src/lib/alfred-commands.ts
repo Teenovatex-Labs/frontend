@@ -17,6 +17,7 @@ export type CommandContext = {
   signOut: () => Promise<void>;
   /** Refresh anything on screen that an action may have changed. */
   changed: () => void;
+  startTour: () => void;
 };
 
 const list = (items: string[]) => items.map((s) => `• ${s}`).join("\n");
@@ -39,6 +40,10 @@ export async function run(intent: Intent, ctx: CommandContext): Promise<string> 
 
       case "help":
         return HELP_TEXT;
+
+      case "tour":
+        ctx.startTour();
+        return "Sure, let me show you around.";
 
       case "go": {
         const page = PAGES[intent.to];
