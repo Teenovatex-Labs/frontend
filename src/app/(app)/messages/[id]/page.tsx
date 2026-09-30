@@ -44,7 +44,7 @@ export default function ThreadPage() {
       const known = new Set(prev.messages.map((m) => m.id));
       return { ...fresh, messages: [...prev.messages.filter((m) => !m.id.startsWith("pending-")), ...fresh.messages.filter((m) => !known.has(m.id))] };
     },
-    refetchInterval: () => (document.visibilityState === "visible" ? 5_000 : false),
+    refetchInterval: () => (document.visibilityState === "visible" ? 20_000 : false),
   });
 
   useEffect(() => {
@@ -121,9 +121,17 @@ export default function ThreadPage() {
       <header className="flex items-center gap-3 border-b border-ink bg-white px-4 py-3">
         <Link href="/messages" aria-label="Back to chats" className="-ml-1 px-2 text-xl md:hidden">←</Link>
         <Avatar name={t.with.username} src={t.with.avatar_url} size={40} />
-        <Link href={`/u/${t.with.username}`} className="min-w-0 flex-1 truncate font-semibold hover:underline">@{t.with.username}</Link>
-        <ReportButton targetType="user" targetId={t.with.username} what={`@${t.with.username}`} />
-        <button type="button" onClick={() => block.mutate(t.with.username)} disabled={block.isPending} className="text-xs text-muted underline underline-offset-4 hover:text-rose">Block</button>
+        {t.with.group ? (
+          <Link href={`/labs/${t.with.lab_slug}?tab=team`} className="min-w-0 flex-1 truncate font-semibold hover:underline">
+            {t.with.username} <span className="ml-1 text-xs font-normal text-muted">team chat</span>
+          </Link>
+        ) : (
+          <>
+            <Link href={`/u/${t.with.username}`} className="min-w-0 flex-1 truncate font-semibold hover:underline">@{t.with.username}</Link>
+            <ReportButton targetType="user" targetId={t.with.username} what={`@${t.with.username}`} />
+            <button type="button" onClick={() => block.mutate(t.with.username)} disabled={block.isPending} className="text-xs text-muted underline underline-offset-4 hover:text-rose">Block</button>
+          </>
+        )}
       </header>
 
       <div
@@ -136,13 +144,16 @@ export default function ThreadPage() {
         role="log"
         aria-live="polite"
       >
-        {messages.length === 0 && <p className="py-10 text-center text-sm text-muted">Say hi to @{t.with.username}.</p>}
+        {messages.length === 0 && <p className="py-10 text-center text-sm text-muted">{t.with.group ? `Say hi to the ${t.with.username} team.` : `Say hi to @${t.with.username}.`}</p>}
         {messages.map((m, i) => {
           const showDay = i === 0 || dayLabel(messages[i - 1]!.created_at) !== dayLabel(m.created_at);
           const pending = m.id.startsWith("pending-");
           return (
             <div key={m.id}>
               {showDay && <p className="my-3 text-center text-[11px] uppercase tracking-wide text-muted">{dayLabel(m.created_at)}</p>}
+              {t.with.group && !m.from_me && m.from_name && (i === 0 || messages[i - 1]!.from_name !== m.from_name || showDay) && (
+                <p className="mb-0.5 ml-1 mt-2 text-[11px] font-medium text-muted">@{m.from_name}</p>
+              )}
               <div className={`group flex items-end gap-2 ${m.from_me ? "justify-end" : "justify-start"}`}>
                 {m.from_me && !pending && (
                   <button type="button" onClick={() => unsend.mutate(m.id)} className="mb-1 hidden text-[11px] text-muted underline underline-offset-4 hover:text-rose group-hover:block">Unsend</button>
@@ -158,7 +169,7 @@ export default function ThreadPage() {
             </div>
           );
         })}
-        {seen && <p className="pr-1 text-right text-[11px] text-muted">Seen</p>}
+        {seen && !t.with.group && <p className="pr-1 text-right text-[11px] text-muted">Seen</p>}
       </div>
 
       {support && (
@@ -173,7 +184,7 @@ export default function ThreadPage() {
         <Composer onSend={(body) => send.mutate(body)} />
       ) : (
         <p className="border-t border-ink bg-white px-4 py-4 text-center text-sm text-muted">
-          You can&rsquo;t send messages to @{t.with.username} right now. Chats need you to follow each other, and neither of you to have blocked the other.
+          You can&rsquo;t send messages to {t.with.group ? t.with.username : `@${t.with.username}`} right now. Chats need you to follow each other, and neither of you to have blocked the other.
         </p>
       )}
     </>

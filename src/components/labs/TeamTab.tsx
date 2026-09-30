@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/api";
-import { labsDeepApi } from "@/lib/services";
+import { labsDeepApi, messagesApi } from "@/lib/services";
 import { keys } from "@/lib/labs";
 import Avatar from "@/components/ui/Avatar";
 import Skeleton from "@/components/ui/Skeleton";
@@ -13,6 +14,7 @@ import { useToast } from "@/components/ui/Toast";
 
 export default function TeamTab({ lab, me }: { lab: string; me?: string }) {
   const qc = useQueryClient();
+  const router = useRouter();
   const toast = useToast();
   const [message, setMessage] = useState("");
   const [asking, setAsking] = useState(false);
@@ -22,6 +24,11 @@ export default function TeamTab({ lab, me }: { lab: string; me?: string }) {
   const refresh = () => qc.invalidateQueries({ queryKey: keys.team(lab) });
   const fail = (e: unknown) => toast.error(e instanceof ApiError ? e.message : "That didn't work. Try again.");
 
+  const chat = useMutation({
+    mutationFn: () => messagesApi.openLabChat(lab),
+    onSuccess: (c) => router.push(`/messages/${c.id}`),
+    onError: fail,
+  });
   const join = useMutation({
     mutationFn: () => labsDeepApi.join(lab, message.trim() || undefined),
     onSuccess: () => { toast.success("Asked! The owner will see your request."); setAsking(false); setMessage(""); void refresh(); },
@@ -36,6 +43,11 @@ export default function TeamTab({ lab, me }: { lab: string; me?: string }) {
 
   return (
     <div className="space-y-8">
+      {t.my_role && (
+        <button className="btn-secondary" disabled={chat.isPending} onClick={() => chat.mutate()}>
+          {chat.isPending ? "Opening…" : "Open the team chat"} <span aria-hidden="true">↗︎</span>
+        </button>
+      )}
       <ul className="grid gap-3 sm:grid-cols-2">
         {t.members.map((m) => (
           <li key={m.username} className="flex items-center gap-3 border border-ink bg-white p-3 shadow-[3px_3px_0_var(--ink)]">

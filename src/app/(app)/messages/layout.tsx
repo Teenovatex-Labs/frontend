@@ -39,11 +39,11 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
                       <Avatar name={c.with.username} src={c.with.avatar_url} size={44} />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-baseline justify-between gap-2">
-                          <span className={`truncate ${c.unread ? "font-semibold" : "font-medium"}`}>@{c.with.username}</span>
+                          <span className={`truncate ${c.unread ? "font-semibold" : "font-medium"}`}>{c.with.group ? c.with.username : `@${c.with.username}`}{c.with.group && <span className="ml-1.5 rounded-full bg-pink px-1.5 py-0.5 text-[10px] font-semibold">Team</span>}</span>
                           {c.last_message && <span className="shrink-0 text-[11px] text-muted">{timeAgo(c.last_message.created_at)}</span>}
                         </span>
                         <span className={`block truncate text-sm ${c.unread ? "text-ink" : "text-muted"}`}>
-                          {c.last_message ? `${c.last_message.from_me ? "You: " : ""}${c.last_message.body}` : "Say hi"}
+                          {c.last_message ? `${c.last_message.from_me ? "You: " : c.last_message.from_name ? `${c.last_message.from_name}: ` : ""}${c.last_message.body}` : "Say hi"}
                         </span>
                       </span>
                       {c.unread > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-pink px-1.5 text-[11px] font-semibold tabular-nums">{c.unread}</span>}
