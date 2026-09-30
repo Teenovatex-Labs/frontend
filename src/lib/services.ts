@@ -374,9 +374,23 @@ export type PetStatus = { available: boolean; enabled_by_member: boolean; remain
 export const petApi = {
   status: () => request<PetStatus>("/pet/status", {}, authed),
   // What the member typed, plus the page they are on. Nothing else is sent.
-  brain: (text: string, page: string) =>
-    request<{ reply: string; intent: unknown; remaining_today: number }>("/pet/brain", { method: "POST", body: json({ text, page }) }, { auth: true, activity: false }),
+  brain: (text: string, page: string, history: { from: "you" | "alfred"; text: string }[] = []) =>
+    request<{ reply: string; intent: unknown; remaining_today: number }>("/pet/brain", { method: "POST", body: json({ text, page, history }) }, { auth: true, activity: false }),
+
+  // What Alfred did for the member, and taking it back.
+  actions: () => request<{ actions: PetActionItem[]; undo_window_minutes: number }>("/pet/actions", {}, authed),
+  logAction: (data: { kind: "follow" | "unfollow" | "vote" | "readall"; summary: string; payload: Record<string, unknown> }) =>
+    request<PetActionItem>("/pet/actions", { method: "POST", body: json(data) }, { auth: true, activity: false }),
+  undo: (id: string) => request<{ message: string }>(`/pet/actions/${id}/undo`, { method: "POST" }, { auth: true, activity: false }),
+
+  // Things the member asked Alfred to remember.
+  memories: () => request<{ memories: { id: string; text: string; created_at: string }[]; max: number }>("/pet/memory", {}, authed),
+  addMemory: (text: string) => request<{ id: string; text: string }>("/pet/memory", { method: "POST", body: json({ text }) }, { auth: true, activity: false }),
+  forget: (id: string) => request<unknown>(`/pet/memory/${id}`, { method: "DELETE" }, { auth: true, activity: false }),
+  forgetAll: () => request<{ forgotten: number }>("/pet/memory", { method: "DELETE" }, { auth: true, activity: false }),
 };
+
+export type PetActionItem = { id: string; kind: string; summary: string; created_at: string; undone: boolean; can_undo: boolean };
 
 // --- announcements and event management -----------------------------------------------------
 
