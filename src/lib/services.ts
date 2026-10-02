@@ -430,7 +430,12 @@ export type EarnedBadge = { key: string; title: string; description: string; sym
 export type BadgeStatus = { key: string; title: string; description: string; symbol: string; earned: boolean; awarded_at: string | null };
 export type Quest = { key: string; title: string; description: string; goal: number; points: number; progress: number; complete: boolean; claimed: boolean; resets_at: string };
 
+export type WeeklyChallenge = { key: string; title: string; description: string; goal: number; points: number; progress: number; complete: boolean; claimed: boolean };
+export type Weekly = { week: string; challenges: WeeklyChallenge[]; bonus: { points: number; available: boolean; claimed: boolean }; resets_at: string };
+
 export const rewardsApi = {
+  weekly: () => request<Weekly>("/rewards/weekly", {}, authed),
+  claimWeekly: (key: string) => request<{ claimed: boolean; points_awarded: number }>(`/rewards/weekly/${encodeURIComponent(key)}/claim`, { method: "POST" }, { auth: true, activity: false }),
   badges: () => request<{ badges: BadgeStatus[] }>("/rewards/badges", {}, authed),
   quest: () => request<Quest>("/rewards/quest", {}, authed),
   claim: () => request<{ claimed: boolean; points_awarded: number }>("/rewards/quest/claim", { method: "POST" }, { auth: true, activity: false }),

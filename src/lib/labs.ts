@@ -36,6 +36,7 @@ export const keys = {
   search: (q: string) => ["search", q] as const,
   announcements: ["announcements"] as const,
   quest: ["rewards", "quest"] as const,
+  weekly: ["rewards", "weekly"] as const,
   badges: ["rewards", "badges"] as const,
   spaces: ["community", "spaces"] as const,
   feed: (slug: string) => ["community", "feed", slug] as const,
