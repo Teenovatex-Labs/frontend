@@ -11,6 +11,7 @@ import { fieldErrors, newPasswordSchema } from "@/lib/validation";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 import Avatar from "@/components/ui/Avatar";
+import AppInstallSection from "@/components/app/AppInstall";
 import Dialog from "@/components/ui/Dialog";
 import Skeleton from "@/components/ui/Skeleton";
 import FormField from "@/components/FormField";
@@ -545,6 +546,7 @@ export default function SettingsPage() {
       <div className="mt-8 flex flex-col gap-7">
         <ProfileSection />
         <PreferencesSection />
+        <AppInstallSection />
         <AlfredSection />
         <AlfredDataSection />
         <PasswordSection />

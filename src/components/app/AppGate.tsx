@@ -11,6 +11,7 @@ import SuspensionBanner from "@/components/safety/SuspensionBanner";
 import AnnouncementBanner from "@/components/announcements/AnnouncementBanner";
 import { usersApi } from "@/lib/api";
 import { browserTimezone } from "@/lib/age";
+import { registerServiceWorker } from "@/lib/push";
 
 export default function AppGate({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -19,6 +20,11 @@ export default function AppGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!loading && !user) router.replace("/auth?mode=login");
   }, [loading, user, router]);
+
+  // The service worker makes the installed app open offline and lets notifications show up.
+  useEffect(() => {
+    void registerServiceWorker();
+  }, []);
 
   // Streaks and deadlines run on the member's own clock, so save it once.
   const needsTimezone = !!user && user.age_confirmed && user.username_set && !user.timezone;
