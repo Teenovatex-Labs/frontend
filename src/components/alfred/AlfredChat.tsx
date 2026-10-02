@@ -97,6 +97,15 @@ export default function AlfredChat() {
           className="max-h-20 min-h-[28px] flex-1 resize-none bg-transparent py-1 text-[13px] leading-snug outline-none"
         />
         <button
+          type="button"
+          onClick={closeChat}
+          aria-label="Close chat"
+          title="Close"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-lg leading-none text-ink/60 transition-colors hover:bg-cream hover:text-ink"
+        >
+          ×
+        </button>
+        <button
           type="submit"
           disabled={busy || !text.trim()}
           aria-label="Send"
