@@ -8,6 +8,7 @@ import { keys, timeAgo } from "@/lib/labs";
 import { eventDay, eventTime } from "@/lib/dates";
 import StatTile from "@/components/ui/StatTile";
 import QuestCard from "@/components/rewards/QuestCard";
+import WeeklyChallenges from "@/components/rewards/WeeklyChallenges";
 import Card from "@/components/ui/Card";
 import Skeleton from "@/components/ui/Skeleton";
 
@@ -89,6 +90,12 @@ export default function HomePage() {
         <Panel title="Today's quest" href="/labs" cta="Explore labs">
           <QuestCard />
         </Panel>
+
+        <div className="md:col-span-2">
+          <Panel title="This week's challenges" href="/labs" cta="Explore labs">
+            <WeeklyChallenges />
+          </Panel>
+        </div>
 
         <Panel title="Votes today" href="/labs" cta="Explore labs">
           {votes.isPending ? (
