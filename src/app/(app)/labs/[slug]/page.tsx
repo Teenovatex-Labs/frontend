@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
+import { shrinkImage } from "@/lib/image";
 import { labsApi, labsDeepApi } from "@/lib/services";
 import { categoryLabel, keys, timeAgo } from "@/lib/labs";
 import Avatar from "@/components/ui/Avatar";
@@ -43,7 +44,7 @@ export default function LabPage() {
 
   const cover = useMutation({
     mutationFn: async (file: File | null) => {
-      if (file) await labsApi.setCover(lab.data!.id, file);
+      if (file) await labsApi.setCover(lab.data!.id, await shrinkImage(file, 1600));
       else await labsApi.clearCover(lab.data!.id);
     },
     onSuccess: (_r, file) => {
@@ -55,7 +56,7 @@ export default function LabPage() {
   const pickCover = (file?: File) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) return toast.error("That needs to be an image.");
-    if (file.size > 5 * 1024 * 1024) return toast.error("Keep it under 5MB.");
+    if (file.size > 25 * 1024 * 1024) return toast.error("That image is too large. Try a smaller one.");
     cover.mutate(file);
   };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type KeyboardEvent } from "react";
+import { shrinkImage } from "@/lib/image";
 
 // A message box that grows as you type (up to a few lines), like the chat apps you already use.
 // Enter sends; Shift+Enter starts a new line.
@@ -29,12 +30,12 @@ export default function Composer({
     el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
   };
 
-  const pick = (f?: File) => {
+  const pick = async (f?: File) => {
     setFileError(null);
     if (!f) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) return setFileError("Use a JPG, PNG or WebP image.");
-    if (f.size > 5 * 1024 * 1024) return setFileError("Keep images under 5MB.");
-    setFile(f);
+    if (f.size > 25 * 1024 * 1024) return setFileError("That image is too large. Try a smaller one.");
+    setFile(await shrinkImage(f, 1280));
   };
 
   const send = () => {
@@ -84,7 +85,7 @@ export default function Composer({
               <path d="m21 16-5-5-8 8" />
             </svg>
           </button>
-          <input ref={picker} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label="Choose an image" onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} />
+          <input ref={picker} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label="Choose an image" onChange={(e) => { void pick(e.target.files?.[0]); e.target.value = ""; }} />
         </>
       )}
       <textarea
