@@ -425,6 +425,7 @@ function DevicesSection() {
                       {here && <span className="rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-cream">This device</span>}
                     </span>
                     <span className="mt-0.5 block text-xs text-muted">
+                      {s.location ? `${s.location} · ` : ""}
                       {here ? "Active now" : `Last active ${timeAgo(s.last_active)}`} · Signed in {when(s.created_at)}
                       {s.ip ? ` · IP ${s.ip}` : ""}
                     </span>
