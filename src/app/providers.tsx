@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/components/ui/Toast";
 import { ApiError } from "@/lib/api";
+import MonitorInit from "@/components/app/MonitorInit";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
@@ -29,7 +30,10 @@ export default function Providers({ children }: { children: ReactNode }) {
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <MonitorInit />
+            {children}
+          </ToastProvider>
         </AuthProvider>
       </QueryClientProvider>
     </GoogleOAuthProvider>
