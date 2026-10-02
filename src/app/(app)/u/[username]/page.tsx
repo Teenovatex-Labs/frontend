@@ -8,6 +8,7 @@ import { ApiError, uploadsApi } from "@/lib/api";
 import { messagesApi, peopleApi, rewardsApi, safetyApi } from "@/lib/services";
 import Badge from "@/components/ui/Badge";
 import ReportButton from "@/components/safety/ReportDialog";
+import { shrinkImage } from "@/lib/image";
 import { keys } from "@/lib/labs";
 import Avatar from "@/components/ui/Avatar";
 import EmptyState from "@/components/ui/EmptyState";
@@ -36,7 +37,7 @@ export default function PersonPage() {
   const myBadges = useQuery({ queryKey: keys.badges, queryFn: rewardsApi.badges, enabled: isMe });
 
   const photo = useMutation({
-    mutationFn: (f: File) => uploadsApi.avatar(f),
+    mutationFn: async (f: File) => uploadsApi.avatar(await shrinkImage(f)),
     onSuccess: async () => {
       await refreshUser();
       await qc.invalidateQueries({ queryKey: keys.person(username) });
@@ -47,7 +48,7 @@ export default function PersonPage() {
   const pickPhoto = (f?: File) => {
     if (!f) return;
     if (!f.type.startsWith("image/")) return toast.error("That needs to be an image.");
-    if (f.size > 5 * 1024 * 1024) return toast.error("Keep photos under 5MB.");
+    if (f.size > 25 * 1024 * 1024) return toast.error("That photo is too large. Try a smaller one.");
     photo.mutate(f);
   };
 

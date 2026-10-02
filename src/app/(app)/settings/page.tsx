@@ -10,6 +10,7 @@ import { keys, timeAgo } from "@/lib/labs";
 import { fieldErrors, newPasswordSchema } from "@/lib/validation";
 import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
+import { shrinkImage } from "@/lib/image";
 import Avatar from "@/components/ui/Avatar";
 import AppInstallSection from "@/components/app/AppInstall";
 import Dialog from "@/components/ui/Dialog";
@@ -70,7 +71,7 @@ function ProfileSection() {
     onError: (e) => toast.error(e instanceof ApiError ? e.message : "Couldn't save. Try again."),
   });
   const photo = useMutation({
-    mutationFn: (f: File) => uploadsApi.avatar(f),
+    mutationFn: async (f: File) => uploadsApi.avatar(await shrinkImage(f)),
     onSuccess: async () => {
       await refreshUser();
       toast.success("Photo updated.");
@@ -94,7 +95,7 @@ function ProfileSection() {
   const pickPhoto = (f?: File) => {
     if (!f) return;
     if (!f.type.startsWith("image/")) return toast.error("That needs to be an image.");
-    if (f.size > 5 * 1024 * 1024) return toast.error("Keep photos under 5MB.");
+    if (f.size > 25 * 1024 * 1024) return toast.error("That photo is too large. Try a smaller one.");
     photo.mutate(f);
   };
 
@@ -107,7 +108,7 @@ function ProfileSection() {
             {photo.isPending ? "Uploading…" : "Change photo"}
           </button>
           <input ref={file} type="file" accept="image/*" aria-label="Choose a new profile photo" className="sr-only" onChange={(e) => pickPhoto(e.target.files?.[0])} />
-          <p className="mt-1.5 text-xs text-muted">JPG or PNG, up to 5MB.</p>
+          <p className="mt-1.5 text-xs text-muted">Any photo works. We shrink it for you.</p>
         </div>
       </div>
 
