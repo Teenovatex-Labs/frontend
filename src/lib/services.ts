@@ -305,7 +305,8 @@ export type ConversationSummary = {
   updated_at: string;
   can_message: boolean;
 };
-export type ChatMessage = { id: string; body: string; created_at: string; from_me: boolean; from_name?: string; support?: string };
+export type ChatImageInfo = { id: string; status: "pending" | "approved" | "rejected"; width: number; height: number };
+export type ChatMessage = { id: string; body: string; created_at: string; from_me: boolean; from_name?: string; support?: string; image?: ChatImageInfo | null };
 export type Thread = {
   with: ChatPartner;
   can_message: boolean;
@@ -326,6 +327,13 @@ export const messagesApi = {
   thread: (id: string, params: { after?: string; before?: string } = {}) => request<Thread>(`/messages/conversations/${id}${qs(params)}`, {}, authed),
   send: (id: string, body: string) =>
     request<ChatMessage>(`/messages/conversations/${id}/messages`, { method: "POST", body: JSON.stringify({ body }) }, { auth: true, activity: false }),
+  sendImage: (id: string, file: File, caption: string) => {
+    const form = new FormData();
+    form.append("image", file);
+    form.append("body", caption);
+    return request<ChatMessage>(`/messages/conversations/${id}/images`, { method: "POST", body: form }, { auth: true, activity: "Sending your image" });
+  },
+  imageLink: (imageId: string) => request<{ url: string; status: "pending" | "approved" | "rejected" }>(`/messages/images/${imageId}`, {}, authed),
   openLabChat: (lab: string) => request<{ id: string }>(`/projects/${lab}/chat`, { method: "POST" }, { auth: true, activity: "Opening the team chat" }),
   unsend: (messageId: string) => request<unknown>(`/messages/messages/${messageId}`, { method: "DELETE" }, authed),
 };
@@ -480,4 +488,22 @@ export const adminContentApi = {
   createLesson: (trackId: string, data: { slug: string; title: string; summary: string; body: string; minutes?: number }) => request<AdminLesson>(`/admin/learn/tracks/${trackId}/lessons`, { method: "POST", body: json(data) }, write()),
   updateLesson: (id: string, data: Partial<{ slug: string; title: string; summary: string; body: string; minutes: number; position: number }>) => request<AdminLesson>(`/admin/learn/lessons/${id}`, { method: "PATCH", body: json(data) }, write()),
   deleteLesson: (id: string) => request<unknown>(`/admin/learn/lessons/${id}`, { method: "DELETE" }, write()),
+};
+
+export type ReviewImage = {
+  id: string;
+  status: "pending" | "approved" | "rejected";
+  url: string;
+  width: number;
+  height: number;
+  caption: string;
+  lab: { name: string; slug: string } | null;
+  sender: { id: string; username: string; avatar_url: string | null; created_at: string };
+  escalated: boolean;
+  created_at: string;
+};
+export const imageReviewApi = {
+  list: (status: "pending" | "approved" | "rejected" = "pending") => request<{ attachments: ReviewImage[] }>(`/admin/attachments${qs({ status })}`, {}, authed),
+  review: (id: string, data: { action: "approve" | "reject"; note?: string; escalate?: boolean; suspend_days?: number }) =>
+    request<{ message: string }>(`/admin/attachments/${id}/review`, { method: "POST", body: json(data) }, { auth: true, activity: false }),
 };

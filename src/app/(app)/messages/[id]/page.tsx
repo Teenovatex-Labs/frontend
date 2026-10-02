@@ -12,6 +12,7 @@ import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
 import ReportButton from "@/components/safety/ReportDialog";
 import Composer from "@/components/messages/Composer";
+import ChatImage from "@/components/messages/ChatImage";
 import { useToast } from "@/components/ui/Toast";
 
 const clock = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -51,6 +52,17 @@ export default function ThreadPage() {
     void qc.invalidateQueries({ queryKey: keys.inboxChats });
     void qc.invalidateQueries({ queryKey: keys.unreadChats });
   }, [thread.dataUpdatedAt, qc]);
+
+  const sendImage = useMutation({
+    mutationFn: (v: { file: File; caption: string }) => messagesApi.sendImage(id, v.file, v.caption),
+    onSuccess: (m) => {
+      stick.current = true;
+      qc.setQueryData<Thread>(keys.thread(id), (t) => (t ? { ...t, messages: [...t.messages, m] } : t));
+      void qc.invalidateQueries({ queryKey: keys.inboxChats });
+      toast.success("Sent. A moderator will check it before your team sees it.");
+    },
+    onError: (e) => setFailed(e instanceof ApiError ? e.message : "Couldn't send that image. Try again."),
+  });
 
   const send = useMutation({
     mutationFn: (body: string) => messagesApi.send(id, body),
@@ -158,10 +170,11 @@ export default function ThreadPage() {
                 {m.from_me && !pending && (
                   <button type="button" onClick={() => unsend.mutate(m.id)} className="mb-1 hidden text-[11px] text-muted underline underline-offset-4 hover:text-rose group-hover:block">Unsend</button>
                 )}
-                <p className={`max-w-[78%] whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-[15px] leading-snug ${m.from_me ? "rounded-br-sm bg-ink text-cream" : "rounded-bl-sm border border-line bg-white"} ${pending ? "opacity-60" : ""}`}>
+                <div className={`max-w-[78%] whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-[15px] leading-snug ${m.from_me ? "rounded-br-sm bg-ink text-cream" : "rounded-bl-sm border border-line bg-white"} ${pending ? "opacity-60" : ""}`}>
+                  {m.image && <div className={`${m.body ? "mb-2" : ""} text-ink`}><ChatImage id={m.image.id} width={m.image.width} height={m.image.height} mine={m.from_me} /></div>}
                   {m.body}
                   <span className={`ml-2 inline-block text-[10px] ${m.from_me ? "text-cream/75" : "text-muted"}`}>{clock(m.created_at)}</span>
-                </p>
+                </div>
                 {!m.from_me && (
                   <span className="mb-1 hidden group-hover:block"><ReportButton targetType="message" targetId={m.id} what="this message" className="text-[11px]" /></span>
                 )}
@@ -181,7 +194,7 @@ export default function ThreadPage() {
       {failed && <p role="alert" className="border-t border-rose bg-rose/[0.08] px-4 py-2.5 text-sm text-rose">{failed}</p>}
 
       {t.can_message ? (
-        <Composer onSend={(body) => send.mutate(body)} />
+        <Composer onSend={(body) => send.mutate(body)} onSendImage={t.with.group ? (file, caption) => sendImage.mutate({ file, caption }) : undefined} disabled={sendImage.isPending} />
       ) : (
         <p className="border-t border-ink bg-white px-4 py-4 text-center text-sm text-muted">
           You can&rsquo;t send messages to {t.with.group ? t.with.username : `@${t.with.username}`} right now. One of you has blocked the other.
