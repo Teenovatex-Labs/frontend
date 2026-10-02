@@ -3,7 +3,7 @@
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { ApiError, settingsApi, uploadsApi } from "@/lib/api";
+import { ApiError, getRefreshToken, settingsApi, uploadsApi } from "@/lib/api";
 import { accountApi, petApi, safetyApi } from "@/lib/services";
 import { alfredController } from "@/lib/alfred";
 import { keys, timeAgo } from "@/lib/labs";
@@ -364,39 +364,86 @@ function PasswordSection() {
   );
 }
 
+function DeviceIcon({ kind }: { kind: "phone" | "tablet" | "computer" | "unknown" }) {
+  const common = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
+  if (kind === "phone") return <svg {...common}><rect x="7" y="2.5" width="10" height="19" rx="2" /><path d="M11 18.5h2" /></svg>;
+  if (kind === "tablet") return <svg {...common}><rect x="4.5" y="3" width="15" height="18" rx="2" /><path d="M11 18h2" /></svg>;
+  return <svg {...common}><rect x="3" y="4.5" width="18" height="12" rx="1.5" /><path d="M8 20h8M12 16.5V20" /></svg>;
+}
+
 function DevicesSection() {
   const qc = useQueryClient();
   const toast = useToast();
   const sessions = useQuery({ queryKey: keys.sessions, queryFn: accountApi.sessions });
+  const refreshToken = typeof window === "undefined" ? null : getRefreshToken();
+  const current = useQuery({
+    queryKey: [...keys.sessions, "current"],
+    queryFn: () => accountApi.currentSession(refreshToken!),
+    enabled: !!refreshToken,
+  });
   const revoke = useMutation({
     mutationFn: accountApi.revokeSession,
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.sessions }),
+    onSuccess: () => {
+      toast.success("Signed that device out.");
+      return qc.invalidateQueries({ queryKey: keys.sessions });
+    },
     onError: () => toast.error("Couldn't sign that device out."),
   });
+  const revokeOthers = useMutation({
+    mutationFn: () => accountApi.revokeOtherSessions(refreshToken!),
+    onSuccess: (r) => {
+      toast.success(r.count === 1 ? "Signed out 1 other device." : `Signed out ${r.count} other devices.`);
+      return qc.invalidateQueries({ queryKey: keys.sessions });
+    },
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : "Couldn't sign the other devices out."),
+  });
+
+  const currentId = current.data?.id ?? null;
+  const list = (sessions.data ?? []).slice().sort((a, b) => Number(b.id === currentId) - Number(a.id === currentId));
+  const others = list.filter((s) => s.id !== currentId).length;
+  const when = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
   return (
-    <Section title="Where you're signed in" hint="Sign out any device you don't recognise.">
+    <Section title="Where you're signed in" hint="If you don't recognise one, sign it out. Then change your password.">
       {sessions.isPending ? (
         <Skeleton className="h-14 w-full" />
       ) : sessions.isError ? (
         <p className="text-sm text-muted">Couldn&rsquo;t load your devices.</p>
       ) : (
-        <ul className="divide-y divide-line">
-          {sessions.data.map((s) => (
-            <li key={s.id} className="flex items-center justify-between gap-4 py-3">
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-medium">{s.device_info ?? "Unknown device"}</span>
-                <span className="block text-xs text-muted">
-                  Active {timeAgo(s.last_active)}
-                  {s.ip ? ` · ${s.ip}` : ""}
-                </span>
-              </span>
-              <button type="button" className="text-sm text-rose underline underline-offset-4" onClick={() => revoke.mutate(s.id)} disabled={revoke.isPending}>
-                Sign out
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="divide-y divide-line">
+            {list.map((s) => {
+              const here = s.id === currentId;
+              return (
+                <li key={s.id} className="flex items-center gap-4 py-3.5">
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full border border-ink ${here ? "bg-yellow" : "bg-cream"}`}>
+                    <DeviceIcon kind={s.device.kind} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                      {s.device.label}
+                      {here && <span className="rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-cream">This device</span>}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-muted">
+                      {here ? "Active now" : `Last active ${timeAgo(s.last_active)}`} · Signed in {when(s.created_at)}
+                      {s.ip ? ` · IP ${s.ip}` : ""}
+                    </span>
+                  </span>
+                  {!here && (
+                    <button type="button" className="shrink-0 text-sm text-rose underline underline-offset-4" onClick={() => revoke.mutate(s.id)} disabled={revoke.isPending}>
+                      Sign out
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          {others > 0 && currentId && (
+            <button type="button" className="btn-secondary btn-sm mt-4" onClick={() => revokeOthers.mutate()} disabled={revokeOthers.isPending}>
+              {revokeOthers.isPending ? "Signing out…" : `Sign out all ${others} other device${others === 1 ? "" : "s"}`}
+            </button>
+          )}
+        </>
       )}
     </Section>
   );
