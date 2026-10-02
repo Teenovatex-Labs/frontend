@@ -121,22 +121,43 @@ export function AlfredProvider({ children }: { children: ReactNode }) {
     try {
       window.localStorage.setItem(tourKey(user.id), "1");
     } catch {
-      // The tour may show again on another visit; that's harmless.
+      // The server remembers it too, so this is only a shortcut.
     }
+    // Remembered on the account, so it never shows again on any device or browser.
+    void petApi.tourDone().catch(() => {});
   }, [user]);
 
-  // First visit: Alfred offers to show the member around, once.
+  // First visit only: Alfred offers to show the member around, once per account (not per browser).
   useEffect(() => {
     if (loading || !user || !user.age_confirmed || !user.username_set) return;
-    let seen = false;
     try {
-      seen = window.localStorage.getItem(tourKey(user.id)) === "1";
+      if (window.localStorage.getItem(tourKey(user.id)) === "1") return;
     } catch {
-      seen = true; // can't remember it, so don't pester
+      // no local memory; the server answer below decides
     }
-    if (seen) return;
-    const t = window.setTimeout(() => alfredController.startTour(TOUR), 1800);
-    return () => window.clearTimeout(t);
+    let cancelled = false;
+    let timer: number | undefined;
+    petApi
+      .status()
+      .then((s) => {
+        if (cancelled) return;
+        if (s.tour_done) {
+          try {
+            window.localStorage.setItem(tourKey(user.id), "1");
+          } catch {
+            // fine
+          }
+          return;
+        }
+        timer = window.setTimeout(() => alfredController.startTour(TOUR), 1800);
+      })
+      .catch(() => {
+        // can't tell, so don't pester
+      });
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
   }, [loading, user]);
 
   const send = useCallback(

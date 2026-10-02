@@ -389,10 +389,11 @@ export const labsDeepApi = {
 
 // --- Alfred's brain -------------------------------------------------------------------------
 
-export type PetStatus = { available: boolean; enabled_by_member: boolean; remaining_today: number; daily_limit: number };
+export type PetStatus = { available: boolean; enabled_by_member: boolean; remaining_today: number; daily_limit: number; tour_done: boolean };
 
 export const petApi = {
   status: () => request<PetStatus>("/pet/status", {}, authed),
+  tourDone: () => request<{ tour_done: boolean }>("/pet/tour-done", { method: "POST" }, authed),
   // What the member typed, plus the page they are on. Nothing else is sent.
   brain: (text: string, page: string, history: { from: "you" | "alfred"; text: string }[] = []) =>
     request<{ reply: string; intent: unknown; remaining_today: number }>("/pet/brain", { method: "POST", body: json({ text, page, history }) }, { auth: true, activity: false }),
