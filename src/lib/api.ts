@@ -53,7 +53,7 @@ export type UserProfile = {
 // survives closing the browser (a returning visit skips the login form
 // entirely), sessionStorage clears the moment the tab/browser closes. Both
 // are checked on read so a token written under either policy is honored.
-function getRefreshToken(): string | null {
+export function getRefreshToken(): string | null {
   if (typeof window === "undefined") return null;
   return window.localStorage.getItem(REFRESH_TOKEN_KEY) ?? window.sessionStorage.getItem(REFRESH_TOKEN_KEY);
 }

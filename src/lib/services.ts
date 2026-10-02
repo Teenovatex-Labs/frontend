@@ -119,7 +119,14 @@ export const peopleApi = {
 };
 
 export type NotificationSettings = { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile?: boolean; ai_chat?: boolean };
-export type SessionInfo = { id: string; device_info: string | null; ip: string | null; last_active: string; created_at: string; current?: boolean };
+export type SessionInfo = {
+  id: string;
+  device_info: string | null;
+  device: { label: string; browser: string; os: string; kind: "phone" | "tablet" | "computer" | "unknown" };
+  ip: string | null;
+  last_active: string;
+  created_at: string;
+};
 
 export const accountApi = {
   update: (data: { full_name?: string; bio?: string; timezone?: string; social_links?: Record<string, string> }) =>
@@ -127,6 +134,10 @@ export const accountApi = {
   notifications: (data: Partial<NotificationSettings>) =>
     request<unknown>("/settings/notifications", { method: "PATCH", body: JSON.stringify(data) }, { auth: true, activity: "Saving your settings" }),
   sessions: () => request<SessionInfo[]>("/settings/sessions", {}, authed),
+  currentSession: (refresh_token: string) =>
+    request<{ id: string | null }>("/settings/sessions/current", { method: "POST", body: JSON.stringify({ refresh_token }) }, authed),
+  revokeOtherSessions: (refresh_token: string) =>
+    request<{ count: number }>("/settings/sessions/revoke-others", { method: "POST", body: JSON.stringify({ refresh_token }) }, { auth: true, activity: "Signing out your other devices" }),
   revokeSession: (id: string) => request<unknown>(`/settings/sessions/${id}`, { method: "DELETE" }, { auth: true, activity: "Signing that device out" }),
   deleteAccount: (data: { password?: string; id_token?: string }) =>
     request<{ message: string }>("/settings/account", { method: "DELETE", body: JSON.stringify(data) }, { auth: true, activity: "Deleting your account" }),
