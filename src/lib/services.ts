@@ -124,6 +124,7 @@ export type SessionInfo = {
   device_info: string | null;
   device: { label: string; browser: string; os: string; kind: "phone" | "tablet" | "computer" | "unknown" };
   ip: string | null;
+  location: string | null;
   last_active: string;
   created_at: string;
 };
