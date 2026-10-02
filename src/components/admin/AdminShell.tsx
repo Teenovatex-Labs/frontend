@@ -13,6 +13,7 @@ import AdminSignIn from "./AdminSignIn";
 const NAV = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/reports", label: "Reports" },
+  { href: "/admin/attachments", label: "Images" },
   { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/learn", label: "Learn" },
   { href: "/admin/events", label: "Events" },
