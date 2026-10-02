@@ -44,7 +44,7 @@ function loadPosition(): Point {
 }
 
 export default function AlfredCompanion() {
-  const { state, animation, runKey, message, bubble, consent, tour, minimized, chatOpen, setMinimized, setHover, setDragging, resolveConsent, nextTour, skipTour, yo } = useAlfred();
+  const { state, animation, runKey, message, bubble, consent, tour, minimized, chatOpen, setMinimized, setHover, setDragging, resolveConsent, nextTour, skipTour, yo, closeChat } = useAlfred();
 
   const root = useRef<HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -150,7 +150,9 @@ export default function AlfredCompanion() {
     const g = gesture.current;
     gesture.current = null;
     if (g?.moved) return;
-    yo();
+    // A tap opens the chat; tapping him again closes it.
+    if (chatOpen) closeChat();
+    else yo();
   };
   const cancel = () => {
     cancelAnimationFrame(frame.current);
@@ -216,7 +218,7 @@ export default function AlfredCompanion() {
           onPointerCancel={cancel}
           onClick={click}
           onKeyDown={key}
-          aria-label={`${label}. Press Enter to say yo. Drag, or use the arrow keys, to move him.`}
+          aria-label={`${label}. Press Enter to open the chat. Drag, or use the arrow keys, to move him.`}
           className="block cursor-grab touch-none select-none rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-rose active:cursor-grabbing"
           style={{ width: w, height: h }}
         >
@@ -230,9 +232,6 @@ export default function AlfredCompanion() {
             showTools ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-1 opacity-0"
           }`}
         >
-          <button type="button" onClick={yo} tabIndex={showTools ? 0 : -1} className="rounded-full bg-pink px-3.5 py-1 text-xs font-semibold transition-colors hover:bg-yellow">
-            Yo
-          </button>
           <button
             type="button"
             onClick={() => setMinimized(true)}
