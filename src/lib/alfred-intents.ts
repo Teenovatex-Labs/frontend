@@ -20,6 +20,7 @@ export type Intent =
   | { kind: "remember"; text: string }
   | { kind: "forget" }
   | { kind: "quest" }
+  | { kind: "weekly" }
   | { kind: "readall" }
   | { kind: "vote"; query: string }
   | { kind: "signout" }
@@ -81,6 +82,7 @@ export function interpret(input: string): Intent {
   if (has(t, "upcoming events", "what events", "any events", "events this week", "whats on")) return { kind: "events" };
   if (has(t, "trending", "popular", "best labs", "top labs", "hot right now")) return { kind: "trending" };
   if (has(t, "my level", "what level", "what level am i", "how far to the next level", "next level")) return { kind: "level" };
+  if (has(t, "weekly challenge", "weekly challenges", "this week challenge", "weekly quest")) return { kind: "weekly" };
   if (has(t, "daily quest", "todays quest", "my quest", "quest")) return { kind: "quest" };
   if (has(t, "whats due", "what is due", "my tasks", "my deadlines", "deadlines", "what do i need to do", "whats next", "up next", "to do")) return { kind: "due" };
   if (has(t, "list my labs", "what labs do i have", "what have i built", "my projects") && !/^(go|open|take)/.test(t)) return { kind: "mylabs" };

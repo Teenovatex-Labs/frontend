@@ -32,7 +32,7 @@ export { interpret };
 export const HELP_TEXT = `here's what i can do:
 ${list([
   "take you places: “open labs”, “go to my profile”, “start a lab”",
-  "tell you stuff: “my points”, “my streak”, “what's due”, “what's new”, “upcoming events”, “trending labs”",
+  "tell you stuff: “my points”, “my streak”, “weekly challenges”, “what's due”, “what's new”, “upcoming events”, “trending labs”",
   "do things (i always ask first): “mark all notifications read”, “vote for <lab name>”, “sign out”",
   "remember things: “remember that I hate gradients”, or “forget everything”",
 ])}`;
@@ -116,6 +116,13 @@ async function runInner(intent: Intent, ctx: CommandContext): Promise<string | O
       const q = await rewardsApi.quest();
       if (q.claimed) return `today's quest (${q.title}) is done and claimed. come back tomorrow.`;
       return q.complete ? `you finished "${q.title}". claim your ${q.points} points on home.` : `today's quest: ${q.title}. ${q.description} (${q.progress} of ${q.goal})`;
+    }
+
+    case "weekly": {
+      const w = await rewardsApi.weekly();
+      const lines = w.challenges.map((c) => `${c.claimed ? "✓" : c.complete ? "★" : "•"} ${c.title} (${c.progress}/${c.goal})`);
+      const ready = w.challenges.some((c) => c.complete && !c.claimed) || (w.bonus.available && !w.bonus.claimed);
+      return `this week:\n${list(lines)}${ready ? "\nyou've got rewards to claim on home." : ""}`;
     }
 
     case "remember": {
