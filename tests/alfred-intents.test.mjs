@@ -51,13 +51,13 @@ test("reading things about you", () => {
   assert.equal(kind("show my tasks"), "due");
   assert.equal(kind("what level am I"), "level");
   assert.equal(kind("what's my daily quest"), "quest");
+  assert.equal(kind("what are my weekly challenges"), "weekly");
 });
 
 test("actions that change things are recognised", () => {
   assert.equal(kind("mark all notifications as read"), "readall");
   assert.equal(kind("sign out"), "signout");
-  assert.deepEqual(interpret("follow @sam_dev"), { kind: "follow", username: "sam_dev", undo: false });
-  assert.deepEqual(interpret("unfollow sam_dev"), { kind: "follow", username: "sam_dev", undo: true });
+  assert.equal(kind("follow @sam_dev"), "unknown"); // there is no following on TeenovateX
   assert.deepEqual(interpret("vote for Pocket Planets"), { kind: "vote", query: "pocket planets" });
   assert.deepEqual(interpret("vote for the pocket planets"), { kind: "vote", query: "pocket planets" });
 });
