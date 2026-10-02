@@ -355,8 +355,8 @@ export class AlfredController {
     }, NOTICE_MS);
   }
 
-  /** "Yo": he greets you back and opens the chat. */
-  yo(reply = "Yo! What's up?"): void {
+  /** Opens the chat with a short greeting. */
+  yo(reply = "What's up?"): void {
     this.setChatOpen(true);
     this.startTransient("greeting", reply, GREETING_MS);
     this.say(reply);

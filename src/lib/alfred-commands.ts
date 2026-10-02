@@ -49,7 +49,7 @@ async function record(kind: "vote" | "readall", summary: string, payload: Record
 async function runInner(intent: Intent, ctx: CommandContext): Promise<string | Outcome> {
   switch (intent.kind) {
     case "greet":
-      return `yo ${ctx.me.username}. what do you need?`;
+      return `hey ${ctx.me.username}. what do you need?`;
 
     case "help":
       return HELP_TEXT;
