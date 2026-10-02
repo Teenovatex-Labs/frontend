@@ -16,8 +16,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: npm run build
+      - run: set -o pipefail; npm run build 2>&1 | tee build.log
         env:
           NEXT_PUBLIC_API_URL: https://api.teenovatex.org/api/v1
+      - run: node scripts/check-budget.mjs build.log
       # After the build so Next's generated route types exist.
       - run: npm run typecheck
