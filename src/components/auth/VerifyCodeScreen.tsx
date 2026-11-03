@@ -62,7 +62,7 @@ export default function VerifyCodeScreen({
     try {
       await onResend();
       setResendState("success");
-      setResendMessage("New code sent — check your inbox.");
+      setResendMessage("New code sent, check your inbox.");
       setResendCooldown(30);
       setTimeout(() => setResendState((s) => (s === "success" ? "idle" : s)), 3000);
     } catch (err) {

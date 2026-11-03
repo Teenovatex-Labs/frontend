@@ -8,6 +8,7 @@ import { LinkedinIcon } from "@animateicons/react/lucide/linkedin-icon";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import type { IconHandle } from "@animateicons/react";
 import useIconHover from "@/lib/useIconHover";
+import { motion, useReducedMotion } from "framer-motion";
 
 type AnimatedIconProps = { size?: number; className?: string };
 
@@ -23,8 +24,15 @@ const SOCIALS: {
 ];
 
 export default function Footer() {
+  const reduce = useReducedMotion();
   return (
-    <footer className="wrap">
+    <motion.footer
+      initial={reduce ? false : { opacity: 0, y: 36 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      className="wrap"
+    >
       <div className="grid gap-8 py-10 md:grid-cols-3 md:items-start md:gap-10">
         <Link href="/" aria-label="TeenovateX home" className="flex items-center">
           <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-9 w-auto" />
@@ -60,7 +68,7 @@ export default function Footer() {
           </a>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }
 

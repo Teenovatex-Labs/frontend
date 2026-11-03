@@ -99,7 +99,7 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     // Every step's button is type="submit" so Enter always does the right
-    // thing from wherever the cursor is — advance on an earlier step,
+    // thing from wherever the cursor is, advance on an earlier step,
     // actually register only on the last one.
     if (step < STEPS.length - 1) {
       goNext();
@@ -369,7 +369,7 @@ function ReviewRow({ label, value, onEdit }: { label: string; value: string; onE
     <div className="flex items-center justify-between gap-3">
       <div>
         <p className="text-[10px] font-bold uppercase tracking-wide text-muted">{label}</p>
-        <p className="text-sm font-medium">{value || "—"}</p>
+        <p className="text-sm font-medium">{value || "Not set"}</p>
       </div>
       <button
         type="button"

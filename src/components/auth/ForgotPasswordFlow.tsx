@@ -144,7 +144,7 @@ export default function ForgotPasswordFlow({
         <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">
           Password <span className="font-serif italic font-medium text-rose">reset.</span>
         </h1>
-        <p className="mt-3 text-sm text-muted">You&rsquo;re all set — log in with your new password.</p>
+        <p className="mt-3 text-sm text-muted">You&rsquo;re all set, log in with your new password.</p>
         <button
           type="button"
           onClick={onBack}

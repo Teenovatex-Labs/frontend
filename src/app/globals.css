@@ -4,6 +4,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "League Spartan";
+  src: url("/fonts/league-spartan.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nimbus Roman";
+  src: url("/fonts/nimbus-roman.otf") format("opentype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nimbus Roman";
+  src: url("/fonts/nimbus-roman-medium.otf") format("opentype");
+  font-weight: 600;
+  font-display: swap;
+}
+
 :root {
   --cream: #fff9eb;
   --ink: #262822;
@@ -12,6 +33,9 @@
   --line: #d9d6c9;
   --muted: #5c6055;
   --rose: #8d355b;
+  --font-display: "League Spartan";
+  --font-display-clean: "League Spartan";
+  --font-body: "Nimbus Roman";
 }
 
 @layer base {
@@ -23,16 +47,36 @@
   body {
     background-color: var(--cream);
     color: var(--ink);
-    font-family: var(--font-poppins), sans-serif;
+    font-family: var(--font-body), Georgia, serif;
+    font-size: 18px;
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3 {
-    font-weight: 600;
-    line-height: 1.05;
-    letter-spacing: -0.05em;
+    font-family: var(--font-display), "Arial Black", sans-serif;
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
     margin: 0;
+  }
+
+  .landing h1,
+  .landing h2 {
+    text-shadow:
+      3px 4px 0 var(--pink),
+      5px 6px 0 rgba(38, 40, 34, 0.2);
+  }
+
+  .landing h3 {
+    font-weight: 800;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
   }
 
   a {
@@ -85,10 +129,10 @@
   }
 
   .eyebrow {
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-family: var(--font-display-clean), sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    font-weight: 800;
   }
 
   /* Buttons. One shape, two weights:
@@ -105,7 +149,8 @@
     padding: 17px 23px;
     border: 1px solid var(--ink);
     border-radius: 6px;
-    font-weight: 600;
+    font-family: var(--font-display-clean), sans-serif;
+    font-weight: 800;
     font-size: 14px;
     line-height: 1.35;
     transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s, border-color 0.2s;
@@ -190,11 +235,37 @@
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    min-height: 660px;
+    min-height: 720px;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 85px 24px 75px;
+  }
+
+  .display-clean {
+    font-family: var(--font-display-clean), sans-serif;
+  }
+
+  .depth-card {
+    box-shadow: 10px 10px 0 var(--ink), 14px 14px 0 var(--pink);
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .depth-card:hover {
+    transform: translate(-4px, -5px) rotate(-0.35deg);
+    box-shadow: 15px 17px 0 var(--ink), 20px 22px 0 var(--pink);
+  }
+
+  .soft-depth-card {
+    box-shadow: 7px 8px 0 rgba(38, 40, 34, 0.95), 11px 12px 0 var(--pink);
+  }
+
+  .doodle-float {
+    animation: doodle-float 5.5s ease-in-out infinite;
+  }
+
+  .doodle-float-delayed {
+    animation: doodle-float 6.5s ease-in-out -2.2s infinite reverse;
   }
 
   @media (max-width: 800px) {
@@ -204,23 +275,7 @@
     }
   }
 
-  /* First-day numbered list */
-  .first-steps {
-    counter-reset: step;
-  }
-
-  .first-steps li {
-    counter-increment: step;
-  }
-
-  .first-steps li::before {
-    content: "0" counter(step);
-    font-size: 12px;
-    color: var(--rose);
-    font-weight: 600;
-  }
-
-  /* Feature track — horizontal position is driven by page scroll (see
+  /* Feature track, horizontal position is driven by page scroll (see
      Toolkit.tsx), so no scroll-snap here: snapping would fight the
      continuous scroll-linked positioning and jump back to the nearest
      card on every update. */
@@ -360,7 +415,7 @@
     animation: step-shake 0.45s;
   }
 
-  /* Field validation callout — pops in pointing at the box it belongs to */
+  /* Field validation callout, pops in pointing at the box it belongs to */
   @keyframes error-pop {
     0% {
       opacity: 0;
@@ -397,6 +452,24 @@
     }
   }
 
+}
+
+@keyframes doodle-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-2deg); }
+  50% { transform: translate3d(0, -14px, 0) rotate(3deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doodle-float,
+  .doodle-float-delayed {
+    animation: none;
+  }
+
+  .depth-card,
+  .depth-card:hover {
+    transition: none;
+    transform: none;
+  }
 }
 
 .no-scrollbar {

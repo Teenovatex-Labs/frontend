@@ -30,7 +30,7 @@ export type UserProfile = {
   streak: number;
   social_links: Record<string, string> | null;
   created_at: string;
-  // Whether the account has a password set / is linked to Google — not
+  // Whether the account has a password set / is linked to Google, not
   // mutually exclusive. A Google-only account (has_google, !has_password)
   // is the one that should be prompted to add a password.
   has_password: boolean;
@@ -195,7 +195,7 @@ export async function openStream(path: string, signal: AbortSignal): Promise<Res
 }
 
 export const authApi = {
-  // No tokens yet — the account exists but is unverified until the code
+  // No tokens yet, the account exists but is unverified until the code
   // from verifyEmail() is confirmed.
   register: (data: {
     full_name: string;
@@ -251,7 +251,7 @@ export const authApi = {
       // Best-effort: the point of logging out is that the browser forgets
       // the session. If the access token was already expired/invalid (or
       // the server call fails for any other reason), there's nothing left
-      // worth doing server-side that should block clearing local state —
+      // worth doing server-side that should block clearing local state.
       // an already-dead session doesn't need to be told it's dead.
     } finally {
       clearTokens();
@@ -285,7 +285,7 @@ export const authApi = {
 
 export const settingsApi = {
   // Also doubles as "add a password": omit current_password when the
-  // account doesn't have one yet (has_password === false) — the backend
+  // account doesn't have one yet (has_password === false), the backend
   // only requires/checks it when a password_hash already exists.
   setPassword: (data: { current_password?: string; new_password: string }) =>
     request<{ message: string }>(
@@ -296,7 +296,7 @@ export const settingsApi = {
 };
 
 export const contactApi = {
-  // `website` is a honeypot — always empty for real people.
+  // `website` is a honeypot, always empty for real people.
   send: (data: { name: string; email: string; topic: string; message: string; website?: string }) =>
     request<{ message: string }>("/contact", { method: "POST", body: JSON.stringify(data) }),
 };

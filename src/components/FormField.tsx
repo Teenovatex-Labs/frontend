@@ -9,8 +9,8 @@ export default function FormField({ label, error, id, name, type, ...props }: Pr
   const isPassword = type === "password";
   const [revealed, setRevealed] = useState(false);
 
-  // Retriggers the shake every time a *new* error lands on this field —
-  // including the same message twice in a row (e.g. wrong password again) —
+  // Retriggers the shake every time a *new* error lands on this field,
+  // including the same message twice in a row (e.g. wrong password again).
   // by remounting the shaking wrapper via `key`. A plain className toggle
   // wouldn't restart a CSS animation that's already at rest.
   const [shakeKey, setShakeKey] = useState(0);

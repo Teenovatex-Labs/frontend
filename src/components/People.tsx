@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import FoundersOrbit from "./FoundersOrbit";
 import FounderModal from "./FounderModal";
+import { Reveal } from "./Motion";
 
 export type Founder = {
   initials: string;
@@ -32,6 +33,7 @@ const FOUNDERS: Founder[] = [
     unit: "Executive leadership",
     href: "https://www.linkedin.com/in/anasmasama",
     bg: "bg-yellow",
+    photo: "/founders/anas-abubakar-masama.png",
     bio: "Sets the direction, protects the mission and makes the final calls that keep TeenovateX moving as one organisation.",
     mandate: "Turn the comeback vision into clear priorities, credible relationships and accountable leadership.",
     speciality: "Strategy, team, administration, partnerships, governance and final accountability.",
@@ -65,6 +67,7 @@ const FOUNDERS: Founder[] = [
     unit: "Community and impact",
     href: "https://www.linkedin.com/in/yasin-lasisi-98626a289/",
     bg: "bg-cream",
+    photo: "/founders/yasin-lasisi.png",
     bio: "Keeps the organisation close to the teenagers it exists for and makes sure their reality changes the plan.",
     mandate: "Build a member experience where teenagers feel seen, find opportunities and keep moving forward.",
     speciality: "Onboarding, opportunities, community health, outreach and impact evidence.",
@@ -95,6 +98,7 @@ const FOUNDERS: Founder[] = [
     role: "Chief Technology Officer",
     unit: "Technology",
     bg: "bg-muted",
+    photo: "/founders/raufu-abdulrahman.png",
     bio: "Owns platform architecture, engineering standards and the team that ships it.",
     mandate: "Build a dependable technical foundation for the website, member platform and future TeenovateX products.",
     speciality: "Architecture, security, releases, code quality and technical team development.",
@@ -110,6 +114,7 @@ const FOUNDERS: Founder[] = [
     role: "Brand and Design Lead",
     unit: "Brand",
     bg: "bg-rose",
+    photo: "/founders/muaz.png",
     bio: "Gives the rebrand its coherent identity, from the logo system to the standards behind every public touchpoint.",
     mandate: "Create and protect a visual identity that feels youthful, credible and unmistakably TeenovateX.",
     speciality: "Brand identity direction, logo development, visual standards and quality control.",
@@ -126,6 +131,7 @@ const FOUNDERS: Founder[] = [
     unit: "Growth and resources",
     bg: "bg-ink",
     fg: "text-cream",
+    photo: "/founders/adeyemi-gabriel.png",
     bio: "Builds partnerships and keeps budgets honest without letting promises drift.",
     mandate: "Secure and steward the money, partners and practical support required to deliver the mission responsibly.",
     speciality: "Budgets, financial records, sponsor proposals and partnership administration.",
@@ -141,6 +147,7 @@ const FOUNDERS: Founder[] = [
     role: "Head of Labs and Technical Programmes",
     unit: "Labs",
     bg: "bg-yellow",
+    photo: "/founders/quadri-lasisi.png",
     bio: "Converts ambitious ideas into structured build challenges and technical programmes.",
     mandate: "Design hands-on environments where teenagers learn by solving, building, presenting and improving real work.",
     speciality: "Build challenges, workshops, mentors and programme delivery systems.",
@@ -156,6 +163,7 @@ const FOUNDERS: Founder[] = [
     role: "Venture and Project Incubation Lead",
     unit: "Project incubation",
     bg: "bg-pink",
+    photo: "/founders/david-uhumagho.png",
     bio: "Helps promising member projects validate real problems and ship beyond a challenge.",
     mandate: "Help strong member projects survive beyond the event that created them and grow through evidence.",
     speciality: "Problem discovery, validation, build reviews and project showcases.",
@@ -218,6 +226,7 @@ const FOUNDERS: Founder[] = [
     unit: "Product experience",
     bg: "bg-ink",
     fg: "text-cream",
+    photo: "/founders/aisha.png",
     bio: "Translates the new direction into clear, human digital experiences.",
     mandate: "Design the member-facing website and TeenCoffee experience so the brand feels human, useful and easy to navigate.",
     speciality: "UI and UX for the website, plus design leadership for TeenCoffee.",
@@ -238,17 +247,17 @@ export default function People() {
         {/* Bottom padding reserves the height of the corner logo (54vw wide,
             1632x1109 aspect) so the text never runs into it. */}
         <div className="md:pb-[calc(min(37vw,585px)+32px)]">
-          <p className="eyebrow text-rose">03 / The humans behind it</p>
-          <h2 className="mt-6 max-w-2xl text-4xl md:text-5xl">
-            Meet the people
-            <br />
-            making the comeback real.
-          </h2>
-          <p className="mt-5 max-w-md text-muted">
-            A focused team of builders, operators and researchers. Each person owns a different part of the same comeback.
-          </p>
+          <Reveal direction="right">
+            <h2 className="max-w-2xl text-4xl md:text-5xl">
+              Meet the people building TeenovateX with you.
+            </h2>
+            <p className="mt-6 max-w-md text-[18px] leading-relaxed text-muted">
+              Builders, operators, researchers, and designers who care about giving teenagers a serious place to create.
+            </p>
+          </Reveal>
         </div>
 
+        <Reveal direction="left">
         <div>
           <FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
 
@@ -271,9 +280,10 @@ export default function People() {
             </div>
           </div>
         </div>
+        </Reveal>
       </div>
 
-      {/* Flush in the section's bottom-left corner — no padding or margin.
+      {/* Flush in the section's bottom-left corner, with no padding or margin.
           The artwork's dark band bleeds off its own left and bottom edges. */}
       <img
         src="/assets/logo-long-1.svg"

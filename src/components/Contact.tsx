@@ -18,7 +18,6 @@ const TOPICS: { id: ContactTopic; label: string }[] = [
   { id: "other", label: "Something else" },
 ];
 
-const PHRASES = ["a question", "an idea", "a partnership", "a wild what-if"];
 const MAX = 2000;
 
 function PaperPlane({ className }: { className?: string }) {
@@ -33,7 +32,6 @@ function PaperPlane({ className }: { className?: string }) {
 
 export default function Contact() {
   const reduce = useReducedMotion();
-  const [phrase, setPhrase] = useState(0);
   const [topic, setTopic] = useState<ContactTopic>("hello");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,12 +40,6 @@ export default function Contact() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
-
-  useEffect(() => {
-    if (reduce) return;
-    const t = window.setInterval(() => setPhrase((p) => (p + 1) % PHRASES.length), 2600);
-    return () => window.clearInterval(t);
-  }, [reduce]);
 
   useEffect(() => {
     const onTopic = (e: Event) => {
@@ -88,32 +80,22 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="relative overflow-hidden border-b border-line py-16 md:py-24">
+    <motion.section
+      id="contact"
+      initial={reduce ? false : { opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+      className="relative overflow-hidden border-b border-line py-16 md:py-24"
+    >
       <div className="wrap grid gap-12 md:grid-cols-[0.9fr_1.1fr] md:gap-20">
         <div>
-          <p className="eyebrow text-rose">06 / Say hello</p>
-          <h2 className="mt-6 text-[40px] leading-[1.08] md:text-[60px]">
-            Got
-            <span className="mt-1 grid">
-              {PHRASES.map((p, i) => (
-                <span
-                  key={p}
-                  aria-hidden={i !== phrase}
-                  style={{ gridArea: "1 / 1" }}
-                  className={`font-serif font-normal italic transition-all duration-500 ${
-                    i === phrase ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-                  }`}
-                >
-                  <span className="highlight">{p}</span>?
-                </span>
-              ))}
-            </span>
+          <h2 className="text-[40px] leading-[1.08] md:text-[60px]">
+            Talk to someone on the TeenovateX team.
           </h2>
-          <p className="sr-only">Got a question, an idea, a partnership or a wild what-if?</p>
 
           <p className="mt-6 max-w-[420px] text-lg text-muted">
-            Ask us anything, pitch us something, or just tell us what you&rsquo;re building. A real person
-            on the team reads every message.
+            Ask a question, propose a partnership, or show us what you are building. A real person reads every message.
           </p>
 
           <ul className="mt-10 space-y-4 border-t border-line pt-6 text-[15px]">
@@ -135,7 +117,7 @@ export default function Contact() {
         </div>
 
         <div className="relative md:-rotate-[0.6deg]">
-          <div className="relative overflow-hidden border border-ink bg-white shadow-[8px_8px_0_var(--pink)]">
+          <div className="relative overflow-hidden rounded-[18px] border-2 border-ink bg-white shadow-[10px_11px_0_var(--ink),16px_17px_0_var(--pink)]">
             <div className="airmail h-3 border-b border-ink" aria-hidden="true" />
 
             <div className="relative min-h-[520px] p-6 md:p-9">
@@ -262,7 +244,7 @@ export default function Contact() {
                     <p className="eyebrow text-rose">Delivered</p>
                     <h3 className="mt-3 text-[36px] leading-[1.05] md:text-[46px]">
                       It&rsquo;s on its way,{" "}
-                      <span className="font-serif font-normal italic">
+                      <span className="font-semibold">
                         <span className="highlight">{name.trim().split(" ")[0] || "friend"}.</span>
                       </span>
                     </h3>
@@ -279,6 +261,6 @@ export default function Contact() {
           </div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

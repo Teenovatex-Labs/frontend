@@ -14,7 +14,7 @@ type Mode = "login" | "signup";
 
 // Consumes the fallback link from the verification email
 // (/auth?mode=signup&verify_email=...&code=...) for anyone whose OTP didn't
-// land — verifies immediately on load instead of making them retype the code.
+// land, verifies immediately on load instead of making them retype the code.
 function EmailLinkVerifier({ email, code }: { email: string; code: string }) {
   const { verifyEmail } = useAuth();
   const router = useRouter();

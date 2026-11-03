@@ -79,7 +79,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     // Both steps' buttons are type="submit" so Enter always does the right
-    // thing from wherever the cursor is — advance past email, actually log
+    // thing from wherever the cursor is, advance past email, actually log
     // in once password is on screen.
     if (step === 0) {
       goNext();
@@ -118,7 +118,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
 
   const panelClass = direction === "back" ? "step-panel-back" : "step-panel-forward";
 
-  // Still checking a persisted session, or already have one — skip the form
+  // Still checking a persisted session, or already have one, skip the form
   // entirely instead of flashing it before the redirect effect above fires.
   if (loading || user || googleBusy) {
     return <SigningIn label={googleBusy ? "Signing you in with Google" : user ? "Taking you in" : "Checking your session"} />;
@@ -133,7 +133,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
             One quick <span className="font-serif italic font-medium text-rose">check.</span>
           </>
         }
-        description="Your email isn't verified yet — we sent a 6-digit code to"
+        description="Your email isn't verified yet, we sent a 6-digit code to"
         onSubmit={async (code) => {
           await verifyEmail(email, code);
           router.push(landingPath());

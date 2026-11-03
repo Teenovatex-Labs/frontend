@@ -19,7 +19,7 @@ export type Step = {
 
 type NodeState = "done" | "active" | "upcoming";
 
-/** Numbered progress rail for a multi-step form — nodes pop in, the fill
+/** Numbered progress rail for a multi-step form, nodes pop in, the fill
  * between them eases forward and back, and the active step's icon plays
  * its built-in animation so the rail itself feels alive, not just a bar. */
 export default function StepRail({ steps, current }: { steps: Step[]; current: number }) {
@@ -49,7 +49,7 @@ function StepNode({ step, state }: { step: Step; state: NodeState }) {
   const ref = useRef<IconHandle>(null);
   const Icon = step.icon;
 
-  // Give the active node's icon a little life beyond the slide-in — it
+  // Give the active node's icon a little life beyond the slide-in, it
   // plays its own animation the moment it becomes current, and every node
   // (done or upcoming) can still be replayed on hover.
   useEffect(() => {
