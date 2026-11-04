@@ -15,13 +15,14 @@ type AuthContextValue = {
     password: string;
     birth_date: string;
     timezone?: string;
+    invite_token?: string;
   }) => Promise<{ email: string; require_verification: boolean }>;
   verifyEmail: (email: string, code: string) => Promise<void>;
   resendVerification: (email: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   verifyResetCode: (email: string, code: string) => Promise<string>;
   resetPassword: (token: string, new_password: string) => Promise<void>;
-  loginWithGoogle: (idToken: string) => Promise<void>;
+  loginWithGoogle: (idToken: string, inviteToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 };
@@ -125,10 +126,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginWithGoogle: AuthContextValue["loginWithGoogle"] = async (idToken) => {
+  const loginWithGoogle: AuthContextValue["loginWithGoogle"] = async (idToken, inviteToken) => {
     setError(null);
     try {
-      await authApi.google(idToken);
+      await authApi.google(idToken, inviteToken);
       await afterAuth();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Google sign-in failed");

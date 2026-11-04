@@ -62,7 +62,7 @@ export default function AuthSplit({
     <div
       key="form"
       ref={formRef}
-      className="relative flex h-screen items-center justify-center overflow-hidden px-5 py-6"
+      className="relative flex min-h-screen flex-col overflow-x-hidden px-5 py-6 lg:h-screen lg:overflow-y-auto"
     >
       {/* Mobile/tablet only, there's no room for the side panel, so the
           brand shows up as a big, unmissable watermark behind the form. */}
@@ -72,12 +72,12 @@ export default function AuthSplit({
         aria-hidden="true"
         className="pointer-events-none absolute left-1/2 top-1/2 w-[240%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-[0.16] lg:hidden"
       />
-      <div className="relative w-full max-w-[440px]">{children}</div>
+      <div className="relative m-auto w-full max-w-[440px]">{children}</div>
     </div>
   );
 
   return (
-    <main className="h-screen overflow-hidden lg:grid lg:grid-cols-2">
+    <main className="min-h-screen lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
       {imageSide === "left" ? [panel, form] : [form, panel]}
     </main>
   );
