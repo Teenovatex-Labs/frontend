@@ -19,7 +19,8 @@ import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
 import VerifyCodeScreen from "@/components/auth/VerifyCodeScreen";
 import useIconHover from "@/lib/useIconHover";
 import { registerBaseSchema, fieldErrors } from "@/lib/validation";
-import { browserTimezone, todayIso } from "@/lib/age";
+import { browserTimezone } from "@/lib/age";
+import BirthDatePicker from "@/components/ui/BirthDatePicker";
 
 const STEPS: Step[] = [
   { id: "you", label: "You", icon: UserIcon },
@@ -246,16 +247,8 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
                 error={errors.username}
               />
               <div>
-                <FormField
-                  label="Date of birth"
-                  type="date"
-                  name="birth_date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                  autoComplete="bday"
-                  max={todayIso()}
-                  error={errors.birth_date}
-                />
+                <p className="mb-2 text-sm font-bold">Date of birth</p>
+                <BirthDatePicker value={birthDate} onChange={setBirthDate} error={errors.birth_date} />
                 <p className="mt-1.5 text-xs text-muted">TeenovateX is for ages 13 and up. We never show this on your profile.</p>
               </div>
             </>
