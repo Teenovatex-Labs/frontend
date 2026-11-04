@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 import CodeSlots, { type CodeSlotsStatus } from "@/components/ui/CodeSlots";
+import { LottieSlot } from "@/components/ui/LottieSlot";
 
 type ResendState = "idle" | "sending" | "success" | "error";
 
@@ -101,7 +102,12 @@ export default function VerifyCodeScreen({
       </div>
 
       {status === "error" && error && <p className="mt-4 text-center text-sm text-rose">{error}</p>}
-      {status === "success" && <p className="mt-4 text-center text-sm font-medium text-emerald-600">Code accepted!</p>}
+      {status === "success" && (
+        <div className="mt-4 flex flex-col items-center">
+          <LottieSlot src="/lottie/success.json" label="" loop={false} className="h-24 w-24" />
+          <p className="text-center text-sm font-medium text-emerald-600">Code accepted!</p>
+        </div>
+      )}
 
       <div className="mt-8 text-center text-sm text-muted">
         Didn&rsquo;t get it?{" "}
