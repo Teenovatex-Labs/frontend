@@ -103,6 +103,8 @@ export const inboxApi = {
   remove: (id: string) => request<unknown>(`/notifications/${id}`, { method: "DELETE" }, authed),
 };
 
+export type Honor = { id: string; slug: string; name: string; description: string; criteria_text: string; tier: "standard" | "high" | "top"; image_url: string | null; fallback_url: string | null; awarded_at: string; featured: boolean };
+
 export type PublicProfile =
   | { private: true; username: string; avatar_url: string | null }
   | (Pick<UserProfile, "id" | "username" | "full_name" | "avatar_url" | "bio" | "points" | "streak" | "social_links" | "created_at"> & {
@@ -110,12 +112,14 @@ export type PublicProfile =
       rank: number;
       level: LevelInfo;
       badges: EarnedBadge[];
+      honors: Honor[];
       lab_count: number;
     });
 
 export const peopleApi = {
   get: (username: string) => request<PublicProfile>(`/users/${encodeURIComponent(username)}`, {}, authed),
   labs: (username: string) => request<{ projects: Lab[] }>(`/users/${encodeURIComponent(username)}/projects`, {}, authed),
+  setFeaturedBadges: (award_ids: string[]) => request<{ featured: string[] }>("/users/me/badges/featured", { method: "PATCH", body: json({ award_ids }) }, write()),
 };
 
 export type NotificationSettings = { email_notifications: boolean; vote_alerts: boolean; contest_updates: boolean; public_profile?: boolean; ai_chat?: boolean };
@@ -605,4 +609,44 @@ export const membershipAdminApi = {
 export const membershipApi = {
   myReview: () => request<{ review: { id: string; response_due_at: string; responded: boolean } | null }>("/membership/review", {}, authed),
   respond: (message: string) => request<{ ok: boolean }>("/membership/review/respond", { method: "POST", body: json({ message }) }, write()),
+};
+
+export type BadgeTier = "standard" | "high" | "top";
+export type BadgeDefinition = {
+  id: string; slug: string; name: string; description: string; tier: BadgeTier; criteria_text: string;
+  image_kind: string | null; image_url: string | null; fallback_url: string | null; active: boolean; repeatable: boolean; awards: number;
+};
+
+export const badgesAdminApi = {
+  list: () => request<{ items: BadgeDefinition[] }>("/admin/badges", {}, authed),
+  create: (data: { slug: string; name: string; description: string; tier?: BadgeTier; criteria_text: string; repeatable?: boolean }) =>
+    request<BadgeDefinition>("/admin/badges", { method: "POST", body: json(data) }, write()),
+  update: (id: string, data: Partial<{ name: string; description: string; tier: BadgeTier; criteria_text: string; active: boolean; repeatable: boolean }>) =>
+    request<BadgeDefinition>(`/admin/badges/${id}`, { method: "PATCH", body: json(data) }, write()),
+  uploadImage: (id: string, file: File) => {
+    const form = new FormData();
+    form.append("image", file);
+    return request<BadgeDefinition>(`/admin/badges/${id}/image`, { method: "POST", body: form }, write());
+  },
+  award: (id: string, data: { user_id: string; reason: string; challenge_id?: string }) =>
+    request<{ id: string; badge: BadgeDefinition; awarded_at: string }>(`/admin/badges/${id}/award`, { method: "POST", body: json(data) }, write()),
+  revoke: (awardId: string, reason: string) =>
+    request<{ revoked: boolean }>(`/admin/badge-awards/${awardId}/revoke`, { method: "POST", body: json({ reason }) }, write()),
+};
+
+export type PointRule = { key: string; points: number; daily_cap: number | null; description: string; customised: boolean };
+export type Season = { id: string; number: number; name: string; starts_at: string; ends_at: string | null; is_current: boolean; archived_members?: number };
+
+export const pointRulesApi = {
+  list: () => request<{ items: PointRule[] }>("/admin/point-rules", {}, authed),
+  update: (key: string, data: { points?: number; daily_cap?: number | null }) =>
+    request<PointRule>(`/admin/point-rules/${key}`, { method: "PATCH", body: json(data) }, write()),
+  reset: (key: string) => request<PointRule>(`/admin/point-rules/${key}`, { method: "PATCH", body: json({ reset: true }) }, write()),
+};
+
+export const seasonsApi = {
+  list: () => request<{ items: Season[] }>("/admin/seasons", {}, authed),
+  totals: (id: string) => request<{ items: { rank: number; username: string; points: number }[] }>(`/admin/seasons/${id}/totals`, {}, authed),
+  start: (data: { confirm: true; name?: string }) =>
+    request<{ ended: Season; current: Season; archived_members: number }>("/admin/seasons/start", { method: "POST", body: json(data) }, write()),
 };

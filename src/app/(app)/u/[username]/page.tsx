@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError, uploadsApi } from "@/lib/api";
-import { messagesApi, peopleApi, rewardsApi, safetyApi } from "@/lib/services";
+import { messagesApi, peopleApi, rewardsApi, safetyApi, type Honor } from "@/lib/services";
 import Badge from "@/components/ui/Badge";
 import ReportButton from "@/components/safety/ReportDialog";
 import { shrinkImage } from "@/lib/image";
@@ -164,6 +165,15 @@ export default function PersonPage() {
         <StatTile label="Labs" value={p.lab_count} tone="white" />
       </div>
 
+      {p.honors.length > 0 && (
+        <>
+          <h2 className="mt-12 text-[26px] tracking-[-0.03em]">
+            Honours <span className="font-serif font-normal italic">({p.honors.length})</span>
+          </h2>
+          <HonorsRow honors={p.honors} isMe={isMe} username={username} />
+        </>
+      )}
+
       <h2 className="mt-12 text-[26px] tracking-[-0.03em]">
         Badges <span className="font-serif font-normal italic">({p.badges.length})</span>
       </h2>
@@ -192,5 +202,53 @@ export default function PersonPage() {
         )}
       </div>
     </main>
+  );
+}
+
+function HonorsRow({ honors, isMe, username }: { honors: Honor[]; isMe: boolean; username: string }) {
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [featuring, setFeaturing] = useState(false);
+  const [picked, setPicked] = useState<string[]>(honors.filter((h) => h.featured).map((h) => h.id));
+
+  const save = useMutation({
+    mutationFn: () => peopleApi.setFeaturedBadges(picked),
+    onSuccess: async () => { toast.success("Saved."); setFeaturing(false); await qc.invalidateQueries({ queryKey: keys.person(username) }); },
+    onError: (e) => toast.error(e instanceof ApiError ? e.message : "Couldn't save that."),
+  });
+
+  const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length < 3 ? [...p, id] : p));
+
+  return (
+    <div className="mt-5">
+      {isMe && (
+        <button type="button" onClick={() => setFeaturing((f) => !f)} className="mb-2 text-sm underline underline-offset-4">
+          {featuring ? "Done choosing" : "Choose which to feature (up to 3)"}
+        </button>
+      )}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {honors.map((h) => (
+          <button
+            key={h.id}
+            type="button"
+            disabled={!featuring}
+            onClick={() => toggle(h.id)}
+            title={h.criteria_text}
+            className={`flex items-center gap-3 border p-3 text-left ${h.featured || picked.includes(h.id) ? "border-ink bg-yellow/40 shadow-[3px_3px_0_var(--ink)]" : "border-ink bg-white"} ${featuring ? "cursor-pointer" : ""}`}
+          >
+            {(h.image_url ?? h.fallback_url) && <img src={h.image_url ?? h.fallback_url ?? undefined} alt="" className="h-11 w-11 shrink-0 rounded-full border border-ink object-contain" />}
+            <span>
+              <span className="block text-sm font-medium">{h.name} <span className="rounded-full bg-cream px-1.5 py-0.5 text-[10px]">{h.tier}</span></span>
+              <span className="block text-xs text-muted">{h.description}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+      {featuring && (
+        <button type="button" onClick={() => save.mutate()} disabled={save.isPending} className="btn mt-3 text-sm disabled:opacity-60">
+          {save.isPending ? "Saving…" : "Save featured"}
+        </button>
+      )}
+    </div>
   );
 }
