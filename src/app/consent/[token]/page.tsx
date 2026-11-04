@@ -10,9 +10,9 @@ import { ApiError, request } from "@/lib/api";
 
 type ConsentView = { child_first_name: string; status: "pending" | "confirmed" | "withdrawn" | "expired"; text: string; text_version: string; expires_at: string };
 
-const getConsent = (token: string) => request<ConsentView>(`/admissions/guardian/${token}`);
-const confirmConsent = (token: string) => request<{ status: string }>(`/admissions/guardian/${token}/confirm`, { method: "POST" });
-const withdrawConsent = (token: string) => request<{ status: string }>(`/admissions/guardian/${token}/withdraw`, { method: "POST" });
+const getConsent = (token: string) => request<ConsentView>(`/applications/guardian/${token}`);
+const confirmConsent = (token: string) => request<{ status: string }>(`/applications/guardian/${token}/confirm`, { method: "POST" });
+const withdrawConsent = (token: string) => request<{ status: string }>(`/applications/guardian/${token}/withdraw`, { method: "POST" });
 
 export default function GuardianConsentPage() {
   const { token } = useParams<{ token: string }>();
