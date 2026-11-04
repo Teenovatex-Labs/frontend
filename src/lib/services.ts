@@ -551,11 +551,28 @@ export type ApplicationRubric = {
   insufficient_evidence: string;
 };
 
+export type CriterionEvidence = {
+  criterion: string;
+  title: string;
+  evidence: { position: number; quote: string }[];
+  explanation: string;
+  gap: string | null;
+  suggested_rating: number | null;
+};
+export type ApplicationEvidence = {
+  criteria: CriterionEvidence[];
+  suggestions_visible: boolean;
+  suggestions_hidden_until_review: boolean;
+  machine_written: true;
+  notice: string;
+};
+
 export const admissionsAdminApi = {
   list: (filters: { status?: string; window_id?: string; claimed?: "mine" | "none"; page?: number }) =>
     request<Paged<ApplicationSummary>>(`/admin/applications${qs(filters)}`, {}, authed),
   stats: (window_id?: string) => request<{ counts: Record<string, number>; unclaimed: number }>(`/admin/applications/stats${qs({ window_id })}`, {}, authed),
   get: (id: string) => request<ApplicationDetail>(`/admin/applications/${id}`, {}, authed),
+  evidence: (id: string) => request<ApplicationEvidence>(`/admin/applications/${id}/evidence`, { method: "POST" }, write()),
   summarise: (id: string) => request<{ summary: string; machine_written: true; notice: string }>(`/admin/applications/${id}/summary`, { method: "POST" }, write()),
   claim: (id: string) => request<{ message: string }>(`/admin/applications/${id}/claim`, { method: "POST" }, write()),
   review: (id: string, data: { scores: Record<string, number | null>; recommendation: string; note?: string | null }) =>
