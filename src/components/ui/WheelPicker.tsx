@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 type Props = {
   value: number;
@@ -24,11 +24,17 @@ const TICK_GAP = 14; // px between values
 const FRICTION = 4.2; // higher = glides for less time
 const SNAP_SPEED = 14; // how fast it settles on the nearest value
 
+const ROLL = {
+  enter: (d: number) => ({ y: 44 * d, rotateX: -80 * d, opacity: 0 }),
+  center: { y: 0, rotateX: 0, opacity: 1 },
+  exit: (d: number) => ({ y: -44 * d, rotateX: 80 * d, opacity: 0 }),
+};
+
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 /**
  * A draggable ruler wheel: flick it and it glides, then snaps to the nearest value. The ruler bends like a
- * real wheel (ticks shrink, fade and bunch up toward both edges), the big number blurs while it moves, and
+ * real wheel (ticks shrink, fade and bunch up toward both edges), the big number rolls like a drum as it changes, and
  * every value passed gives a small click. Arrow keys, Home/End and PageUp/PageDown work too.
  */
 export default function WheelPicker({ value, onChange, min, max, step = 1, label, unit, majorEvery = 5, haptics = true, className = "" }: Props) {
@@ -39,7 +45,6 @@ export default function WheelPicker({ value, onChange, min, max, step = 1, label
 
   const rootRef = useRef<HTMLDivElement>(null);
   const tickRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const numberRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<AudioContext | null>(null);
 
   // Everything that changes every frame lives in refs, so dragging never re-renders React.
@@ -54,6 +59,12 @@ export default function WheelPicker({ value, onChange, min, max, step = 1, label
   onChangeRef.current = onChange;
 
   const [shown, setShown] = useState(value);
+  // Which way the number is travelling, so it can roll in from the right side like a drum.
+  const prevShown = useRef(shown);
+  const dir = shown >= prevShown.current ? 1 : -1;
+  useEffect(() => {
+    prevShown.current = shown;
+  }, [shown]);
 
   const tick = useCallback(() => {
     if (!haptics) return;
@@ -89,11 +100,7 @@ export default function WheelPicker({ value, onChange, min, max, step = 1, label
       el.style.opacity = String(c * c * c);
       el.style.transform = `translateX(${radius * Math.sin(angle)}px) scaleY(${0.35 + 0.65 * c})`;
     }
-    if (numberRef.current) {
-      const speed = Math.abs(vel.current);
-      numberRef.current.style.filter = reduced ? "none" : `blur(${Math.min(5, speed * 0.35).toFixed(2)}px)`;
-    }
-  }, [count, reduced]);
+  }, [count]);
 
   const commitIfChanged = useCallback(() => {
     const idx = clamp(Math.round(pos.current), 0, count - 1);
@@ -228,8 +235,22 @@ export default function WheelPicker({ value, onChange, min, max, step = 1, label
         </p>
       )}
       <div className="text-center">
-        <div ref={numberRef} aria-hidden className="font-display text-7xl leading-none tabular-nums will-change-[filter]">
-          {shown}
+        {/* The number is a drum turning on its horizontal axis: going up, the next one rolls in from below and the old one rolls away above; going down, the other way. */}
+        <div aria-hidden className="relative mx-auto h-[4.5rem] w-full [perspective:700px]">
+          <AnimatePresence initial={false} mode="popLayout" custom={dir}>
+            <motion.div
+              key={shown}
+              custom={dir}
+              variants={ROLL}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={reduced ? { duration: 0 } : { duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-0 flex items-center justify-center font-display text-7xl leading-none tabular-nums [transform-style:preserve-3d]"
+            >
+              {shown}
+            </motion.div>
+          </AnimatePresence>
         </div>
         {unit && <p className="mt-2 text-sm text-cream/60">{unit}</p>}
       </div>

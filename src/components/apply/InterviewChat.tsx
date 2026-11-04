@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SendIcon } from "@animateicons/react/lucide/send-icon";
 import useIconHover from "@/lib/useIconHover";
 import { ApiError } from "@/lib/api";
@@ -18,6 +18,7 @@ export default function InterviewChat({ token, locked, onProgress }: { token: st
   const [error, setError] = useState<string | null>(null);
   const [safetyNote, setSafetyNote] = useState<string | null>(null);
   const send = useIconHover();
+  const scroller = useRef<HTMLDivElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -31,6 +32,12 @@ export default function InterviewChat({ token, locked, onProgress }: { token: st
       setLoading(false);
     }
   };
+
+  // Keep the newest question in view: the chat scrolls on its own, so a new question could otherwise sit below the fold.
+  useEffect(() => {
+    const el = scroller.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [state?.next?.position, state?.answered]);
 
   useEffect(() => {
     load();
@@ -73,7 +80,7 @@ export default function InterviewChat({ token, locked, onProgress }: { token: st
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex max-h-[420px] flex-col gap-3 overflow-y-auto rounded-md border border-ink bg-white p-4">
+      <div ref={scroller} aria-live="polite" className="flex max-h-[420px] flex-col gap-3 overflow-y-auto rounded-md border border-ink bg-white p-4">
         {state.answered === 0 && !state.next && (
           <p className="text-sm text-muted">Alfred will ask a few short questions to get to know you. Nothing here is scored by looks or demographics.</p>
         )}
@@ -209,7 +216,7 @@ function AnswerInput({ q, answer, setAnswer, picked, setPicked, value, setValue,
               aria-label="Your answer"
               className="flex-1"
             />
-            <span className="w-8 text-right text-sm font-semibold tabular-nums">{value ?? "–"}</span>
+            <span className="min-w-8 text-right text-sm font-semibold tabular-nums">{value ?? <span className="font-normal text-muted">Move it to answer</span>}</span>
           </div>
         )}
         {(spec.low || spec.high) && (

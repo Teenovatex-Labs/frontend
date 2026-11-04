@@ -42,9 +42,12 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 30px;
+    /* Decorative, animated or carousel elements must never make the page scroll sideways. `clip` (unlike `hidden`) keeps sticky headers working. */
+    overflow-x: clip;
   }
 
   body {
+    overflow-x: clip;
     background-color: var(--cream);
     color: var(--ink);
     font-family: var(--font-body), Georgia, serif;
