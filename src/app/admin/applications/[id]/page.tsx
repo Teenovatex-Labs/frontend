@@ -35,11 +35,12 @@ export default function ApplicationReviewPage() {
   const [summary, setSummary] = useState<string | null>(null);
   const summarise = useMutation({ mutationFn: () => admissionsAdminApi.summarise(id), onSuccess: (r) => setSummary(r.summary), onError: fail });
 
-  const [scores, setScores] = useState<Record<string, number>>({});
+  // undefined = not chosen yet, null = insufficient evidence. There is no default, so nobody is nudged towards a middle score.
+  const [scores, setScores] = useState<Record<string, number | null>>({});
   const [recommendation, setRecommendation] = useState<"accept" | "decline" | "waitlist" | "shortlist">("shortlist");
   const [note, setNote] = useState("");
   const review = useMutation({
-    mutationFn: () => admissionsAdminApi.review(id, { scores, recommendation, note: note || null }),
+    mutationFn: (payload: Record<string, number | null>) => admissionsAdminApi.review(id, { scores: payload, recommendation, note: note || null }),
     onSuccess: () => { toast.success("Review saved."); void refresh(); },
     onError: fail,
   });
@@ -66,6 +67,8 @@ export default function ApplicationReviewPage() {
   const isMine = a.claimed_by === me?.id;
   const canReview = isMine || a.second_reviewer_id === me?.id;
   const myReview = a.reviews.find((r) => r.reviewer_id === me?.id);
+  const chosen = (c: string): number | null | undefined => (c in scores ? scores[c] : myReview?.scores[c]);
+  const complete = a.criteria.every((c) => chosen(c) !== undefined);
 
   return (
     <>
@@ -153,12 +156,33 @@ export default function ApplicationReviewPage() {
           {canReview && (
             <section className="rounded-md border border-ink bg-white p-4">
               <h2 className="font-bold">{myReview ? "Your review (saved)" : "Your review"}</h2>
+              {a.rubric && (
+                <details className="mt-2 text-sm">
+                  <summary className="cursor-pointer underline underline-offset-4">How to rate</summary>
+                  <div className="mt-2 flex flex-col gap-2 text-xs text-muted">
+                    {a.rubric.ratings.map((r) => <p key={r.rating}><b className="text-ink">{r.rating} · {r.label}.</b> {r.meaning}</p>)}
+                    <p><b className="text-ink">Insufficient evidence.</b> {a.rubric.insufficient_evidence}</p>
+                    {a.criteria.map((c) => (
+                      <p key={c}><b className="text-ink">{a.rubric!.criteria[c]?.title}.</b> {a.rubric!.criteria[c]?.lookFor} <i>{a.rubric!.criteria[c]?.notThis}</i></p>
+                    ))}
+                  </div>
+                </details>
+              )}
               <div className="mt-3 flex flex-col gap-3">
                 {a.criteria.map((c) => (
                   <label key={c} className="flex items-center justify-between gap-2 text-sm">
-                    {CRITERIA_LABEL[c] ?? c}
-                    <select value={scores[c] ?? myReview?.scores[c] ?? 3} onChange={(e) => setScores((s) => ({ ...s, [c]: Number(e.target.value) }))} className="rounded-md border border-ink bg-cream px-2 py-1">
-                      {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+                    <span>
+                      {a.rubric?.criteria[c]?.title ?? CRITERIA_LABEL[c] ?? c}
+                      {a.rubric?.weights[c] ? <span className="ml-1 text-xs text-muted">({a.rubric.weights[c]}%)</span> : null}
+                    </span>
+                    <select
+                      value={chosen(c) === undefined ? "" : chosen(c) === null ? "none" : String(chosen(c))}
+                      onChange={(e) => setScores((s) => ({ ...s, [c]: e.target.value === "none" ? null : Number(e.target.value) }))}
+                      className="rounded-md border border-ink bg-cream px-2 py-1"
+                    >
+                      <option value="" disabled>Choose…</option>
+                      {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n} · {a.rubric?.ratings[n - 1]?.label ?? ""}</option>)}
+                      <option value="none">Insufficient evidence</option>
                     </select>
                   </label>
                 ))}
@@ -169,7 +193,7 @@ export default function ApplicationReviewPage() {
                   <option value="decline">Decline</option>
                 </select>
                 <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Private note (optional)" rows={2} className="rounded-md border border-ink bg-cream px-3 py-2 text-sm" />
-                <button onClick={() => review.mutate()} disabled={review.isPending} className="btn text-sm disabled:opacity-60">{review.isPending ? "Saving…" : "Save review"}</button>
+                <button onClick={() => review.mutate(Object.fromEntries(a.criteria.map((c) => [c, chosen(c) ?? null])))} disabled={review.isPending || !complete} className="btn text-sm disabled:opacity-60">{review.isPending ? "Saving…" : "Save review"}</button>
               </div>
             </section>
           )}
@@ -180,7 +204,7 @@ export default function ApplicationReviewPage() {
               {a.reviews_disagree && <p className="mt-1 text-sm font-semibold text-rose">Reviewers disagree — worth a second look.</p>}
               {a.reviews.map((r) => (
                 <div key={r.id} className="mt-2 text-sm">
-                  <p className="font-medium">{r.kind === "first" ? "First reviewer" : "Second reviewer"}: {r.recommendation} (score {r.weighted_score})</p>
+                  <p className="font-medium">{r.kind === "first" ? "First reviewer" : "Second reviewer"}: {r.recommendation} (score {r.weighted_score ?? "not rated"})</p>
                   {r.note && <p className="text-muted">{r.note}</p>}
                 </div>
               ))}
