@@ -26,6 +26,7 @@ export function LottieSlot({ src, label, className = "", loop = true, autoplay =
   const host = useRef<HTMLDivElement>(null);
   const [lowMotion, setLowMotion] = useState(true);
   const [near, setNear] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setLowMotion(prefersLowMotion());
@@ -67,6 +68,7 @@ export function LottieSlot({ src, label, className = "", loop = true, autoplay =
         entries.forEach((e) => (e.isIntersecting ? anim?.play() : anim?.pause())),
       );
       visibility.observe(node);
+      setReady(true);
     })().catch(() => {
       /* poster stays visible; a failed decoration must never break the page */
     });
@@ -85,7 +87,7 @@ export function LottieSlot({ src, label, className = "", loop = true, autoplay =
       role={label ? "img" : undefined}
       aria-label={label || undefined}
       aria-hidden={label ? undefined : true}
-      style={poster ? { backgroundImage: `url(${poster})`, backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundPosition: "center" } : undefined}
+      style={poster && !ready ? { backgroundImage: `url(${poster})`, backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundPosition: "center" } : undefined}
     />
   );
 }
