@@ -10,6 +10,7 @@ import { keys, timeAgo } from "@/lib/labs";
 import { ApiError } from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
 import Skeleton from "@/components/ui/Skeleton";
+import EvidencePanel from "@/components/admin/EvidencePanel";
 
 const CRITERIA_LABEL: Record<string, string> = {
   curiosity_creativity: "Curiosity & creativity",
@@ -113,7 +114,7 @@ export default function ApplicationReviewPage() {
                 {summarise.isPending ? "Reading…" : "Machine-written summary"}
               </button>
             </div>
-            {summary && <p className="mt-2 rounded-md border border-ink bg-yellow/30 p-3 text-sm">{summary}</p>}
+            {summary && <p className="mt-2 whitespace-pre-line rounded-md border border-ink bg-yellow/30 p-3 text-sm">{summary}</p>}
             <div className="mt-3 flex flex-col gap-3">
               {a.answers.map((qa) => (
                 <div key={qa.id}>
@@ -123,6 +124,8 @@ export default function ApplicationReviewPage() {
               ))}
             </div>
           </section>
+
+          <EvidencePanel id={id} weights={a.rubric?.weights} reviewedAt={myReview?.submitted_at ?? null} />
 
           {a.attachments.length > 0 && (
             <section className="rounded-md border border-ink bg-white p-4">

@@ -98,7 +98,11 @@ export const requestGuardian = (token: string, parent_email: string) =>
     body: JSON.stringify({ parent_email }),
   });
 
-export type InterviewQuestion = { position: number; question: string; format: string };
+/** How a question is answered. Typed answers have no spec. */
+export type QuestionSpec = { options?: string[]; min?: number; max?: number; low?: string; high?: string };
+export type QuestionFormat = "text" | "choice" | "multi" | "scale" | "slider";
+export type InterviewQuestion = { position: number; question: string; format: QuestionFormat | string; spec: QuestionSpec | null };
+export type AnswerPayload = { answer?: string; choice?: string[]; value?: number; note?: string };
 export type InterviewState = {
   /** The most questions Alfred will ask. He may stop sooner once he has heard enough. */
   total: number;
@@ -106,7 +110,7 @@ export type InterviewState = {
   answered: number;
   complete: boolean;
   can_submit: boolean;
-  questions: { position: number; question: string; format: string; answer: string | null }[];
+  questions: { position: number; question: string; format: string; spec: QuestionSpec | null; answer: string | null }[];
   next?: InterviewQuestion | null;
 };
 
@@ -115,11 +119,11 @@ export const getInterview = (token: string) => applicantRequest<InterviewState>(
 export const nextQuestion = (token: string) =>
   applicantRequest<InterviewState>("/applications/interview/next", token, { method: "POST" });
 
-export const answerQuestion = (token: string, position: number, answer: string) =>
+export const answerQuestion = (token: string, position: number, payload: AnswerPayload) =>
   applicantRequest<{ saved: boolean; safety_message?: string | null } & InterviewState>(
     `/applications/interview/answers/${position}`,
     token,
-    { method: "PUT", body: JSON.stringify({ answer }) }
+    { method: "PUT", body: JSON.stringify(payload) }
   );
 
 // Images are private, so the API gives no address for them; links carry their address.
