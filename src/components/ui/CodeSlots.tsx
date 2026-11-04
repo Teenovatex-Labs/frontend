@@ -14,7 +14,7 @@ import {
   useReducedMotion,
   useTransform,
   type MotionValue,
-} from "motion/react";
+} from "framer-motion";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 
