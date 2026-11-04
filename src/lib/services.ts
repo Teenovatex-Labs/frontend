@@ -533,7 +533,7 @@ export type ApplicationSummary = {
 export type ApplicationAnswer = { id: string; position: number; question: string; source: string; criterion: string | null; answer: string };
 export type ApplicationAttachment = { id: string; kind: "image" | "link"; url: string; filename: string | null; scan_status: string };
 export type ApplicationClarification = { id: string; question: string; response: string | null; status: "open" | "answered"; due_at: string };
-export type ApplicationReview = { id: string; reviewer_id: string; kind: "first" | "second"; scores: Record<string, number>; weighted_score: number; recommendation: string; note: string | null; submitted_at: string | null };
+export type ApplicationReview = { id: string; reviewer_id: string; kind: "first" | "second"; scores: Record<string, number | null>; weighted_score: number | null; recommendation: string; note: string | null; submitted_at: string | null };
 export type ApplicationDetail = ApplicationSummary & {
   email: string; whatsapp: string; city: string; school: string | null; education_level: string;
   interests: string[]; skill_level: string | null; skill_level_note: string | null;
@@ -542,6 +542,13 @@ export type ApplicationDetail = ApplicationSummary & {
   second_reviewer_id: string | null; decided_by: string | null; decision_note: string | null;
   answers: ApplicationAnswer[]; attachments: ApplicationAttachment[]; clarifications: ApplicationClarification[];
   reviews: ApplicationReview[]; reviews_disagree: boolean | null; criteria: string[];
+  rubric?: ApplicationRubric;
+};
+export type ApplicationRubric = {
+  weights: Record<string, number>;
+  criteria: Record<string, { title: string; lookFor: string; examples: string[]; notThis: string }>;
+  ratings: { rating: number; label: string; meaning: string }[];
+  insufficient_evidence: string;
 };
 
 export const admissionsAdminApi = {
@@ -551,8 +558,8 @@ export const admissionsAdminApi = {
   get: (id: string) => request<ApplicationDetail>(`/admin/applications/${id}`, {}, authed),
   summarise: (id: string) => request<{ summary: string; machine_written: true; notice: string }>(`/admin/applications/${id}/summary`, { method: "POST" }, write()),
   claim: (id: string) => request<{ message: string }>(`/admin/applications/${id}/claim`, { method: "POST" }, write()),
-  review: (id: string, data: { scores: Record<string, number>; recommendation: string; note?: string | null }) =>
-    request<{ id: string; weighted_score: number; message: string }>(`/admin/applications/${id}/review`, { method: "POST", body: json(data) }, write()),
+  review: (id: string, data: { scores: Record<string, number | null>; recommendation: string; note?: string | null }) =>
+    request<{ id: string; weighted_score: number | null; message: string }>(`/admin/applications/${id}/review`, { method: "POST", body: json(data) }, write()),
   assignSecondReviewer: (id: string, reviewer_id: string) =>
     request<{ message: string }>(`/admin/applications/${id}/second-review`, { method: "POST", body: json({ reviewer_id }) }, write()),
   decide: (id: string, data: { decision: string; note?: string | null; feedback?: string | null }) =>
