@@ -575,3 +575,34 @@ export const cohortsApi = {
   release: (id: string, allow_undecided?: boolean) =>
     request<{ released: number; invited: number; still_under_review: number }>(`/admin/cohorts/${id}/release`, { method: "POST", body: json({ allow_undecided }) }, write()),
 };
+
+export type OnboardingStep = { key: string; title: string; required: boolean; link: string | null; done: boolean; self_reported: boolean };
+export type OnboardingState = { status: string; due_at: string | null; overdue: boolean; steps: OnboardingStep[]; complete: boolean };
+export const onboardingApi = {
+  get: () => request<OnboardingState>("/onboarding", {}, authed),
+  confirmStep: (step: string) => request<OnboardingState>(`/onboarding/steps/${step}`, { method: "POST" }, write()),
+  extend: (id: string, data: { days: number; reason: string }) =>
+    request<{ onboarding_due_at: string }>(`/admin/onboarding/${id}/extend`, { method: "POST", body: json(data) }, write()),
+};
+
+export type MembershipStatus = "onboarding" | "active" | "on_leave" | "inactive" | "alumni" | "removed";
+export type MemberRow = { id: string; username: string; membership_status: MembershipStatus; status_changed_at: string; last_login_at: string | null };
+export type InactivityCandidate = { id: string; username: string; status: MembershipStatus; last_seen: string; under_review: boolean };
+export type InactivityReview = { id: string; user_id: string; username: string; reason: string; response_due_at: string; overdue: boolean; member_response: string | null; responded_at: string | null };
+
+export const membershipAdminApi = {
+  members: (status?: string) => request<{ items: MemberRow[] }>(`/admin/members${qs({ status })}`, {}, authed),
+  inactivity: (days?: number) => request<{ days: number; items: InactivityCandidate[] }>(`/admin/members/inactivity${qs({ days })}`, {}, authed),
+  setStatus: (id: string, data: { status: MembershipStatus; reason: string }) =>
+    request<{ status: string }>(`/admin/members/${id}/status`, { method: "POST", body: json(data) }, write()),
+  reviews: () => request<{ items: InactivityReview[] }>("/admin/inactivity-reviews", {}, authed),
+  startReview: (id: string, data: { reason: string; days?: number }) =>
+    request<{ id: string; response_due_at: string }>(`/admin/members/${id}/inactivity-review`, { method: "POST", body: json(data) }, write()),
+  decideReview: (id: string, data: { decision: "active" | "on_leave" | "alumni" | "removed"; reason: string }) =>
+    request<{ decision: string }>(`/admin/members/${id}/inactivity-review/decide`, { method: "POST", body: json(data) }, write()),
+};
+
+export const membershipApi = {
+  myReview: () => request<{ review: { id: string; response_due_at: string; responded: boolean } | null }>("/membership/review", {}, authed),
+  respond: (message: string) => request<{ ok: boolean }>("/membership/review/respond", { method: "POST", body: json({ message }) }, write()),
+};
