@@ -80,6 +80,11 @@ export type PointsSummary = {
   activity: { description: string; points: number; timestamp: string }[];
 };
 
+export const seasonBoardApi = {
+  list: () => request<{ items: { id: string; number: number; name: string; is_current: boolean }[] }>("/seasons", {}, authed),
+  board: (id: string) => request<{ season: { id: string; name: string }; leaderboard: LeaderboardEntry[] }>(`/seasons/${id}/leaderboard`, {}, authed),
+};
+
 export const pointsApi = {
   leaderboard: (page = 1, limit = 20, period: "all" | "week" = "all") =>
     request<{ leaderboard: LeaderboardEntry[] }>(`/leaderboard${qs({ page, limit, period })}`, {}, authed),
