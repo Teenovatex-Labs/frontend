@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { reportBrowserError } from "@/lib/monitor";
+import { LottieSlot } from "@/components/ui/LottieSlot";
 
 // Shown when a page crashes. The error goes to the team (if alerts are on); the member gets a calm way out.
 export default function RouteError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -12,6 +13,7 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
   return (
     <main className="grid min-h-[60vh] place-items-center px-6 py-16 text-center">
       <div>
+        <LottieSlot src="/lottie/error.json" label="" className="mx-auto h-40 w-40" />
         <p className="eyebrow text-rose">Something broke</p>
         <h1 className="mt-3 text-[32px] tracking-[-0.03em] md:text-[44px]">
           That wasn&rsquo;t supposed to <span className="font-serif font-normal italic">happen.</span>
