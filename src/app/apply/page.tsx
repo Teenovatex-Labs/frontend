@@ -7,8 +7,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ApiError } from "@/lib/api";
 import { getApplicantToken, getWindow, requestReminder, setApplicantToken, type WindowStatus } from "@/lib/admissions";
-import StartApplyForm from "@/components/apply/StartApplyForm";
-import ApplicationPortal from "@/components/apply/ApplicationPortal";
+import dynamic from "next/dynamic";
+
+const StartApplyForm = dynamic(() => import("@/components/apply/StartApplyForm"), { loading: () => <p className="text-sm text-muted">Loading…</p> });
+const ApplicationPortal = dynamic(() => import("@/components/apply/ApplicationPortal"), { loading: () => <p className="text-sm text-muted">Loading…</p> });
 
 function ApplyContent() {
   const params = useSearchParams();
