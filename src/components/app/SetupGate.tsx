@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError, usersApi } from "@/lib/api";
 import FormField from "@/components/FormField";
-import { todayIso } from "@/lib/age";
+import BirthDatePicker from "@/components/ui/BirthDatePicker";
 import { birthDateSchema, usernameSchema } from "@/lib/validation";
 
 // Full-screen stop for an account that isn't finished yet. Google sign-ups skip
@@ -111,17 +111,10 @@ export default function SetupGate() {
               />
             )}
             {needsBirthDate && (
-              <FormField
-                label="Date of birth"
-                type="date"
-                name="birth_date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                autoComplete="bday"
-                max={todayIso()}
-                error={errors.birth_date}
-                autoFocus={!needsUsername}
-              />
+              <div>
+                <p className="mb-2 text-sm font-bold">Date of birth</p>
+                <BirthDatePicker value={birthDate} onChange={setBirthDate} error={errors.birth_date} />
+              </div>
             )}
 
             {formError && <p className="text-sm text-rose">{formError}</p>}
