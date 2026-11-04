@@ -64,71 +64,77 @@ export type StartApplicationInput = {
   education_level: string;
 };
 
-export const getWindow = () => request<WindowStatus>("/admissions/window");
+export const getWindow = () => request<WindowStatus>("/applications/window");
 
 export const startApplication = (data: StartApplicationInput) =>
-  request<{ message: string }>("/admissions/start", { method: "POST", body: JSON.stringify(data) });
+  request<{ message: string }>("/applications/start", { method: "POST", body: JSON.stringify(data) });
 
 export const lookupApplication = (email: string) =>
-  request<{ message: string }>("/admissions/lookup", { method: "POST", body: JSON.stringify({ email }) });
+  request<{ message: string }>("/applications/lookup", { method: "POST", body: JSON.stringify({ email }) });
 
 export const requestReminder = (email: string) =>
-  request<{ message: string }>("/admissions/reminders", { method: "POST", body: JSON.stringify({ email }) });
+  request<{ message: string }>("/applications/reminders", { method: "POST", body: JSON.stringify({ email }) });
 
-export const getMyApplication = (token: string) => applicantRequest<ApplicationView>("/admissions/me", token);
+export const getMyApplication = (token: string) => applicantRequest<ApplicationView>("/applications/me", token);
 
 export const updateDraft = (token: string, data: Partial<Record<string, unknown>>) =>
-  applicantRequest<ApplicationView>("/admissions/draft", token, { method: "PATCH", body: JSON.stringify(data) });
+  applicantRequest<ApplicationView>("/applications/draft", token, { method: "PATCH", body: JSON.stringify(data) });
 
 export const submitApplication = (token: string) =>
-  applicantRequest<ApplicationView>("/admissions/submit", token, { method: "POST" });
+  applicantRequest<ApplicationView>("/applications/submit", token, { method: "POST" });
 
 export const withdrawApplication = (token: string) =>
-  applicantRequest<ApplicationView>("/admissions/withdraw", token, { method: "POST" });
+  applicantRequest<ApplicationView>("/applications/withdraw", token, { method: "POST" });
 
 export const replyToClarification = (token: string, id: string, response: string) =>
-  applicantRequest<{ message: string }>(`/admissions/clarifications/${id}/reply`, token, {
+  applicantRequest<{ message: string }>(`/applications/clarifications/${id}/reply`, token, {
     method: "POST",
     body: JSON.stringify({ response }),
   });
 
 export const requestGuardian = (token: string, parent_email: string) =>
-  applicantRequest<{ message: string }>("/admissions/guardian", token, {
+  applicantRequest<{ message: string }>("/applications/guardian", token, {
     method: "POST",
     body: JSON.stringify({ parent_email }),
   });
 
 export type InterviewQuestion = { position: number; question: string; format: string };
 export type InterviewState = {
-  answered: { position: number; question: string; answer: string }[];
+  /** The most questions Alfred will ask. He may stop sooner once he has heard enough. */
+  total: number;
+  /** How many have been answered. */
+  answered: number;
+  complete: boolean;
   can_submit: boolean;
+  questions: { position: number; question: string; format: string; answer: string | null }[];
   next?: InterviewQuestion | null;
 };
 
-export const getInterview = (token: string) => applicantRequest<InterviewState>("/admissions/interview", token);
+export const getInterview = (token: string) => applicantRequest<InterviewState>("/applications/interview", token);
 
 export const nextQuestion = (token: string) =>
-  applicantRequest<InterviewState>("/admissions/interview/next", token, { method: "POST" });
+  applicantRequest<InterviewState>("/applications/interview/next", token, { method: "POST" });
 
 export const answerQuestion = (token: string, position: number, answer: string) =>
   applicantRequest<{ saved: boolean; safety_message?: string | null } & InterviewState>(
-    `/admissions/interview/answers/${position}`,
+    `/applications/interview/answers/${position}`,
     token,
     { method: "PUT", body: JSON.stringify({ answer }) }
   );
 
-export type Attachment = { id: string; kind: "image" | "link"; url: string; created_at: string };
+// Images are private, so the API gives no address for them; links carry their address.
+export type Attachment = { id: string; kind: "image" | "link"; url: string | null; filename: string | null; size_bytes: number | null };
 
-export const listAttachments = (token: string) => applicantRequest<Attachment[]>("/admissions/attachments", token);
+export const listAttachments = async (token: string) => (await applicantRequest<{ items: Attachment[] }>("/applications/attachments", token)).items;
 
 export const addAttachmentLink = (token: string, url: string) =>
-  applicantRequest<Attachment>("/admissions/attachments/link", token, { method: "POST", body: JSON.stringify({ url }) });
+  applicantRequest<Attachment>("/applications/attachments/link", token, { method: "POST", body: JSON.stringify({ url }) });
 
 export const removeAttachment = (token: string, id: string) =>
-  applicantRequest<{ message: string }>(`/admissions/attachments/${id}`, token, { method: "DELETE" });
+  applicantRequest<{ ok: boolean }>(`/applications/attachments/${id}`, token, { method: "DELETE" });
 
 export async function uploadAttachmentImage(token: string, file: File): Promise<Attachment> {
   const form = new FormData();
   form.append("image", file);
-  return applicantRequest<Attachment>("/admissions/attachments/image", token, { method: "POST", body: form });
+  return applicantRequest<Attachment>("/applications/attachments/image", token, { method: "POST", body: form });
 }

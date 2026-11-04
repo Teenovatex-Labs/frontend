@@ -85,7 +85,7 @@ export default function AttachmentsPanel({ token, locked }: { token: string; loc
         <div className="flex flex-wrap gap-2">
           {images.map((a) => (
             <div key={a.id} className="relative h-20 w-20 overflow-hidden rounded-md border border-ink">
-              <img src={a.url} alt="" className="h-full w-full object-cover" />
+              {a.url ? <img src={a.url} alt="" className="h-full w-full object-cover" /> : <span className="flex h-full w-full items-center justify-center break-all bg-cream p-1 text-center text-[10px] text-muted">{a.filename ?? "image"}</span>}
               {!locked && (
                 <button type="button" onClick={() => handleRemove(a.id)} aria-label="Remove image" className="absolute right-0.5 top-0.5 rounded-full bg-ink/80 p-1 text-cream">
                   <Trash2Icon size={12} />
@@ -107,7 +107,7 @@ export default function AttachmentsPanel({ token, locked }: { token: string; loc
         <div className="flex flex-col gap-2">
           {links.map((a) => (
             <div key={a.id} className="flex items-center justify-between gap-2 rounded-md border border-ink bg-white px-3 py-2 text-sm">
-              <a href={a.url} target="_blank" rel="noreferrer noopener" className="truncate underline">{a.url}</a>
+              <a href={a.url ?? "#"} target="_blank" rel="noreferrer noopener" className="truncate underline">{a.url}</a>
               {!locked && (
                 <button type="button" onClick={() => handleRemove(a.id)} aria-label="Remove link" className="shrink-0 text-muted hover:text-rose">
                   <Trash2Icon size={14} />

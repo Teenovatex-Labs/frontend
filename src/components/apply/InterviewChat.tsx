@@ -59,10 +59,10 @@ export default function InterviewChat({ token, locked, onProgress }: { token: st
   return (
     <div className="flex flex-col gap-3">
       <div className="flex max-h-[420px] flex-col gap-3 overflow-y-auto rounded-md border border-ink bg-white p-4">
-        {state.answered.length === 0 && !state.next && (
+        {state.answered === 0 && !state.next && (
           <p className="text-sm text-muted">Alfred will ask a few short questions to get to know you. Nothing here is scored by looks or demographics.</p>
         )}
-        {state.answered.map((qa) => (
+        {state.questions.filter((qa) => qa.answer).map((qa) => (
           <div key={qa.position} className="flex flex-col gap-1.5">
             <div className="self-start rounded-xl rounded-bl-sm border border-ink bg-pink/30 px-3.5 py-2 text-sm max-w-[85%]">{qa.question}</div>
             <div className="self-end rounded-xl rounded-br-sm bg-ink px-3.5 py-2 text-sm text-cream max-w-[85%]">{qa.answer}</div>
