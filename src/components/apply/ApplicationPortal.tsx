@@ -122,14 +122,14 @@ export default function ApplicationPortal({ token }: { token: string }) {
           {tab === "alfred" && <InterviewChat token={token} locked={locked} onProgress={setCanSubmitInterview} />}
           {tab === "work" && <AttachmentsPanel token={token} locked={locked} />}
 
-          <div className="flex items-center gap-3 border-t border-line pt-4">
+          <div className="flex flex-wrap items-center gap-3 border-t border-line pt-4">
             <button type="button" onClick={handleSubmit} disabled={!canSubmit || app.window.state !== "open"} className="btn disabled:opacity-50">
               <CircleCheckIcon size={16} /> {app.status === "draft" ? "Submit application" : "Resubmit"}
             </button>
             <button type="button" onClick={handleWithdraw} className="btn-secondary text-sm">
               Withdraw
             </button>
-            {!canSubmit && <p className="text-xs text-muted">Pick at least one interest and finish talking with Alfred first.</p>}
+            {!canSubmit && <p className="basis-full text-xs text-muted">Pick at least one interest and finish talking with Alfred first.</p>}
           </div>
         </>
       ) : (

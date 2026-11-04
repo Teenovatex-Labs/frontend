@@ -17,6 +17,8 @@ function ApplyContent() {
   const urlToken = params.get("token");
   const [token, setToken] = useState<string | null>(null);
   const [windowStatus, setWindowStatus] = useState<WindowStatus | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (urlToken) {
@@ -28,8 +30,10 @@ function ApplyContent() {
   }, [urlToken]);
 
   useEffect(() => {
-    if (!token) getWindow().then(setWindowStatus).catch(() => setWindowStatus(null));
-  }, [token]);
+    if (token) return;
+    setLoadFailed(false);
+    getWindow().then(setWindowStatus).catch(() => setLoadFailed(true));
+  }, [token, attempt]);
 
   return (
     <>
@@ -46,6 +50,12 @@ function ApplyContent() {
         <div className="mt-8">
           {token ? (
             <ApplicationPortal token={token} />
+          ) : loadFailed ? (
+            <div className="rounded-md border border-ink bg-pink/20 p-6 text-center">
+              <h2 className="text-xl font-bold">We couldn&apos;t reach the server.</h2>
+              <p className="mt-2 text-sm text-muted">Check your connection and try again. If it keeps happening, email hello@teenovatex.org.</p>
+              <button type="button" onClick={() => setAttempt((n) => n + 1)} className="btn-secondary mt-4 text-sm">Try again</button>
+            </div>
           ) : windowStatus === null ? (
             <p className="text-sm text-muted">Loading…</p>
           ) : windowStatus.state === "open" ? (
