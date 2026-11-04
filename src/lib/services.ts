@@ -508,3 +508,101 @@ export const imageReviewApi = {
   review: (id: string, data: { action: "approve" | "reject"; note?: string; escalate?: boolean; suspend_days?: number }) =>
     request<{ message: string }>(`/admin/attachments/${id}/review`, { method: "POST", body: json(data) }, { auth: true, activity: false }),
 };
+
+export type ApplicationStatus = "submitted" | "under_review" | "shortlisted" | "waitlisted" | "accepted" | "declined" | "withdrawn";
+export type ApplicationSummary = {
+  id: string;
+  reference: string;
+  status: ApplicationStatus;
+  full_name: string;
+  age: number;
+  country: string;
+  submitted_at: string | null;
+  claimed_by: string | null;
+  window_id: string;
+};
+export type ApplicationAnswer = { id: string; position: number; question: string; source: string; criterion: string | null; answer: string };
+export type ApplicationAttachment = { id: string; kind: "image" | "link"; url: string; filename: string | null; scan_status: string };
+export type ApplicationClarification = { id: string; question: string; response: string | null; status: "open" | "answered"; due_at: string };
+export type ApplicationReview = { id: string; reviewer_id: string; kind: "first" | "second"; scores: Record<string, number>; weighted_score: number; recommendation: string; note: string | null; submitted_at: string | null };
+export type ApplicationDetail = ApplicationSummary & {
+  email: string; whatsapp: string; city: string; school: string | null; education_level: string;
+  interests: string[]; skill_level: string | null; skill_level_note: string | null;
+  current_skills: string[]; learning_goals: string[];
+  portfolio_url: string | null; github_url: string | null; linkedin_url: string | null;
+  second_reviewer_id: string | null; decided_by: string | null; decision_note: string | null;
+  answers: ApplicationAnswer[]; attachments: ApplicationAttachment[]; clarifications: ApplicationClarification[];
+  reviews: ApplicationReview[]; reviews_disagree: boolean | null; criteria: string[];
+};
+
+export const admissionsAdminApi = {
+  list: (filters: { status?: string; window_id?: string; claimed?: "mine" | "none"; page?: number }) =>
+    request<Paged<ApplicationSummary>>(`/admin/applications${qs(filters)}`, {}, authed),
+  stats: (window_id?: string) => request<{ counts: Record<string, number>; unclaimed: number }>(`/admin/applications/stats${qs({ window_id })}`, {}, authed),
+  get: (id: string) => request<ApplicationDetail>(`/admin/applications/${id}`, {}, authed),
+  summarise: (id: string) => request<{ summary: string; machine_written: true; notice: string }>(`/admin/applications/${id}/summary`, { method: "POST" }, write()),
+  claim: (id: string) => request<{ message: string }>(`/admin/applications/${id}/claim`, { method: "POST" }, write()),
+  review: (id: string, data: { scores: Record<string, number>; recommendation: string; note?: string | null }) =>
+    request<{ id: string; weighted_score: number; message: string }>(`/admin/applications/${id}/review`, { method: "POST", body: json(data) }, write()),
+  assignSecondReviewer: (id: string, reviewer_id: string) =>
+    request<{ message: string }>(`/admin/applications/${id}/second-review`, { method: "POST", body: json({ reviewer_id }) }, write()),
+  decide: (id: string, data: { decision: string; note?: string | null; feedback?: string | null }) =>
+    request<{ message: string }>(`/admin/applications/${id}/decision`, { method: "POST", body: json(data) }, write()),
+  reverse: (id: string, data: { decision: string; reason: string }) =>
+    request<{ message: string }>(`/admin/applications/${id}/reverse`, { method: "POST", body: json(data) }, write()),
+  askClarification: (id: string, question: string) =>
+    request<{ id: string; due_at: string }>(`/admin/applications/${id}/clarification`, { method: "POST", body: json({ question }) }, write()),
+  reviewerLink: (id: string, attId: string) => request<{ url: string }>(`/admin/applications/${id}/attachments/${attId}/link`, {}, authed),
+};
+
+export type Cohort = {
+  id: string;
+  opens_at: string;
+  closes_at: string;
+  decisions_publish_at: string;
+  target_size: number | null;
+  note: string | null;
+  state: "upcoming" | "open" | "closed";
+  released: boolean;
+  applications?: Record<string, number>;
+};
+export const cohortsApi = {
+  list: () => request<{ items: Cohort[] }>("/admin/cohorts", {}, authed),
+  create: (data: { opens_at: string; closes_at: string; decisions_publish_at: string; target_size?: number | null; note?: string | null }) =>
+    request<Cohort>("/admin/cohorts", { method: "POST", body: json(data) }, write()),
+  update: (id: string, data: Partial<{ opens_at: string; closes_at: string; decisions_publish_at: string; target_size: number | null; note: string | null }>) =>
+    request<Cohort>(`/admin/cohorts/${id}`, { method: "PATCH", body: json(data) }, write()),
+  release: (id: string, allow_undecided?: boolean) =>
+    request<{ released: number; invited: number; still_under_review: number }>(`/admin/cohorts/${id}/release`, { method: "POST", body: json({ allow_undecided }) }, write()),
+};
+
+export type OnboardingStep = { key: string; title: string; required: boolean; link: string | null; done: boolean; self_reported: boolean };
+export type OnboardingState = { status: string; due_at: string | null; overdue: boolean; steps: OnboardingStep[]; complete: boolean };
+export const onboardingApi = {
+  get: () => request<OnboardingState>("/onboarding", {}, authed),
+  confirmStep: (step: string) => request<OnboardingState>(`/onboarding/steps/${step}`, { method: "POST" }, write()),
+  extend: (id: string, data: { days: number; reason: string }) =>
+    request<{ onboarding_due_at: string }>(`/admin/onboarding/${id}/extend`, { method: "POST", body: json(data) }, write()),
+};
+
+export type MembershipStatus = "onboarding" | "active" | "on_leave" | "inactive" | "alumni" | "removed";
+export type MemberRow = { id: string; username: string; membership_status: MembershipStatus; status_changed_at: string; last_login_at: string | null };
+export type InactivityCandidate = { id: string; username: string; status: MembershipStatus; last_seen: string; under_review: boolean };
+export type InactivityReview = { id: string; user_id: string; username: string; reason: string; response_due_at: string; overdue: boolean; member_response: string | null; responded_at: string | null };
+
+export const membershipAdminApi = {
+  members: (status?: string) => request<{ items: MemberRow[] }>(`/admin/members${qs({ status })}`, {}, authed),
+  inactivity: (days?: number) => request<{ days: number; items: InactivityCandidate[] }>(`/admin/members/inactivity${qs({ days })}`, {}, authed),
+  setStatus: (id: string, data: { status: MembershipStatus; reason: string }) =>
+    request<{ status: string }>(`/admin/members/${id}/status`, { method: "POST", body: json(data) }, write()),
+  reviews: () => request<{ items: InactivityReview[] }>("/admin/inactivity-reviews", {}, authed),
+  startReview: (id: string, data: { reason: string; days?: number }) =>
+    request<{ id: string; response_due_at: string }>(`/admin/members/${id}/inactivity-review`, { method: "POST", body: json(data) }, write()),
+  decideReview: (id: string, data: { decision: "active" | "on_leave" | "alumni" | "removed"; reason: string }) =>
+    request<{ decision: string }>(`/admin/members/${id}/inactivity-review/decide`, { method: "POST", body: json(data) }, write()),
+};
+
+export const membershipApi = {
+  myReview: () => request<{ review: { id: string; response_due_at: string; responded: boolean } | null }>("/membership/review", {}, authed),
+  respond: (message: string) => request<{ ok: boolean }>("/membership/review/respond", { method: "POST", body: json({ message }) }, write()),
+};

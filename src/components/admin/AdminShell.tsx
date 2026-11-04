@@ -5,13 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { adminApi } from "@/lib/services";
+import { adminApi, admissionsAdminApi } from "@/lib/services";
 import { keys } from "@/lib/labs";
 import SigningIn from "@/components/auth/SigningIn";
 import AdminSignIn from "./AdminSignIn";
 
 const NAV = [
   { href: "/admin", label: "Overview" },
+  { href: "/admin/applications", label: "Applications" },
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/attachments", label: "Images" },
   { href: "/admin/analytics", label: "Analytics" },
@@ -19,6 +20,7 @@ const NAV = [
   { href: "/admin/events", label: "Events" },
   { href: "/admin/announcements", label: "Announcements" },
   { href: "/admin/members", label: "Members" },
+  { href: "/admin/membership", label: "Membership" },
   { href: "/admin/audit", label: "Audit log" },
 ];
 
@@ -29,7 +31,9 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isStaff = user?.role === "moderator" || user?.role === "admin";
 
+  const isAdmin = user?.role === "admin";
   const stats = useQuery({ queryKey: keys.admin("stats"), queryFn: adminApi.stats, enabled: isStaff, refetchInterval: 60_000 });
+  const appStats = useQuery({ queryKey: keys.admin("applications-stats"), queryFn: () => admissionsAdminApi.stats(), enabled: isAdmin, refetchInterval: 60_000 });
 
   if (loading) return <SigningIn label="Checking your access" />;
   if (!user) return <AdminSignIn />;
@@ -51,18 +55,21 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   }
 
   const open = stats.data?.open_reports ?? 0;
+  const unclaimed = appStats.data?.unclaimed ?? 0;
+  const nav = NAV.filter((n) => !["/admin/applications", "/admin/membership"].includes(n.href) || isAdmin);
   return (
     <div className="min-h-screen bg-cream">
       <header className="border-b border-ink bg-white">
         <div className="mx-auto flex max-w-[1100px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 md:px-10">
           <span className="font-semibold tracking-tight">TeenovateX <span className="font-serif font-normal italic text-rose">Admin</span></span>
           <nav className="flex flex-wrap gap-1" aria-label="Admin sections">
-            {NAV.map((n) => {
+            {nav.map((n) => {
               const active = n.href === "/admin" ? pathname === "/admin" : pathname.startsWith(n.href);
               return (
                 <Link key={n.href} href={n.href} aria-current={active ? "page" : undefined} className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${active ? "bg-ink text-cream" : "hover:bg-yellow"}`}>
                   {n.label}
                   {n.href === "/admin/reports" && open > 0 && <span className="ml-2 rounded-full bg-pink px-1.5 py-0.5 text-[11px] text-ink">{open}</span>}
+                  {n.href === "/admin/applications" && unclaimed > 0 && <span className="ml-2 rounded-full bg-pink px-1.5 py-0.5 text-[11px] text-ink">{unclaimed}</span>}
                 </Link>
               );
             })}
