@@ -650,3 +650,78 @@ export const seasonsApi = {
   start: (data: { confirm: true; name?: string }) =>
     request<{ ended: Season; current: Season; archived_members: number }>("/admin/seasons/start", { method: "POST", body: json(data) }, write()),
 };
+
+export type ChallengeKind = "weekly" | "monthly" | "special";
+export type ChallengeStatus = "draft" | "open" | "judging" | "closed";
+export type ChallengeCriterion = { name: string; weight: number };
+export type Challenge = {
+  id: string; title: string; description: string; rules: string; kind: ChallengeKind; status: ChallengeStatus;
+  starts_at: string; ends_at: string; judging_ends_at: string; criteria: ChallengeCriterion[];
+  badge_id: string | null; entry_limit: number; results_published: boolean;
+};
+export type ChallengeEntry = { id: string; title: string; body: string; links: string[]; status: string; submitted_at: string };
+export type ChallengeInput = {
+  title: string; description: string; rules: string; kind: ChallengeKind; starts_at: string; ends_at: string; judging_ends_at: string;
+  criteria: ChallengeCriterion[]; badge_id?: string | null; entry_limit?: number;
+};
+
+export const challengesApi = {
+  list: () => request<{ items: (Challenge & { my_entries: number; accepting_entries: boolean })[] }>("/challenges", {}, authed),
+  get: (id: string) =>
+    request<Challenge & {
+      accepting_entries: boolean; my_entries: ChallengeEntry[]; my_results: { entry_id: string; place: number }[];
+      podium: { place: number; username: string | null; avatar_url: string | null; entry_title: string }[];
+    }>(`/challenges/${id}`, {}, authed),
+  submit: (id: string, data: { title: string; body: string; links?: string[] }) =>
+    request<ChallengeEntry>(`/challenges/${id}/entries`, { method: "POST", body: json(data) }, write()),
+  edit: (entryId: string, data: { title?: string; body?: string; links?: string[] }) =>
+    request<ChallengeEntry>(`/challenges/entries/${entryId}`, { method: "PATCH", body: json(data) }, write()),
+  withdraw: (entryId: string) => request<{ ok: boolean }>(`/challenges/entries/${entryId}`, { method: "DELETE" }, write()),
+};
+
+export const challengesAdminApi = {
+  list: () => request<{ items: (Challenge & { entries: number })[] }>("/admin/challenges", {}, authed),
+  create: (data: ChallengeInput) => request<Challenge>("/admin/challenges", { method: "POST", body: json(data) }, write()),
+  update: (id: string, data: Partial<ChallengeInput>) => request<Challenge>(`/admin/challenges/${id}`, { method: "PATCH", body: json(data) }, write()),
+  advance: (id: string, to: "open" | "judging") => request<Challenge>(`/admin/challenges/${id}/status`, { method: "POST", body: json({ to }) }, write()),
+  disqualify: (id: string, entryId: string, reason: string) =>
+    request<{ ok: boolean }>(`/admin/challenges/${id}/entries/${entryId}/disqualify`, { method: "POST", body: json({ reason }) }, write()),
+  entries: (id: string) =>
+    request<{
+      criteria: ChallengeCriterion[];
+      items: { id: string; title: string; body: string; links: string[]; own_entry: boolean; my_score: { scores: Record<string, number>; total: number; note: string | null } | null }[];
+    }>(`/admin/challenges/${id}/entries`, {}, authed),
+  standings: (id: string) =>
+    request<{ unscored_entries: number; items: { entry_id: string; title: string; place: number; average: number; judges: number }[] }>(`/admin/challenges/${id}/standings`, {}, authed),
+  score: (id: string, entryId: string, data: { scores: Record<string, number>; note?: string }) =>
+    request<{ total: number }>(`/admin/challenges/${id}/entries/${entryId}/score`, { method: "PUT", body: json(data) }, write()),
+  publish: (id: string) => request<{ published?: boolean; already_published?: boolean }>(`/admin/challenges/${id}/publish-results`, { method: "POST" }, write()),
+};
+
+export type PairingStatus = "proposed" | "active" | "closed" | "cancelled";
+export type Pairing = {
+  id: string; kind: "pair" | "trio"; goal: string; rationale: string | null; status: PairingStatus; supervised: boolean;
+  supervisor_id: string | null; starts_on: string | null; ends_on: string; created_by: string; approved_by: string | null;
+  second_approved_by: string | null; closed_reason: string | null; members: { id: string; username: string }[];
+};
+export type PairingSuggestion = {
+  id: string; username: string; band: string; score: number;
+  shared_interests: string[]; shared_skills: string[]; they_can_help_with: string[]; you_can_help_with: string[];
+};
+
+export const pairingAdminApi = {
+  list: (status?: PairingStatus) => request<{ items: Pairing[] }>(`/admin/pairings${status ? `?status=${status}` : ""}`, {}, authed),
+  suggestions: (memberId: string) =>
+    request<{ member: { id: string; username: string; band: string }; items: PairingSuggestion[] }>(`/admin/pairing/suggestions?member_id=${memberId}`, {}, authed),
+  create: (data: { member_ids: string[]; goal: string; rationale?: string; ends_on: string; supervisor_id?: string }) =>
+    request<Pairing>("/admin/pairings", { method: "POST", body: json(data) }, write()),
+  approve: (id: string) => request<Pairing>(`/admin/pairings/${id}/approve`, { method: "POST" }, write()),
+  close: (id: string, reason: string) => request<Pairing>(`/admin/pairings/${id}/close`, { method: "POST", body: json({ reason }) }, write()),
+  setClearance: (memberId: string, cleared: boolean, note?: string) =>
+    request<{ cleared: boolean }>(`/admin/members/${memberId}/safeguarding-clearance`, { method: "POST", body: json({ cleared, note }) }, write()),
+};
+
+export const pairingApi = {
+  mine: () =>
+    request<{ items: { id: string; goal: string; ends_on: string; supervised: boolean; partners: { username: string }[]; conversation_id: string | null }[] }>("/pairings/mine", {}, authed),
+};

@@ -3,12 +3,14 @@ import type { IconHandle } from "@animateicons/react";
 import { BookOpenIcon } from "@animateicons/react/lucide/book-open-icon";
 import { BellIcon } from "@animateicons/react/lucide/bell-icon";
 import { ChartBarIncreasingIcon } from "@animateicons/react/lucide/chart-bar-increasing-icon";
+import { FlagIcon } from "@animateicons/react/lucide/flag-icon";
 import { HeartIcon } from "@animateicons/react/lucide/heart-icon";
 import { HouseIcon } from "@animateicons/react/lucide/house-icon";
 import { MessageCircleIcon } from "@animateicons/react/lucide/message-circle-icon";
 import { RocketIcon } from "@animateicons/react/lucide/rocket-icon";
 import { UserPlusIcon } from "@animateicons/react/lucide/user-plus-icon";
 import { UsersIcon } from "@animateicons/react/lucide/users-icon";
+import { UsersRoundIcon } from "@animateicons/react/lucide/users-round-icon";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 
 export type AnimatedIcon = ComponentType<{ size?: number; className?: string } & RefAttributes<IconHandle>>;
@@ -49,6 +51,8 @@ export const MAIN: NavItem[] = [
   { id: "learn", label: "Learn", href: "/learn", icon: BookOpenIcon },
   { id: "messages", label: "Messages", href: "/messages", icon: MessageCircleIcon },
   { id: "leaderboard", label: "Leaderboard", href: "/leaderboard", icon: ChartBarIncreasingIcon },
+  { id: "challenges", label: "Challenges", href: "/challenges", icon: FlagIcon },
+  { id: "pairing", label: "My pairing", href: "/pairing", icon: UsersRoundIcon },
   { id: "notifications", label: "Notifications", href: "/notifications", icon: BellIcon },
 ];
 

@@ -23,6 +23,8 @@ const NAV = [
   { href: "/admin/membership", label: "Membership" },
   { href: "/admin/points", label: "Points" },
   { href: "/admin/badges", label: "Badges" },
+  { href: "/admin/challenges", label: "Challenges" },
+  { href: "/admin/pairing", label: "Pairing" },
   { href: "/admin/audit", label: "Audit log" },
 ];
 
@@ -58,7 +60,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   const open = stats.data?.open_reports ?? 0;
   const unclaimed = appStats.data?.unclaimed ?? 0;
-  const nav = NAV.filter((n) => !["/admin/applications", "/admin/membership", "/admin/points", "/admin/badges"].includes(n.href) || isAdmin);
+  const nav = NAV.filter((n) => !["/admin/applications", "/admin/membership", "/admin/points", "/admin/badges", "/admin/challenges", "/admin/pairing"].includes(n.href) || isAdmin);
   return (
     <div className="min-h-screen bg-cream">
       <header className="border-b border-ink bg-white">
