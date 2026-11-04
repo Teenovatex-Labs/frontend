@@ -3,7 +3,7 @@
 import { landingPath } from "@/lib/landing";
 import { siteUrl } from "@/lib/hosts";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { UserIcon } from "@animateicons/react/lucide/user-icon";
 import { LockIcon } from "@animateicons/react/lucide/lock-icon";
@@ -18,6 +18,7 @@ import SigningIn from "./SigningIn";
 import GoogleAuthCard from "@/components/auth/GoogleAuthCard";
 import VerifyCodeScreen from "@/components/auth/VerifyCodeScreen";
 import useIconHover from "@/lib/useIconHover";
+import { ApiError } from "@/lib/api";
 import { registerBaseSchema, fieldErrors } from "@/lib/validation";
 import { browserTimezone } from "@/lib/age";
 import BirthDatePicker from "@/components/ui/BirthDatePicker";
@@ -31,6 +32,25 @@ const STEPS: Step[] = [
 export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
   const { register, verifyEmail, resendVerification, loginWithGoogle, user, loading } = useAuth();
   const router = useRouter();
+  const params = useSearchParams();
+  const urlInvite = params.get("invite");
+  const [invite, setInvite] = useState<string | undefined>(undefined);
+  const [needsInvite, setNeedsInvite] = useState(false);
+
+  // The emailed link carries the invitation; keep it for the whole sign-up even if the page reloads.
+  useEffect(() => {
+    try {
+      if (urlInvite) sessionStorage.setItem("tx_invite", urlInvite);
+      setInvite(urlInvite ?? sessionStorage.getItem("tx_invite") ?? undefined);
+    } catch {
+      setInvite(urlInvite ?? undefined);
+    }
+  }, [urlInvite]);
+
+  const handleError = (err: unknown, fallback: string) => {
+    setFormError(err instanceof Error ? err.message : fallback);
+    if (err instanceof ApiError && (err.code.startsWith("INVITE_") || err.code === "CONSENT_REQUIRED")) setNeedsInvite(true);
+  };
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
@@ -132,10 +152,11 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
         password: result.data.password,
         birth_date: result.data.birth_date,
         timezone: browserTimezone(),
+        invite_token: invite,
       });
       setVerifying(true);
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Registration failed");
+      handleError(err, "Registration failed");
     } finally {
       setSubmitting(false);
     }
@@ -178,6 +199,15 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
 
       <StepRail steps={STEPS} current={step} />
 
+      {!invite && step === 0 && (
+        <p className="mb-4 rounded-md border border-ink bg-cream p-3 text-sm">
+          TeenovateX is by invitation. Open the link in your acceptance email to sign up.{" "}
+          <Link href="/apply" className="font-semibold underline underline-offset-4">Apply</Link>
+          {" · "}
+          <Link href="/apply/status" className="font-semibold underline underline-offset-4">Check your application</Link>
+        </p>
+      )}
+
       <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">
         {step === 0 && (
           <>
@@ -205,11 +235,11 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
               setFormError(null);
               setGoogleBusy(true);
               try {
-                await loginWithGoogle(credentialResponse.credential);
+                await loginWithGoogle(credentialResponse.credential, invite);
                 router.push(landingPath());
               } catch (err) {
                 setGoogleBusy(false);
-                setFormError(err instanceof Error ? err.message : "Google sign-in failed");
+                handleError(err, "Google sign-in failed");
               }
             }}
             onError={() => setFormError("Google sign-in failed")}
@@ -302,6 +332,13 @@ export default function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () =>
           )}
 
           {formError && <p className="text-sm text-rose">{formError}</p>}
+          {needsInvite && (
+            <p className="text-sm">
+              <Link href="/apply/status" className="font-semibold underline underline-offset-4">Find your application</Link>
+              {" or "}
+              <Link href="/apply" className="font-semibold underline underline-offset-4">apply to join</Link>.
+            </p>
+          )}
 
           <div className="mt-1 flex items-center gap-3">
             {step > 0 && (

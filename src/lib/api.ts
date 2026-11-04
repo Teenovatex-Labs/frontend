@@ -204,6 +204,7 @@ export const authApi = {
     password: string;
     birth_date: string;
     timezone?: string;
+    invite_token?: string;
   }) =>
     request<{ message: string; email: string; require_verification: boolean }>("/auth/register", {
       method: "POST",
@@ -234,10 +235,10 @@ export const authApi = {
     return result;
   },
 
-  google: async (id_token: string) => {
+  google: async (id_token: string, invite_token?: string) => {
     const result = await request<AuthResponse>("/auth/google", {
       method: "POST",
-      body: JSON.stringify({ id_token }),
+      body: JSON.stringify({ id_token, invite_token }),
     });
     setTokens(result);
     return result;
