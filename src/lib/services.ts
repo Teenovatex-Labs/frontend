@@ -531,7 +531,7 @@ export type ApplicationSummary = {
   window_id: string;
 };
 export type ApplicationAnswer = { id: string; position: number; question: string; source: string; criterion: string | null; answer: string };
-export type ApplicationAttachment = { id: string; kind: "image" | "link"; url: string; filename: string | null; scan_status: string };
+export type ApplicationAttachment = { id: string; kind: "image" | "link" | "pdf"; url: string; filename: string | null; scan_status: string };
 export type ApplicationClarification = { id: string; question: string; response: string | null; status: "open" | "answered"; due_at: string };
 export type ApplicationReview = { id: string; reviewer_id: string; kind: "first" | "second"; scores: Record<string, number | null>; weighted_score: number | null; recommendation: string; note: string | null; submitted_at: string | null };
 export type ApplicationDetail = ApplicationSummary & {
