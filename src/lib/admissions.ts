@@ -110,7 +110,7 @@ export type InterviewState = {
   answered: number;
   complete: boolean;
   can_submit: boolean;
-  questions: { position: number; question: string; format: string; spec: QuestionSpec | null; answer: string | null }[];
+  questions: { position: number; question: string; format: string; spec: QuestionSpec | null; answer: string | null; alternatives_left?: number }[];
   next?: InterviewQuestion | null;
 };
 
@@ -125,6 +125,13 @@ export const answerQuestion = (token: string, position: number, payload: AnswerP
     token,
     { method: "PUT", body: JSON.stringify(payload) }
   );
+
+export type HelpAction = "hint" | "alternative" | "skip";
+export const questionHelp = (token: string, position: number, action: HelpAction) =>
+  applicantRequest<{ hint: string | null; skips_left: number } & InterviewState>(`/applications/interview/${position}/help`, token, {
+    method: "POST",
+    body: JSON.stringify({ action }),
+  });
 
 // Images are private, so the API gives no address for them; links carry their address.
 export type Attachment = { id: string; kind: "image" | "link"; url: string | null; filename: string | null; size_bytes: number | null };

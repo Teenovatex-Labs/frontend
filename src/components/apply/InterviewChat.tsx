@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { SendIcon } from "@animateicons/react/lucide/send-icon";
 import useIconHover from "@/lib/useIconHover";
 import { ApiError } from "@/lib/api";
-import { answerQuestion, getInterview, nextQuestion, type AnswerPayload, type InterviewQuestion, type InterviewState } from "@/lib/admissions";
+import { answerQuestion, getInterview, nextQuestion, questionHelp, type HelpAction, type AnswerPayload, type InterviewQuestion, type InterviewState } from "@/lib/admissions";
 
 /** A short, adaptive chat with Alfred: one question at a time, answered in order. */
 export default function InterviewChat({ token, locked, onProgress }: { token: string; locked: boolean; onProgress?: (canSubmit: boolean) => void }) {
@@ -17,6 +17,8 @@ export default function InterviewChat({ token, locked, onProgress }: { token: st
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [safetyNote, setSafetyNote] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
+  const [skipsLeft, setSkipsLeft] = useState<number | null>(null);
   const send = useIconHover();
   const scroller = useRef<HTMLDivElement>(null);
 
@@ -64,6 +66,7 @@ export default function InterviewChat({ token, locked, onProgress }: { token: st
       setPicked([]);
       setValue(null);
       setNote("");
+      setHint(null);
       if (result.safety_message) setSafetyNote(result.safety_message);
       const advanced = result.next === undefined ? await nextQuestion(token) : result;
       setState(advanced);
@@ -74,6 +77,35 @@ export default function InterviewChat({ token, locked, onProgress }: { token: st
       setBusy(false);
     }
   };
+
+  const handleHelp = async (action: HelpAction) => {
+    if (!state?.next) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await questionHelp(token, state.next.position, action);
+      setSkipsLeft(r.skips_left);
+      if (action === "hint") {
+        setHint(r.hint);
+      } else {
+        setHint(null);
+        setAnswer("");
+        setPicked([]);
+        setValue(null);
+        setNote("");
+        const fresh = r.next === undefined ? await nextQuestion(token) : r;
+        setState(fresh);
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't get help right now.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const open = state?.next ? state.questions.find((qa) => qa.position === state.next!.position) : undefined;
+  const canSwap = (open?.alternatives_left ?? 0) > 0;
+  const canSkip = skipsLeft === null || skipsLeft > 0;
 
   if (loading) return <p className="text-sm text-muted">Loading your conversation with Alfred…</p>;
   if (!state) return <p className="text-sm text-rose">{error}</p>;
@@ -103,8 +135,15 @@ export default function InterviewChat({ token, locked, onProgress }: { token: st
       {safetyNote && <p className="rounded-md border border-ink bg-yellow/40 p-3 text-sm">{safetyNote}</p>}
       {error && <p className="text-sm text-rose">{error}</p>}
 
+      {hint && <p className="rounded-md border border-ink bg-yellow/40 p-3 text-sm">{hint}</p>}
+
       {state.next && !locked && (
         <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <button type="button" disabled={busy} onClick={() => handleHelp("hint")} className="font-semibold underline underline-offset-4 disabled:opacity-60">Give me a hint</button>
+            {canSwap && <button type="button" disabled={busy} onClick={() => handleHelp("alternative")} className="font-semibold underline underline-offset-4 disabled:opacity-60">Ask something different</button>}
+            {canSkip && <button type="button" disabled={busy} onClick={() => handleHelp("skip")} className="text-muted underline underline-offset-4 disabled:opacity-60">Skip this one{skipsLeft !== null ? ` (${skipsLeft} left)` : ""}</button>}
+          </div>
           <AnswerInput
             q={state.next}
             answer={answer}
