@@ -142,3 +142,8 @@ export async function uploadAttachmentImage(token: string, file: File): Promise<
   form.append("image", file);
   return applicantRequest<Attachment>("/applications/attachments/image", token, { method: "POST", body: form });
 }
+
+export type OfferView = { state: "pending" | "accepted" | "declined" | "expired"; expires_at: string | null; first_name: string };
+export const getOffer = (token: string) => request<OfferView>(`/applications/offer/${encodeURIComponent(token)}`);
+export const answerOffer = (token: string, accept: boolean) =>
+  request<{ accepted: boolean }>(`/applications/offer/${encodeURIComponent(token)}/respond`, { method: "POST", body: JSON.stringify({ accept }) });
