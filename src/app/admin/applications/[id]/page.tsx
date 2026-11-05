@@ -255,13 +255,20 @@ function TagRow({ label, items }: { label: string; items: string[] }) {
   );
 }
 
-function AttachmentLink({ applicationId, attachment }: { applicationId: string; attachment: { id: string; kind: "image" | "link"; url: string; filename: string | null } }) {
+function AttachmentLink({ applicationId, attachment }: { applicationId: string; attachment: { id: string; kind: "image" | "link" | "pdf"; url: string; filename: string | null } }) {
   const [url, setUrl] = useState<string | null>(attachment.kind === "link" ? attachment.url : null);
   const load = async () => {
     const r = await admissionsAdminApi.reviewerLink(applicationId, attachment.id);
     setUrl(r.url);
   };
   if (attachment.kind === "link") return <a href={attachment.url} target="_blank" rel="noreferrer" className="rounded-md border border-ink bg-cream px-3 py-1.5 text-sm underline">{attachment.url}</a>;
+  if (attachment.kind === "pdf") {
+    return url ? (
+      <a href={url} download rel="noreferrer" className="rounded-md border border-ink bg-yellow/40 px-3 py-1.5 text-sm underline">Download {attachment.filename ?? "PDF"}</a>
+    ) : (
+      <button onClick={load} className="rounded-md border border-ink bg-cream px-3 py-1.5 text-sm">PDF: {attachment.filename ?? "document"} (get download link)</button>
+    );
+  }
   return url ? (
     <a href={url} target="_blank" rel="noreferrer"><img src={url} alt="" className="h-20 w-20 rounded-md border border-ink object-cover" /></a>
   ) : (

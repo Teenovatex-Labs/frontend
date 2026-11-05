@@ -127,7 +127,7 @@ export const answerQuestion = (token: string, position: number, payload: AnswerP
   );
 
 // Images are private, so the API gives no address for them; links carry their address.
-export type Attachment = { id: string; kind: "image" | "link"; url: string | null; filename: string | null; size_bytes: number | null };
+export type Attachment = { id: string; kind: "image" | "link" | "pdf"; url: string | null; filename: string | null; size_bytes: number | null };
 
 export const listAttachments = async (token: string) => (await applicantRequest<{ items: Attachment[] }>("/applications/attachments", token)).items;
 
@@ -141,4 +141,10 @@ export async function uploadAttachmentImage(token: string, file: File): Promise<
   const form = new FormData();
   form.append("image", file);
   return applicantRequest<Attachment>("/applications/attachments/image", token, { method: "POST", body: form });
+}
+
+export async function uploadAttachmentPdf(token: string, file: File): Promise<Attachment> {
+  const form = new FormData();
+  form.append("pdf", file);
+  return applicantRequest<Attachment>("/applications/attachments/pdf", token, { method: "POST", body: form });
 }
