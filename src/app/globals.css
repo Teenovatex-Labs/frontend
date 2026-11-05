@@ -574,3 +574,18 @@
 @media (prefers-reduced-motion: reduce) {
   .skeleton { animation: none; }
 }
+
+@keyframes confetti-fall {
+  0% { opacity: 0; translate: 0 -20px; }
+  10% { opacity: 1; }
+  100% { opacity: 0; translate: 0 340px; rotate: 540deg; }
+}
+.confetti-piece {
+  opacity: 0;
+  animation-name: confetti-fall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti { display: none; }
+}
