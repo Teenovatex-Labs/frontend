@@ -610,10 +610,13 @@ export const cohortsApi = {
 };
 
 export type OnboardingStep = { key: string; title: string; required: boolean; link: string | null; done: boolean; self_reported: boolean };
-export type OnboardingState = { status: string; due_at: string | null; overdue: boolean; steps: OnboardingStep[]; complete: boolean };
+export type OnboardingState = { status: string; due_at: string | null; overdue: boolean; steps: OnboardingStep[]; complete: boolean; intro?: string | null; whatsapp_text?: string | null };
 export const onboardingApi = {
   get: () => request<OnboardingState>("/onboarding", {}, authed),
   confirmStep: (step: string) => request<OnboardingState>(`/onboarding/steps/${step}`, { method: "POST" }, write()),
+  profileSuggestion: () => request<{ bio: string }>("/onboarding/profile-suggestion", {}, authed),
+  saveBio: (bio: string) => request<OnboardingState>("/onboarding/bio", { method: "PUT", body: json({ bio }) }, write()),
+  saveIntro: (intro: string) => request<OnboardingState>("/onboarding/intro", { method: "PUT", body: json({ intro }) }, write()),
   extend: (id: string, data: { days: number; reason: string }) =>
     request<{ onboarding_due_at: string }>(`/admin/onboarding/${id}/extend`, { method: "POST", body: json(data) }, write()),
 };
