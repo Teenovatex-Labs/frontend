@@ -77,6 +77,30 @@ function ApplyContent() {
   );
 }
 
+function Countdown({ to }: { to: string }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  const ms = new Date(to).getTime() - now;
+  if (!(ms > 0)) return null;
+  const d = Math.floor(ms / 86_400_000);
+  const h = Math.floor((ms % 86_400_000) / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  const parts = [[d, "days"], [h, "hours"], [m, "minutes"]] as const;
+  return (
+    <div className="mt-4 flex justify-center gap-2" role="timer" aria-label={`Applications open in ${d} days, ${h} hours, ${m} minutes`}>
+      {parts.map(([n, label]) => (
+        <div key={label} className="min-w-[64px] rounded-md border border-ink bg-cream px-3 py-2">
+          <p className="font-display text-2xl leading-none tabular-nums">{n}</p>
+          <p className="mt-1 text-[11px] uppercase tracking-wide text-muted">{label}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ClosedNotice({ nextOpensAt }: { nextOpensAt: string | null }) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -103,6 +127,7 @@ function ClosedNotice({ nextOpensAt }: { nextOpensAt: string | null }) {
       {nextOpensAt && (
         <p className="mt-2 text-sm text-muted">The next window opens {new Date(nextOpensAt).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}.</p>
       )}
+      {nextOpensAt && <Countdown to={nextOpensAt} />}
       {sent ? (
         <p className="mt-3 text-sm font-medium">We'll email you when applications open.</p>
       ) : (

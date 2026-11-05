@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CircleCheckIcon } from "@animateicons/react/lucide/circle-check-icon";
 import { ShieldCheckIcon } from "@animateicons/react/lucide/shield-check-icon";
-import Tabs from "@/components/ui/Tabs";
+import StepRail, { type Step } from "@/components/auth/StepRail";
+import { UserIcon } from "@animateicons/react/lucide/user-icon";
+import { MessageCircleIcon } from "@animateicons/react/lucide/message-circle-icon";
+import { UploadIcon } from "@animateicons/react/lucide/upload-icon";
+import { ArrowLeftIcon } from "@animateicons/react/lucide/arrow-left-icon";
+import { ArrowRightIcon } from "@animateicons/react/lucide/arrow-right-icon";
+import ReviewStep from "@/components/apply/ReviewStep";
+import SubmittedCelebration from "@/components/apply/SubmittedCelebration";
 import { useToast } from "@/components/ui/Toast";
 import { ApiError } from "@/lib/api";
 import {
@@ -30,10 +37,19 @@ const STATUS_LABEL: Record<ApplicationView["status"], string> = {
   withdrawn: "Withdrawn",
 };
 
+const STEPS: Step[] = [
+  { id: "about", label: "About you", icon: UserIcon },
+  { id: "alfred", label: "Alfred", icon: MessageCircleIcon },
+  { id: "work", label: "Your work", icon: UploadIcon },
+  { id: "review", label: "Review", icon: CircleCheckIcon },
+];
+
 export default function ApplicationPortal({ token }: { token: string }) {
   const [app, setApp] = useState<ApplicationView | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"about" | "alfred" | "work">("about");
+  const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
   const [canSubmitInterview, setCanSubmitInterview] = useState(false);
   const toast = useToast();
 
@@ -66,12 +82,15 @@ export default function ApplicationPortal({ token }: { token: string }) {
   const canSubmit = app.interests.length > 0 && canSubmitInterview;
 
   const handleSubmit = async () => {
-    if (!confirm("Submit your application? You can still edit it until review starts.")) return;
+    setSubmitting(true);
     try {
       setApp(await submitApplication(token));
-      toast.success("Submitted. We'll email you when decisions are out.");
+      setCelebrate(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Couldn't submit that.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -105,31 +124,31 @@ export default function ApplicationPortal({ token }: { token: string }) {
         <GuardianPanel token={token} status={app.guardian.status} />
       )}
 
+      {celebrate && app.status === "submitted" && (
+        <SubmittedCelebration name={app.full_name} reference={app.reference} decisionDate={app.window.decisions_publish_at} />
+      )}
+
       {!locked ? (
         <>
-          <Tabs
-            label="Application section"
-            value={tab}
-            onChange={setTab}
-            options={[
-              { id: "about", label: "About you" },
-              { id: "alfred", label: "Talk to Alfred" },
-              { id: "work", label: "Show your work" },
-            ]}
-          />
+          <StepRail steps={STEPS} current={step} />
 
-          {tab === "about" && <AboutYouForm app={app} token={token} onSaved={setApp} />}
-          {tab === "alfred" && <InterviewChat token={token} locked={locked} onProgress={setCanSubmitInterview} />}
-          {tab === "work" && <AttachmentsPanel token={token} locked={locked} />}
+          {step === 0 && <AboutYouForm app={app} token={token} onSaved={setApp} />}
+          {step === 1 && <InterviewChat token={token} locked={locked} onProgress={setCanSubmitInterview} />}
+          {step === 2 && <AttachmentsPanel token={token} locked={locked} />}
+          {step === 3 && <ReviewStep app={app} token={token} onEdit={setStep} onSubmit={handleSubmit} submitting={submitting} canSubmit={canSubmit} />}
 
-          <div className="flex flex-wrap items-center gap-3 border-t border-line pt-4">
-            <button type="button" onClick={handleSubmit} disabled={!canSubmit || app.window.state !== "open"} className="btn disabled:opacity-50">
-              <CircleCheckIcon size={16} /> {app.status === "draft" ? "Submit application" : "Resubmit"}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+            <button type="button" onClick={() => setStep((n) => Math.max(0, n - 1))} disabled={step === 0} className="btn-secondary text-sm disabled:opacity-40">
+              <ArrowLeftIcon size={16} /> Back
             </button>
-            <button type="button" onClick={handleWithdraw} className="btn-secondary text-sm">
+            <button type="button" onClick={handleWithdraw} className="text-sm font-semibold text-muted underline underline-offset-4">
               Withdraw
             </button>
-            {!canSubmit && <p className="basis-full text-xs text-muted">Pick at least one interest and finish talking with Alfred first.</p>}
+            {step < STEPS.length - 1 && (
+              <button type="button" onClick={() => setStep((n) => Math.min(STEPS.length - 1, n + 1))} className="btn text-sm">
+                Next <ArrowRightIcon size={16} />
+              </button>
+            )}
           </div>
         </>
       ) : (
