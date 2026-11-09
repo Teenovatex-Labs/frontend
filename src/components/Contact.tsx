@@ -5,7 +5,6 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import FormField from "./FormField";
 import TextAreaField from "./TextAreaField";
 import { ApiError, contactApi } from "@/lib/api";
-import { CONTACT_TOPIC_EVENT } from "@/lib/contactBus";
 import { contactFormSchema, fieldErrors, type ContactTopic } from "@/lib/validation";
 
 const TOPICS: { id: ContactTopic; label: string }[] = [
@@ -31,10 +30,10 @@ function PaperPlane({ className }: { className?: string }) {
   );
 }
 
-export default function Contact() {
+export default function Contact({ initialTopic = "hello" }: { initialTopic?: ContactTopic }) {
   const reduce = useReducedMotion();
   const [phrase, setPhrase] = useState(0);
-  const [topic, setTopic] = useState<ContactTopic>("hello");
+  const [topic, setTopic] = useState<ContactTopic>(initialTopic);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -48,15 +47,6 @@ export default function Contact() {
     const t = window.setInterval(() => setPhrase((p) => (p + 1) % PHRASES.length), 2600);
     return () => window.clearInterval(t);
   }, [reduce]);
-
-  useEffect(() => {
-    const onTopic = (e: Event) => {
-      setTopic((e as CustomEvent<ContactTopic>).detail);
-      setStatus("idle");
-    };
-    window.addEventListener(CONTACT_TOPIC_EVENT, onTopic);
-    return () => window.removeEventListener(CONTACT_TOPIC_EVENT, onTopic);
-  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,16 +73,16 @@ export default function Contact() {
     setName("");
     setEmail("");
     setMessage("");
-    setTopic("hello");
+    setTopic(initialTopic);
     setStatus("idle");
   };
 
   return (
-    <section id="contact" className="relative overflow-hidden border-b border-line py-16 md:py-24">
+    <section id="contact" className="relative overflow-hidden py-14 md:py-20">
       <div className="wrap grid gap-12 md:grid-cols-[0.9fr_1.1fr] md:gap-20">
         <div>
-          <p className="eyebrow text-rose">06 / Say hello</p>
-          <h2 className="mt-6 text-[40px] leading-[1.08] md:text-[60px]">
+          <p className="eyebrow text-rose">Say hello</p>
+          <h1 className="mt-6 text-[40px] leading-[1.08] md:text-[60px]">
             Got
             <span className="mt-1 grid">
               {PHRASES.map((p, i) => (
@@ -108,7 +98,7 @@ export default function Contact() {
                 </span>
               ))}
             </span>
-          </h2>
+          </h1>
           <p className="sr-only">Got a question, an idea, a partnership or a wild what-if?</p>
 
           <p className="mt-6 max-w-[420px] text-lg text-muted">

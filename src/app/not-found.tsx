@@ -16,7 +16,7 @@ export default function NotFound() {
         <p className="mx-auto mt-3 max-w-[420px] text-muted">The link may be old or mistyped. Head back and we&rsquo;ll point you the right way.</p>
         <div className="mt-6 flex justify-center gap-3">
           <a href="/" className="btn">Go home</a>
-          <a href="/#contact" className="btn-secondary">Tell us about it</a>
+          <a href="/contact" className="btn-secondary">Tell us about it</a>
         </div>
       </div>
     </main>

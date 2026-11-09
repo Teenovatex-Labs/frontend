@@ -37,7 +37,7 @@ export default function Footer() {
         </p>
 
         <div className="flex items-center gap-5 md:justify-end">
-          <Link href="/#contact" className="text-sm hover:text-rose">
+          <Link href="/contact" className="text-sm hover:text-rose">
             Say hello ↗︎
           </Link>
           {SOCIALS.map(({ href, label, Icon }) => (
