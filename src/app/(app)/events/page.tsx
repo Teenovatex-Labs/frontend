@@ -15,11 +15,15 @@ import MonthCalendar from "@/components/events/MonthCalendar";
 
 export default function EventsPage() {
   const [view, setView] = useState<"list" | "calendar">("list");
-  const [when, setWhen] = useState<"upcoming" | "past">("upcoming");
-  const events = useQuery({ queryKey: keys.events(when), queryFn: () => eventsApi.list(when) });
+  const [when, setWhen] = useState<"upcoming" | "past" | "tickets">("upcoming");
+  const listWhen = when === "past" ? "past" : "upcoming";
+  const events = useQuery({ queryKey: keys.events(listWhen), queryFn: () => eventsApi.list(listWhen) });
   // The calendar shows both what is coming and what just happened.
   const upcoming = useQuery({ queryKey: keys.events("upcoming"), queryFn: () => eventsApi.list("upcoming"), enabled: view === "calendar" });
-  const past = useQuery({ queryKey: keys.events("past"), queryFn: () => eventsApi.list("past"), enabled: view === "calendar" });
+  const past = useQuery({ queryKey: keys.events("past"), queryFn: () => eventsApi.list("past"), enabled: view === "calendar" || when === "tickets" });
+  const visibleEvents = when === "tickets"
+    ? [...(events.data?.events ?? []), ...(past.data?.events ?? [])].filter((event) => event.has_rsvped)
+    : events.data?.events ?? [];
 
   return (
     <main className="mx-auto w-full max-w-[860px] px-5 py-10 md:px-10 md:py-14">
@@ -35,6 +39,7 @@ export default function EventsPage() {
           options={[
             { id: "upcoming", label: "Upcoming" },
             { id: "past", label: "Past" },
+            { id: "tickets", label: "My tickets" },
           ]}
           value={when}
           onChange={setWhen}
@@ -53,21 +58,21 @@ export default function EventsPage() {
       )}
 
       <div className={`mt-8 ${view === "calendar" ? "hidden" : ""}`}>
-        {events.isPending ? (
+        {events.isPending || (when === "tickets" && past.isPending) ? (
           <div className="space-y-4" aria-busy="true">
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} className="h-32 w-full" />
             ))}
           </div>
-        ) : events.isError ? (
+        ) : events.isError || (when === "tickets" && past.isError) ? (
           <EmptyState title="That didn't load." action={<button className="btn-secondary" onClick={() => events.refetch()}>Try again</button>} />
-        ) : events.data.events.length === 0 ? (
-          <EmptyState title={when === "upcoming" ? "Nothing on the calendar yet." : "No past events."}>
-            {when === "upcoming" ? "New events are added all the time. Check back soon." : "Once events have happened they'll be listed here."}
+        ) : visibleEvents.length === 0 ? (
+          <EmptyState title={when === "tickets" ? "No tickets yet." : when === "upcoming" ? "Nothing on the calendar yet." : "No past events."}>
+            {when === "tickets" ? "Reserve a spot at an event and your ticket will live here." : when === "upcoming" ? "New events are added all the time. Check back soon." : "Once events have happened they'll be listed here."}
           </EmptyState>
         ) : (
           <ul className="space-y-5">
-            {events.data.events.map((e) => {
+            {visibleEvents.map((e) => {
               const soon = startsIn(e.starts_at, e.ends_at);
               return (
                 <li key={e.id} className="flex flex-col gap-4 border border-ink bg-white p-5 shadow-[5px_5px_0_var(--ink)] sm:flex-row sm:items-center">
@@ -87,7 +92,7 @@ export default function EventsPage() {
                       {e.location ? ` · ${e.location}` : ""} · {e.rsvp_count} going
                     </p>
                   </div>
-                  <RsvpButton event={e} over={when === "past"} />
+                  <RsvpButton event={e} over={when === "past" || (when === "tickets" && !soon)} />
                 </li>
               );
             })}
