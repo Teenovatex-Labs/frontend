@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { ApiError, uploadsApi } from "@/lib/api";
 import { messagesApi, peopleApi, rewardsApi, safetyApi, type Honor } from "@/lib/services";
 import Badge from "@/components/ui/Badge";
+import { LottieSlot } from "@/components/ui/LottieSlot";
 import ReportButton from "@/components/safety/ReportDialog";
 import { shrinkImage } from "@/lib/image";
 import { keys } from "@/lib/labs";
@@ -205,6 +206,12 @@ export default function PersonPage() {
   );
 }
 
+const SEEN_KEY = "tx-seen-honors";
+
+function readSeen(): string[] {
+  try { return JSON.parse(localStorage.getItem(SEEN_KEY) ?? "[]"); } catch { return []; }
+}
+
 function HonorsRow({ honors, isMe, username }: { honors: Honor[]; isMe: boolean; username: string }) {
   const qc = useQueryClient();
   const toast = useToast();
@@ -217,10 +224,32 @@ function HonorsRow({ honors, isMe, username }: { honors: Honor[]; isMe: boolean;
     onError: (e) => toast.error(e instanceof ApiError ? e.message : "Couldn't save that."),
   });
 
+  const [fresh, setFresh] = useState<Honor | null>(null);
+  useEffect(() => {
+    if (!isMe) return;
+    const seen = readSeen();
+    const unseen = honors.filter((h) => !seen.includes(h.id));
+    if (unseen.length) setFresh([...unseen].sort((a, b) => b.awarded_at.localeCompare(a.awarded_at))[0]);
+  }, [honors, isMe]);
+  const dismissFresh = () => {
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify(honors.map((h) => h.id))); } catch {}
+    setFresh(null);
+  };
+
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length < 3 ? [...p, id] : p));
 
   return (
     <div className="mt-5">
+      {fresh && (
+        <div role="status" className="mb-4 flex items-center gap-4 border-2 border-ink bg-yellow/40 p-3 shadow-[3px_3px_0_var(--ink)]">
+          <LottieSlot src="/lottie/badge-unlock.json" label="" loop={false} className="h-24 w-24 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">New honour unlocked: {fresh.name}</p>
+            <p className="text-xs text-muted">{fresh.description}</p>
+          </div>
+          <button type="button" onClick={dismissFresh} className="text-sm underline underline-offset-4">Nice</button>
+        </div>
+      )}
       {isMe && (
         <button type="button" onClick={() => setFeaturing((f) => !f)} className="mb-2 text-sm underline underline-offset-4">
           {featuring ? "Done choosing" : "Choose which to feature (up to 3)"}
