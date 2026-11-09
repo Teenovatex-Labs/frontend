@@ -30,6 +30,28 @@ const ROLL = {
   exit: (d: number) => ({ y: -44 * d, rotateX: 80 * d, opacity: 0 }),
 };
 
+/** One odometer column. It only animates when its own digit changes. */
+function Digit({ ch, dir, reduced }: { ch: string; dir: number; reduced: boolean }) {
+  return (
+    <span className="relative inline-block h-full w-[0.56em] text-center [perspective:700px]">
+      <AnimatePresence initial={false} mode="popLayout" custom={dir}>
+        <motion.span
+          key={ch}
+          custom={dir}
+          variants={ROLL}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={reduced ? { duration: 0 } : { duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-0 flex items-center justify-center [transform-style:preserve-3d]"
+        >
+          {ch}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 /**
@@ -235,22 +257,11 @@ export default function WheelPicker({ value, onChange, min, max, step = 1, label
         </p>
       )}
       <div className="text-center">
-        {/* The number is a drum turning on its horizontal axis: going up, the next one rolls in from below and the old one rolls away above; going down, the other way. */}
-        <div aria-hidden className="relative mx-auto h-[4.5rem] w-full [perspective:700px]">
-          <AnimatePresence initial={false} mode="popLayout" custom={dir}>
-            <motion.div
-              key={shown}
-              custom={dir}
-              variants={ROLL}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={reduced ? { duration: 0 } : { duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-0 flex items-center justify-center font-display text-7xl leading-none tabular-nums [transform-style:preserve-3d]"
-            >
-              {shown}
-            </motion.div>
-          </AnimatePresence>
+        {/* An odometer: each digit sits in its own column and only the digits that change roll. 2006 to 2007 turns the 6 into a 7 and leaves 2, 0 and 0 where they are. Columns are counted from the right, so 9 to 10 keeps the units column in place. */}
+        <div aria-hidden className="mx-auto flex h-[4.5rem] items-center justify-center font-display text-7xl leading-none tabular-nums">
+          {String(shown).split("").map((ch, i, all) => (
+            <Digit key={all.length - i} ch={ch} dir={dir} reduced={!!reduced} />
+          ))}
         </div>
         {unit && <p className="mt-2 text-sm text-cream/60">{unit}</p>}
       </div>
@@ -285,7 +296,7 @@ export default function WheelPicker({ value, onChange, min, max, step = 1, label
                   tickRefs.current[i] = el;
                 }}
                 aria-hidden
-                className="absolute left-1/2 top-0 flex -translate-x-1/2 flex-col items-center opacity-0 will-change-transform"
+                className="absolute left-1/2 top-0 flex w-0 flex-col items-center whitespace-nowrap opacity-0 will-change-transform"
                 style={{ transformOrigin: "top center" }}
               >
                 <span className={`block w-0.5 rounded-full bg-cream ${major ? "h-9" : "h-5 opacity-60"}`} />
