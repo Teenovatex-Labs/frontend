@@ -529,6 +529,7 @@ export type ApplicationSummary = {
   submitted_at: string | null;
   claimed_by: string | null;
   window_id: string;
+  waitlist_offer?: { sent_at: string; expires_at: string | null; state: "pending" | "accepted" | "declined" | "expired" } | null;
   interview_invited_at?: string | null;
 };
 export type ApplicationAnswer = { id: string; position: number; question: string; source: string; criterion: string | null; answer: string };
@@ -582,6 +583,7 @@ export const admissionsAdminApi = {
     request<{ message: string }>(`/admin/applications/${id}/second-review`, { method: "POST", body: json({ reviewer_id }) }, write()),
   decide: (id: string, data: { decision: string; note?: string | null; feedback?: string | null }) =>
     request<{ message: string }>(`/admin/applications/${id}/decision`, { method: "POST", body: json(data) }, write()),
+  offerPlace: (id: string) => request<{ expires_at: string }>(`/admin/applications/${id}/waitlist-offer`, { method: "POST" }, write()),
   reverse: (id: string, data: { decision: string; reason: string }) =>
     request<{ message: string }>(`/admin/applications/${id}/reverse`, { method: "POST", body: json(data) }, write()),
   askClarification: (id: string, question: string) =>

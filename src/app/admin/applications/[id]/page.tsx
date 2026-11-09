@@ -61,6 +61,12 @@ export default function ApplicationReviewPage() {
     onError: fail,
   });
 
+  const offerPlace = useMutation({
+    mutationFn: () => admissionsAdminApi.offerPlace(id),
+    onSuccess: () => { toast.success("Offer sent. They have 72 hours."); void refresh(); },
+    onError: fail,
+  });
+
   const [callDetails, setCallDetails] = useState("");
   const invite = useMutation({
     mutationFn: () => admissionsAdminApi.inviteToInterview(id, callDetails.trim()),
@@ -218,6 +224,22 @@ export default function ApplicationReviewPage() {
                   {r.note && <p className="text-muted">{r.note}</p>}
                 </div>
               ))}
+            </section>
+          )}
+
+          {a.status === "waitlisted" && (
+            <section className="rounded-md border border-ink bg-yellow/30 p-4">
+              <h2 className="font-bold">Waitlist</h2>
+              <p className="mt-1 text-sm text-muted">
+                {a.waitlist_offer
+                  ? a.waitlist_offer.state === "pending"
+                    ? `Offer sent. They answer by ${a.waitlist_offer.expires_at ? new Date(a.waitlist_offer.expires_at).toLocaleString() : "the deadline"}.`
+                    : `Last offer: ${a.waitlist_offer.state}.`
+                  : "No offer yet. Offer a place when one opens up."}
+              </p>
+              <button onClick={() => offerPlace.mutate()} disabled={offerPlace.isPending || a.waitlist_offer?.state === "pending"} className="btn-secondary mt-3 text-xs disabled:opacity-60">
+                {a.waitlist_offer?.state === "expired" || a.waitlist_offer?.state === "declined" ? "Offer again" : "Offer a place (72 hours)"}
+              </button>
             </section>
           )}
 

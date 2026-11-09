@@ -150,6 +150,10 @@ export async function uploadAttachmentImage(token: string, file: File): Promise<
   return applicantRequest<Attachment>("/applications/attachments/image", token, { method: "POST", body: form });
 }
 
+export type OfferView = { state: "pending" | "accepted" | "declined" | "expired"; expires_at: string | null; first_name: string };
+export const getOffer = (token: string) => request<OfferView>(`/applications/offer/${encodeURIComponent(token)}`);
+export const answerOffer = (token: string, accept: boolean) =>
+  request<{ accepted: boolean }>(`/applications/offer/${encodeURIComponent(token)}/respond`, { method: "POST", body: JSON.stringify({ accept }) });
 export async function uploadAttachmentPdf(token: string, file: File): Promise<Attachment> {
   const form = new FormData();
   form.append("pdf", file);
