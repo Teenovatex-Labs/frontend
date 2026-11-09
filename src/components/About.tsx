@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import CrowdCanvas from "@/components/about/CrowdCanvas";
+import PinnedSlider from "@/components/PinnedSlider";
 
 const ACTION_WORDS = [
   { word: "Explore", rotate: "-rotate-3", bg: "bg-cream" },
@@ -21,46 +22,42 @@ const PEOPLE_MARKS: { bg: string; fg: string; photo?: string }[] = [
 
 export default function About() {
   return (
-    <section id="about" className="relative overflow-hidden py-16 md:py-24">
-      <img
-        src="/assets/illustration-nobg.svg"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-[18%] top-0 w-[70%] max-w-none opacity-[0.06] md:-right-[8%] md:w-[46%]"
-      />
-
-      {/* A crowd of tiny figures walking behind the "Why" chapter, near the
-          section's bottom edge — a literal "community" texture under the
-          closing line about people, not just a decorative flourish. Kept
-          centered and narrower than the section rather than full-bleed,
-          so it reads as a little stage rather than a banner. The mask
-          fades it to nothing by the time it reaches the paragraph text
-          above, so it reads as ambient motion in the margin rather than
-          something you have to read around. */}
-      <CrowdCanvas
-        src="/assets/crowd-sprite.png"
-        className="pointer-events-none absolute bottom-0 left-1/2 h-[300px] w-full max-w-[820px] -translate-x-1/2 opacity-[0.16] [filter:invert(1)] [mask-image:linear-gradient(to_top,black_15%,transparent_88%)] md:h-[420px] md:max-w-[960px]"
-      />
-
-      {/* Intro — the three questions this whole section answers. */}
-      <div className="wrap mx-auto max-w-[680px] text-center">
-        <p className="eyebrow text-rose">01 / Who. What. Why.</p>
-        <h2 className="mt-6 text-[35px] leading-[1.12] tracking-[-0.03em] md:text-[52px]">
-          Three simple questions.
-          <br />
-          <span className="pink-underline">One big reason to exist.</span>
-        </h2>
-        <p className="mt-6 text-[17px] leading-[1.7] text-muted">
-          TeenovateX is easier to understand when you start with the people,
-          follow what they create, and discover why any of it matters.
-        </p>
-      </div>
-
-      {/* Who → What → Why: one connected story, not three identical cards. */}
-      <div className="wrap mx-auto mt-16 max-w-[760px] md:mt-20 md:pb-44 md:max-w-[1180px] md:grid md:grid-cols-3 md:gap-x-12 lg:gap-x-16">
-        {/* 01 — Who. Alive and communal: a handwritten-style mark on
-            "Teenovators" plus a scatter of member initials. */}
-        <Chapter number="01">
+    <section id="about" className="relative">
+      <PinnedSlider
+        label="Who we are, what we do and why we exist. Scroll horizontally."
+        background={
+          <>
+            <img
+              src="/assets/illustration-nobg.svg"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-[18%] top-0 w-[70%] max-w-none opacity-[0.06] md:-right-[8%] md:w-[46%]"
+            />
+            {/* A crowd of tiny figures walking along the bottom edge: a literal "community" texture. */}
+            <CrowdCanvas
+              src="/assets/crowd-sprite.png"
+              className="pointer-events-none absolute bottom-0 left-1/2 h-[260px] w-full max-w-[820px] -translate-x-1/2 opacity-[0.14] [filter:invert(1)] [mask-image:linear-gradient(to_top,black_15%,transparent_88%)] md:h-[340px] md:max-w-[960px]"
+            />
+          </>
+        }
+        header={
+          <>
+            <p className="eyebrow text-rose">01 / Who. What. Why.</p>
+            <h2 className="mt-5 text-[35px] leading-[1.12] tracking-[-0.03em] md:text-[42px]">
+              Three simple questions.
+              <br />
+              <span className="pink-underline">One big reason to exist.</span>
+            </h2>
+          </>
+        }
+        blurb={
+          <p className="text-[16px] leading-[1.65] text-muted">
+            TeenovateX is easier to understand when you start with the people,
+            follow what they create, and discover why any of it matters.
+          </p>
+        }
+      >
+        <Chapter tone="bg-yellow/40">
           <Question>Who are we?</Question>
           <Answer>
             Young people who <em>refused to wait.</em>
@@ -103,11 +100,7 @@ export default function About() {
           </div>
         </Chapter>
 
-        <Connector variant="doodle" />
-
-        {/* 02 — What. Active: the words that describe the work, scattered
-            like sticky notes rather than laid out in a tidy list. */}
-        <Chapter number="02">
+        <Chapter tone="bg-pink/30">
           <Question>What do we do?</Question>
           <Answer>
             We turn curiosity into <em>something real.</em>
@@ -143,11 +136,7 @@ export default function About() {
           </div>
         </Chapter>
 
-        <Connector variant="path" />
-
-        {/* 03 — Why. Quieter and more spacious: the point of everything
-            above, given room to land. */}
-        <Chapter number="03">
+        <Chapter tone="bg-white">
           <Question>Why do we exist?</Question>
           <Answer>
             Because potential should <em>not need permission.</em>
@@ -167,9 +156,9 @@ export default function About() {
             </p>
           </div>
 
-          <div className="mt-8 flex flex-col items-start gap-2">
+          <div className="mt-8 flex flex-col items-start gap-2 md:flex-row md:items-center md:gap-5">
             <p className="text-lg text-muted">&ldquo;I wonder if I can&hellip;&rdquo;</p>
-            <span className="text-2xl text-rose" aria-hidden="true">↓</span>
+            <span className="text-2xl text-rose" aria-hidden="true"><span className="md:hidden">↓</span><span className="hidden md:inline">→</span></span>
             <p className="font-serif text-[28px] italic leading-tight text-rose md:text-[34px]">
               &ldquo;Look what we built.&rdquo;
             </p>
@@ -182,22 +171,17 @@ export default function About() {
             their own future.
           </p>
         </Chapter>
-      </div>
+      </PinnedSlider>
     </section>
   );
 }
 
-function Chapter({ number, children }: { number: string; children: ReactNode }) {
+/** One slide: a full card with the whole answer readable at once. */
+function Chapter({ tone, children }: { tone: string; children: ReactNode }) {
   return (
-    <div className="relative pl-9 md:pl-0 md:border-t md:border-ink md:pt-5">
-      <span
-        className="absolute left-0 top-0 font-serif text-[13px] italic text-muted/70 md:static md:block md:mb-3"
-        aria-hidden="true"
-      >
-        {number}
-      </span>
+    <article className={`flex w-[88vw] max-w-[640px] shrink-0 flex-col rounded-md border border-ink p-6 md:p-7 ${tone}`}>
       {children}
-    </div>
+    </article>
   );
 }
 
@@ -207,33 +191,8 @@ function Question({ children }: { children: ReactNode }) {
 
 function Answer({ children }: { children: ReactNode }) {
   return (
-    <h3 className="mt-3 text-[26px] leading-[1.15] tracking-[-0.02em] text-ink md:text-[36px] [&_em]:font-serif [&_em]:font-normal [&_em]:not-italic md:[&_em]:italic">
+    <h3 className="mt-3 text-[26px] leading-[1.15] tracking-[-0.02em] text-ink md:text-[32px] [&_em]:font-serif [&_em]:font-normal [&_em]:not-italic md:[&_em]:italic">
       {children}
     </h3>
-  );
-}
-
-/** The pink thread running through the section — loose and hand-drawn
- * between Who and What, then a single purposeful line into Why. */
-function Connector({ variant }: { variant: "doodle" | "path" }) {
-  return (
-    <div className="flex h-16 items-center pl-9 md:hidden" aria-hidden="true">
-      {variant === "doodle" ? (
-        <svg width="28" height="56" viewBox="0 0 28 56" fill="none">
-          <path
-            d="M14 2c-7 4-9 9-4 13s11 3 6 9-13 5-9 13 12 4 7 11"
-            stroke="var(--pink)"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeDasharray="1 7"
-          />
-        </svg>
-      ) : (
-        <svg width="28" height="56" viewBox="0 0 28 56" fill="none">
-          <path d="M14 0v44" stroke="var(--pink)" strokeWidth="2" strokeLinecap="round" />
-          <circle cx="14" cy="51" r="4.5" fill="var(--pink)" />
-        </svg>
-      )}
-    </div>
   );
 }
