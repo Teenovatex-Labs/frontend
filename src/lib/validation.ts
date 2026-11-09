@@ -21,7 +21,7 @@ export const loginFormSchema = z.object({
 });
 
 // Split out from registerFormSchema so the signup stepper can validate one
-// step's fields at a time via `.pick()`, a ZodEffects (the `.refine()`
+// step's fields at a time via `.pick()` — a ZodEffects (the `.refine()`
 // result below) can't be picked from.
 export const usernameSchema = z
   .string()

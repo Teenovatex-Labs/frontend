@@ -73,14 +73,7 @@ export default function Donate() {
   };
 
   return (
-    <motion.section
-      id="donate"
-      initial={reduce ? false : { opacity: 0, y: 60 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      className="relative overflow-hidden border-y border-ink bg-ink py-16 text-cream md:py-24"
-    >
+    <section id="donate" className="relative overflow-hidden border-y border-ink bg-ink py-16 text-cream md:py-24">
       <img
         src="/assets/logo-long6.svg"
         alt=""
@@ -90,11 +83,15 @@ export default function Donate() {
 
       <div className="wrap relative grid gap-12 md:grid-cols-[1.05fr_1fr] md:items-center md:gap-20">
         <div>
-          <h2 className="text-[40px] leading-[1.05] md:text-[62px]">
-            Help a teenager build something they can call their own.
+          <p className="eyebrow text-pink">05 / Keep the lights on</p>
+          <h2 className="mt-6 text-[40px] leading-[1.05] md:text-[62px]">
+            Help the next teenager
+            <br />
+            <span className="font-serif font-normal italic text-yellow">build their first thing.</span>
           </h2>
           <p className="mt-6 max-w-[460px] text-lg text-cream/75">
-            TeenovateX stays free for every teenager. Your support pays for the tools, spaces, and guidance that help a first idea become real.
+            TeenovateX is youth-led and free for every teen who joins. Your gift helps keep it that way,
+            and keeps the doors open for the ones who haven&rsquo;t found us yet.
           </p>
 
           <div className="mt-10 border-t border-cream/20 pt-6">
@@ -118,7 +115,7 @@ export default function Donate() {
           </div>
         </div>
 
-        <div className="relative rounded-[18px] border-2 border-cream bg-cream p-6 text-ink shadow-[10px_11px_0_var(--pink),16px_17px_0_var(--yellow)] md:p-8">
+        <div className="relative border border-cream bg-cream p-6 text-ink shadow-[8px_8px_0_var(--pink)] md:p-8">
           <div className="grid grid-cols-[auto_1fr] items-center gap-6 md:gap-8">
             <div className="flex flex-col items-center">
               <PowerCell lit={lit} reduce={reduce} />
@@ -130,7 +127,7 @@ export default function Donate() {
                     animate={{ y: 0, opacity: 1 }}
                     exit={reduce ? undefined : { y: -14, opacity: 0 }}
                     transition={{ duration: 0.18 }}
-                    className="text-lg font-semibold leading-6 text-rose"
+                    className="font-serif text-lg italic leading-6 text-rose"
                   >
                     {tierFor(amount)}
                   </motion.p>
@@ -212,6 +209,6 @@ export default function Donate() {
           </p>
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

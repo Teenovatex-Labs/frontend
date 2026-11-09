@@ -18,8 +18,8 @@ export default function PrivacyPolicyPage() {
 
         <div className="mt-6 rounded-md border border-ink bg-pink/20 p-4 text-sm">
           <strong>This is a draft, not legal advice.</strong> It describes what the product actually does today
-          in plain language, but it hasn&rsquo;t been reviewed by a lawyer. Have one look it over,
-          especially the children&rsquo;s-privacy section, before this is the real policy people rely on.
+          in plain language, but it hasn&rsquo;t been reviewed by a lawyer. Have one look it over &mdash;
+          especially the children&rsquo;s-privacy section &mdash; before this is the real policy people rely on.
         </div>
 
         <div className="prose-legal mt-8 flex flex-col gap-8 text-[15px] leading-relaxed text-ink">
@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
             <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-muted">
               <li>
                 <strong className="text-ink">Account info:</strong> full name, username, email address, and a
-                password (stored as a one-way hash, never in plain text), or, if you sign in with Google,
+                password (stored as a one-way hash, never in plain text) &mdash; or, if you sign in with Google,
                 your Google account ID, name, email, and profile picture instead.
               </li>
               <li>
@@ -46,7 +46,7 @@ export default function PrivacyPolicyPage() {
               </li>
               <li>
                 <strong className="text-ink">Activity:</strong> projects you submit, votes, points, streaks, and
-                follows, the things that make the community and leaderboard work.
+                follows &mdash; the things that make the community and leaderboard work.
               </li>
               <li>
                 <strong className="text-ink">Login sessions:</strong> device/browser info and IP address tied to
@@ -65,7 +65,7 @@ export default function PrivacyPolicyPage() {
             <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-muted">
               <li>verifying your email and resetting your password when you ask,</li>
               <li>showing your projects, points, and rank to other members,</li>
-              <li>keeping the platform secure, rate-limiting, fraud/abuse prevention, session management,</li>
+              <li>keeping the platform secure &mdash; rate-limiting, fraud/abuse prevention, session management,</li>
               <li>emailing you things you specifically triggered (a verification code, a password reset link).</li>
             </ul>
           </section>
@@ -74,7 +74,7 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-semibold">Who else sees it</h2>
             <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-muted">
               <li>
-                <strong className="text-ink">Google</strong>, if you use Google Sign-In, only to verify your
+                <strong className="text-ink">Google</strong>, if you use Google Sign-In &mdash; only to verify your
                 identity; we don&rsquo;t see or store your Google password.
               </li>
               <li>
@@ -117,7 +117,7 @@ export default function PrivacyPolicyPage() {
             <p className="mt-2 text-muted">
               TeenovateX is built for teenagers, and some members will be minors. This draft doesn&rsquo;t yet
               describe a specific minimum age, parental-consent process, or region-specific safeguard (like
-              COPPA in the US, or the UK/EU Age-Appropriate Design rules), those need to be decided and
+              COPPA in the US, or the UK/EU Age-Appropriate Design rules) &mdash; those need to be decided and
               actually built (an age gate at signup, a consent flow, etc.) before this section is accurate. Treat
               this as the most important paragraph to get a lawyer&rsquo;s eyes on.
             </p>

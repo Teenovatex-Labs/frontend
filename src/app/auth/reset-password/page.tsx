@@ -12,7 +12,7 @@ import useIconHover from "@/lib/useIconHover";
 import { newPasswordSchema, fieldErrors } from "@/lib/validation";
 
 // Landing page for the fallback link in the password-reset email
-// (/auth/reset-password?token=...), the token is the same short-lived JWT
+// (/auth/reset-password?token=...) — the token is the same short-lived JWT
 // verify-reset-code returns, so this skips straight to the new-password step.
 function ResetPasswordInner() {
   const { resetPassword } = useAuth();
@@ -58,7 +58,7 @@ function ResetPasswordInner() {
         <h1 className="text-[28px] leading-[1.1] tracking-[-0.03em] md:text-[30px]">
           Password <span className="font-serif italic font-medium text-rose">reset.</span>
         </h1>
-        <p className="mt-3 text-sm text-muted">You&rsquo;re all set, log in with your new password.</p>
+        <p className="mt-3 text-sm text-muted">You&rsquo;re all set — log in with your new password.</p>
         <button
           type="button"
           onClick={() => router.push("/auth?mode=login")}

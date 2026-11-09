@@ -8,7 +8,7 @@ import { useLayoutEffect, useRef, type ReactNode } from "react";
  * instead, since there's no room for a side panel.
  *
  * Switching between login and signup keeps both panels mounted in the
- * same two grid slots and just swaps which content each holds, so this
+ * same two grid slots and just swaps which content each holds — so this
  * runs a manual FLIP (First-Last-Invert-Play) on every `imageSide` change:
  * capture each panel's position before the swap, let the swap happen,
  * then animate from the old position to the new one. That's what actually
@@ -46,7 +46,7 @@ export default function AuthSplit({
           el.style.transition = "none";
           el.style.transform = `translateX(${dx}px)`;
           // Force a reflow so the browser registers the jump before we
-          // transition back to identity, otherwise it just skips straight
+          // transition back to identity — otherwise it just skips straight
           // to the end state.
           el.getBoundingClientRect();
           el.style.transition = "transform 1s cubic-bezier(0.22, 0.68, 0, 1.01)";
@@ -64,7 +64,7 @@ export default function AuthSplit({
       ref={formRef}
       className="relative flex min-h-screen flex-col overflow-x-hidden px-5 py-6 lg:h-screen lg:overflow-y-auto"
     >
-      {/* Mobile/tablet only, there's no room for the side panel, so the
+      {/* Mobile/tablet only — there's no room for the side panel, so the
           brand shows up as a big, unmissable watermark behind the form. */}
       <img
         src="/assets/illustration2-nobg.svg"
@@ -102,7 +102,7 @@ function ImagePanel({
         aria-hidden="true"
         className={`h-full w-full object-cover ${flip ? "-scale-x-100" : ""}`}
       />
-      {/* Blends the panel's inner edge, whichever side touches the form.
+      {/* Blends the panel's inner edge — whichever side touches the form —
           into the form side's cream background instead of a sharp cut. */}
       <div
         className={`pointer-events-none absolute inset-y-0 w-28 ${

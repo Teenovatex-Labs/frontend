@@ -18,9 +18,7 @@ export default function Header() {
   const close = () => setOpen(false);
 
   return (
-    <header
-      className="wrap sticky top-0 z-50 flex items-center justify-between border-b border-line bg-cream py-5 lg:grid lg:grid-cols-[1fr_auto_1fr]"
-    >
+    <header className="wrap flex items-center justify-between border-b border-line py-7 lg:grid lg:grid-cols-[1fr_auto_1fr]">
       <Link href="/" aria-label="TeenovateX home" className="flex items-center">
         <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-8 w-auto lg:h-9" />
       </Link>
@@ -54,7 +52,7 @@ export default function Header() {
       >
         <div className={`min-h-0 overflow-hidden ${open ? "visible" : "invisible"} lg:visible lg:contents`}>
           <div className="relative flex flex-col items-stretch gap-1 overflow-hidden border border-ink bg-cream p-6 shadow-[4px_4px_0_var(--pink)] lg:contents">
-            {/* A little personality in the corner, shown only on the
+            {/* A little personality in the corner — only shows on the
                 mobile panel, tucked behind the links. */}
             <img
               src="/doodles/notes.png"
@@ -64,7 +62,7 @@ export default function Header() {
             />
 
             {/* Hand-drawn thread connecting the links, like the About
-                section's chapters with loose dashes, not a rigid rule. */}
+                section's chapters — loose dashes, not a rigid rule. */}
             <svg
               width="2"
               height="100%"

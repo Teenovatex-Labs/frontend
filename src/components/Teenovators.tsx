@@ -169,14 +169,7 @@ export default function Teenovators() {
   }, [open, closeModal, step]);
 
   return (
-    <motion.section
-      id="story"
-      initial={reduce ? false : { opacity: 0, y: 60 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.08 }}
-      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      className="relative overflow-x-clip border-t border-line py-16 md:py-24"
-    >
+    <section id="story" className="relative overflow-x-clip border-t border-line py-16 md:py-24">
       <img
         src="/doodles/laptop.png"
         alt=""
@@ -187,12 +180,18 @@ export default function Teenovators() {
       <div className="wrap">
         <div className="grid gap-8 md:grid-cols-[1.3fr_1fr] md:items-end md:gap-16">
           <div>
-            <h2 className="text-[40px] leading-[1.05] md:text-[64px]">
-              See what Teenovators have already made happen.
+            <p className="eyebrow text-rose">04 / The story so far</p>
+            <h2 className="mt-6 text-[40px] leading-[1.05] md:text-[64px]">
+              Receipts,
+              <br />
+              <span className="font-serif font-normal italic">
+                in <span className="highlight">photographs.</span>
+              </span>
             </h2>
           </div>
-          <p className="max-w-md text-[18px] leading-relaxed text-muted">
-            These are the events, experiments, and people behind the community. Drag through the wall or open a photo to read the story.
+          <p className="max-w-md text-muted">
+            Our first events, the day the founders finally shared a room, and the Teenovators who made
+            it real. Drag through it, or tap any photo for the story behind it.
           </p>
         </div>
 
@@ -247,10 +246,10 @@ export default function Teenovators() {
                   style={
                     {
                       "--tilt": `${TILTS[i % TILTS.length]}deg`,
-                      boxShadow: `8px 9px 0 var(--ink), 13px 14px 0 ${SHADOWS[i % SHADOWS.length]}`,
+                      boxShadow: `6px 6px 0 ${SHADOWS[i % SHADOWS.length]}`,
                     } as React.CSSProperties
                   }
-                  className="relative block w-full rounded-[14px] border-2 border-ink bg-[#fffdf6] p-3.5 pb-5 text-left transition-transform duration-300 ease-[cubic-bezier(0.34,1.4,0.64,1)] [transform:rotate(var(--tilt))] hover:z-10 hover:[transform:rotate(0deg)_translateY(-12px)] focus-visible:[transform:rotate(0deg)_translateY(-12px)]"
+                  className="relative block w-full border border-ink bg-[#fffdf6] p-3.5 pb-5 text-left transition-transform duration-300 ease-[cubic-bezier(0.34,1.4,0.64,1)] [transform:rotate(var(--tilt))] hover:z-10 hover:[transform:rotate(0deg)_translateY(-10px)] focus-visible:[transform:rotate(0deg)_translateY(-10px)]"
                 >
                   <span
                     aria-hidden="true"
@@ -259,10 +258,10 @@ export default function Teenovators() {
                   <motion.span layoutId={`photo-${m.id}`} className="block">
                     <Photo moment={m} sizes="(max-width: 768px) 78vw, 340px" />
                   </motion.span>
-                  <span className="mt-4 block text-[22px] font-semibold leading-tight">{m.caption}</span>
+                  <span className="mt-4 block font-serif text-[22px] italic leading-tight">{m.caption}</span>
                   <span className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.1em]">
                     <span className="text-rose">
-                      {KIND_LABEL[m.kind]}
+                      Nº {pad(i + 1)} &middot; {KIND_LABEL[m.kind]}
                     </span>
                     <span className="text-muted">Read ↗︎</span>
                   </span>
@@ -280,9 +279,10 @@ export default function Teenovators() {
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className="w-[78vw] max-w-[340px] shrink-0 snap-start"
             >
-              <div className="soft-depth-card flex h-full min-h-[430px] flex-col justify-between rounded-[14px] border-2 border-dashed border-ink bg-pink/40 p-6">
+              <div className="flex h-full min-h-[430px] flex-col justify-between border border-dashed border-ink bg-pink/40 p-6">
                 <div>
-                  <p className="text-[30px] font-semibold leading-[1.1]">Add your story.</p>
+                  <p className="eyebrow text-rose">Your turn</p>
+                  <p className="mt-4 font-serif text-[30px] italic leading-[1.1]">Were you there?</p>
                   <p className="mt-3 text-sm text-muted">
                     Been to a TeenovateX event, or built something with us? Send us your photo and your story
                     and it could be the next one on this wall.
@@ -385,7 +385,7 @@ export default function Teenovators() {
                 <h3 className="mt-4 text-[32px] leading-[1.05] md:text-[42px]">
                   <span className="highlight">{open.title}</span>
                 </h3>
-                <p className="mt-4 text-xl font-semibold">{open.caption}</p>
+                <p className="mt-4 font-serif text-xl italic">{open.caption}</p>
                 <div className="mt-5 space-y-3 text-[15px] text-muted">
                   {open.body.map((p) => (
                     <p key={p}>{p}</p>
@@ -432,6 +432,6 @@ export default function Teenovators() {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.section>
+    </section>
   );
 }

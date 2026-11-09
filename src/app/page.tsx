@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main className="landing">
+      <main>
         <Hero />
         <InterestStrip />
         <About />

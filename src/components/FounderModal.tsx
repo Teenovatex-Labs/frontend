@@ -61,8 +61,8 @@ export default function FounderModal({
 
         <aside className="bg-ink p-6 pr-20 text-cream md:p-8 md:pr-8">
           <div
-            className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-cream/50 ${founder.bg} ${
-              founder.photo ? "" : founder.fg ?? "text-ink"
+            className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-cream/50 ${
+              founder.photo ? "" : `${founder.bg} ${founder.fg ?? "text-ink"}`
             }`}
           >
             {founder.photo ? (

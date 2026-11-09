@@ -21,7 +21,7 @@ const randomIndex = (array: unknown[]) => (randomRange(0, array.length) | 0);
 const removeFromArray = <T,>(array: T[], i: number) => array.splice(i, 1)[0];
 const removeRandomFromArray = <T,>(array: T[]) => removeFromArray(array, randomIndex(array));
 
-/** A parade of tiny line-art figures walking across a canvas, self-paced,
+/** A parade of tiny line-art figures walking across a canvas — self-paced,
  * looping forever, each on its own random timing so the crowd never
  * feels mechanical. Ported from the classic codepen "crowd" sketch
  * (openpeeps.com sprite sheet) and trimmed to just the one walk cycle
@@ -34,7 +34,7 @@ export default function CrowdCanvas({
   className,
 }: {
   src: string;
-  /** Sprite sheet grid, characters across (cols) by characters down (rows). */
+  /** Sprite sheet grid — characters across (cols) by characters down (rows). */
   cols?: number;
   rows?: number;
   /** Recolors every drawn (opaque) pixel to this CSS color, so the crowd
@@ -47,7 +47,7 @@ export default function CrowdCanvas({
 
   // Mounting the canvas + sprite sheet only once this section is close to
   // view keeps it off the critical path entirely, so the rest of the page
-  // paints and becomes interactive first, this is what makes it feel
+  // paints and becomes interactive first — this is what makes it feel
   // instant instead of the sluggish load a naive "just render it" version
   // would have.
   useEffect(() => {
