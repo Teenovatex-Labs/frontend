@@ -21,7 +21,7 @@ function applicantRequest<T>(path: string, token: string, init: RequestInit = {}
   return request<T>(path, { ...init, headers }, { auth: false, retry: false, activity: false });
 }
 
-export type WindowInfo = { id: string; opens_at: string; closes_at: string; decisions_publish_at: string };
+export type WindowInfo = { id: string; opens_at: string; closes_at: string; decisions_publish_at: string; is_test?: boolean };
 export type WindowStatus = { state: "open" | "closed"; window: WindowInfo | null; next_opens_at: string | null };
 
 export type Clarification = { id: string; question: string; response: string | null; status: "open" | "answered"; due_at: string };
@@ -62,9 +62,12 @@ export type StartApplicationInput = {
   whatsapp: string;
   school?: string | null;
   education_level: string;
+  /** The private key of a test window, from the ?test= link. Absent for real applicants. */
+  test_key?: string;
 };
 
-export const getWindow = () => request<WindowStatus>("/applications/window");
+export const getWindow = (testKey?: string | null) =>
+  request<WindowStatus>(`/applications/window${testKey ? `?test_key=${encodeURIComponent(testKey)}` : ""}`);
 
 export const startApplication = (data: StartApplicationInput) =>
   request<{ message: string }>("/applications/start", { method: "POST", body: JSON.stringify(data) });

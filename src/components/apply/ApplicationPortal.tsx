@@ -1,5 +1,6 @@
 "use client";
 
+import TestBanner from "@/components/apply/TestBanner";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CircleCheckIcon } from "@animateicons/react/lucide/circle-check-icon";
@@ -106,6 +107,7 @@ export default function ApplicationPortal({ token }: { token: string }) {
 
   return (
     <div className="flex flex-col gap-5">
+      {app.window.is_test && <TestBanner />}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink bg-white p-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-muted">Reference {app.reference}</p>
