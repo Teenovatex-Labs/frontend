@@ -57,7 +57,7 @@ export default function About() {
       </div>
 
       {/* Who → What → Why: one connected story, not three identical cards. */}
-      <div className="wrap mx-auto mt-16 max-w-[760px] md:mt-20">
+      <div className="wrap mx-auto mt-16 max-w-[760px] md:mt-20 md:pb-44 md:max-w-[1180px] md:grid md:grid-cols-3 md:gap-x-12 lg:gap-x-16">
         {/* 01 — Who. Alive and communal: a handwritten-style mark on
             "Teenovators" plus a scatter of member initials. */}
         <Chapter number="01">
@@ -65,7 +65,7 @@ export default function About() {
           <Answer>
             Young people who <em>refused to wait.</em>
           </Answer>
-          <div className="mt-5 flex flex-col gap-4 text-[16px] leading-[1.75] text-muted md:flex-row md:items-start md:gap-10">
+          <div className="mt-5 flex flex-col gap-4 text-[16px] leading-[1.75] text-muted">
             <div className="flex-1">
               <p>
                 We&rsquo;re a youth-led community of teenagers, builders,
@@ -83,7 +83,7 @@ export default function About() {
                 already here.
               </p>
             </div>
-            <div className="flex shrink-0 -space-x-3 self-center md:mt-1 md:self-start" aria-hidden="true">
+            <div className="flex shrink-0 -space-x-3 self-start" aria-hidden="true">
               {PEOPLE_MARKS.map((m, i) => (
                 <span
                   key={i}
@@ -152,7 +152,7 @@ export default function About() {
           <Answer>
             Because potential should <em>not need permission.</em>
           </Answer>
-          <div className="mt-5 max-w-[600px] text-[16px] leading-[1.75] text-muted">
+          <div className="mt-5 text-[16px] leading-[1.75] text-muted">
             <p>
               Talent is everywhere. Access, confidence, guidance, and the
               right room are not.
@@ -167,15 +167,15 @@ export default function About() {
             </p>
           </div>
 
-          <div className="mt-8 flex flex-col items-start gap-3 md:flex-row md:items-center md:gap-6">
+          <div className="mt-8 flex flex-col items-start gap-2">
             <p className="text-lg text-muted">&ldquo;I wonder if I can&hellip;&rdquo;</p>
-            <span className="text-2xl text-rose" aria-hidden="true">→</span>
+            <span className="text-2xl text-rose" aria-hidden="true">↓</span>
             <p className="font-serif text-[28px] italic leading-tight text-rose md:text-[34px]">
               &ldquo;Look what we built.&rdquo;
             </p>
           </div>
 
-          <p className="mt-10 max-w-[600px] text-[16px] leading-[1.8] text-muted">
+          <p className="mt-8 text-[16px] leading-[1.8] text-muted">
             Because one opportunity can change a direction. One community
             can make somebody feel less alone. And one teenager who
             discovers what they are capable of can change far more than
@@ -189,9 +189,9 @@ export default function About() {
 
 function Chapter({ number, children }: { number: string; children: ReactNode }) {
   return (
-    <div className="relative pl-9 md:pl-12">
+    <div className="relative pl-9 md:pl-0 md:border-t md:border-ink md:pt-5">
       <span
-        className="absolute left-0 top-0 font-serif text-[13px] italic text-muted/70"
+        className="absolute left-0 top-0 font-serif text-[13px] italic text-muted/70 md:static md:block md:mb-3"
         aria-hidden="true"
       >
         {number}
@@ -217,7 +217,7 @@ function Answer({ children }: { children: ReactNode }) {
  * between Who and What, then a single purposeful line into Why. */
 function Connector({ variant }: { variant: "doodle" | "path" }) {
   return (
-    <div className="flex h-16 items-center pl-9 md:h-20 md:pl-12" aria-hidden="true">
+    <div className="flex h-16 items-center pl-9 md:hidden" aria-hidden="true">
       {variant === "doodle" ? (
         <svg width="28" height="56" viewBox="0 0 28 56" fill="none">
           <path
