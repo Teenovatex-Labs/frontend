@@ -47,6 +47,7 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
   const [needsVerification, setNeedsVerification] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [needsInvite, setNeedsInvite] = useState(false);
 
   const backIcon = useIconHover();
   const nextIcon = useIconHover();
@@ -175,12 +176,14 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
             onSuccess={async (credentialResponse) => {
               if (!credentialResponse.credential) return;
               setFormError(null);
+              setNeedsInvite(false);
               setGoogleBusy(true);
               try {
                 await loginWithGoogle(credentialResponse.credential);
                 router.push(landingPath());
               } catch (err) {
                 setGoogleBusy(false);
+                setNeedsInvite(err instanceof ApiError && err.code === "INVITE_REQUIRED");
                 setFormError(err instanceof Error ? err.message : "Google sign-in failed");
               }
             }}
@@ -256,7 +259,19 @@ export default function LoginForm({ onSwitchToSignup }: { onSwitchToSignup: () =
             </>
           )}
 
-          {formError && <p className="text-sm text-rose">{formError}</p>}
+          {formError && (
+            <p className="text-sm text-rose">
+              {formError}
+              {needsInvite && (
+                <>
+                  {" "}
+                  <Link href="/apply" className="font-semibold underline underline-offset-4">
+                    Apply to join
+                  </Link>
+                </>
+              )}
+            </p>
+          )}
 
           <div className="mt-1 flex items-center gap-3">
             {step === 1 && (
