@@ -530,9 +530,10 @@ export type ApplicationSummary = {
   claimed_by: string | null;
   window_id: string;
   waitlist_offer?: { sent_at: string; expires_at: string | null; state: "pending" | "accepted" | "declined" | "expired" } | null;
+  interview_invited_at?: string | null;
 };
 export type ApplicationAnswer = { id: string; position: number; question: string; source: string; criterion: string | null; answer: string };
-export type ApplicationAttachment = { id: string; kind: "image" | "link"; url: string; filename: string | null; scan_status: string };
+export type ApplicationAttachment = { id: string; kind: "image" | "link" | "pdf"; url: string; filename: string | null; scan_status: string };
 export type ApplicationClarification = { id: string; question: string; response: string | null; status: "open" | "answered"; due_at: string };
 export type ApplicationReview = { id: string; reviewer_id: string; kind: "first" | "second"; scores: Record<string, number | null>; weighted_score: number | null; recommendation: string; note: string | null; submitted_at: string | null };
 export type ApplicationDetail = ApplicationSummary & {
@@ -587,6 +588,8 @@ export const admissionsAdminApi = {
     request<{ message: string }>(`/admin/applications/${id}/reverse`, { method: "POST", body: json(data) }, write()),
   askClarification: (id: string, question: string) =>
     request<{ id: string; due_at: string }>(`/admin/applications/${id}/clarification`, { method: "POST", body: json({ question }) }, write()),
+  inviteToInterview: (id: string, details: string) =>
+    request<{ message: string }>(`/admin/applications/${id}/interview-invite`, { method: "POST", body: json({ details }) }, write()),
   reviewerLink: (id: string, attId: string) => request<{ url: string }>(`/admin/applications/${id}/attachments/${attId}/link`, {}, authed),
 };
 
@@ -612,10 +615,13 @@ export const cohortsApi = {
 };
 
 export type OnboardingStep = { key: string; title: string; required: boolean; link: string | null; done: boolean; self_reported: boolean };
-export type OnboardingState = { status: string; due_at: string | null; overdue: boolean; steps: OnboardingStep[]; complete: boolean };
+export type OnboardingState = { status: string; due_at: string | null; overdue: boolean; steps: OnboardingStep[]; complete: boolean; intro?: string | null; whatsapp_text?: string | null };
 export const onboardingApi = {
   get: () => request<OnboardingState>("/onboarding", {}, authed),
   confirmStep: (step: string) => request<OnboardingState>(`/onboarding/steps/${step}`, { method: "POST" }, write()),
+  profileSuggestion: () => request<{ bio: string }>("/onboarding/profile-suggestion", {}, authed),
+  saveBio: (bio: string) => request<OnboardingState>("/onboarding/bio", { method: "PUT", body: json({ bio }) }, write()),
+  saveIntro: (intro: string) => request<OnboardingState>("/onboarding/intro", { method: "PUT", body: json({ intro }) }, write()),
   extend: (id: string, data: { days: number; reason: string }) =>
     request<{ onboarding_due_at: string }>(`/admin/onboarding/${id}/extend`, { method: "POST", body: json(data) }, write()),
 };

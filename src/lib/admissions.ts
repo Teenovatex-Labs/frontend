@@ -110,7 +110,7 @@ export type InterviewState = {
   answered: number;
   complete: boolean;
   can_submit: boolean;
-  questions: { position: number; question: string; format: string; spec: QuestionSpec | null; answer: string | null }[];
+  questions: { position: number; question: string; format: string; spec: QuestionSpec | null; answer: string | null; alternatives_left?: number }[];
   next?: InterviewQuestion | null;
 };
 
@@ -126,8 +126,15 @@ export const answerQuestion = (token: string, position: number, payload: AnswerP
     { method: "PUT", body: JSON.stringify(payload) }
   );
 
+export type HelpAction = "hint" | "alternative" | "skip";
+export const questionHelp = (token: string, position: number, action: HelpAction) =>
+  applicantRequest<{ hint: string | null; skips_left: number } & InterviewState>(`/applications/interview/${position}/help`, token, {
+    method: "POST",
+    body: JSON.stringify({ action }),
+  });
+
 // Images are private, so the API gives no address for them; links carry their address.
-export type Attachment = { id: string; kind: "image" | "link"; url: string | null; filename: string | null; size_bytes: number | null };
+export type Attachment = { id: string; kind: "image" | "link" | "pdf"; url: string | null; filename: string | null; size_bytes: number | null };
 
 export const listAttachments = async (token: string) => (await applicantRequest<{ items: Attachment[] }>("/applications/attachments", token)).items;
 
@@ -147,3 +154,8 @@ export type OfferView = { state: "pending" | "accepted" | "declined" | "expired"
 export const getOffer = (token: string) => request<OfferView>(`/applications/offer/${encodeURIComponent(token)}`);
 export const answerOffer = (token: string, accept: boolean) =>
   request<{ accepted: boolean }>(`/applications/offer/${encodeURIComponent(token)}/respond`, { method: "POST", body: JSON.stringify({ accept }) });
+export async function uploadAttachmentPdf(token: string, file: File): Promise<Attachment> {
+  const form = new FormData();
+  form.append("pdf", file);
+  return applicantRequest<Attachment>("/applications/attachments/pdf", token, { method: "POST", body: form });
+}
