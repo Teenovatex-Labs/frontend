@@ -25,7 +25,7 @@ export default function Home() {
         <Donate />
         <Join />
       </main>
-      <Footer />
+      <Footer merged />
     </>
   );
 }
