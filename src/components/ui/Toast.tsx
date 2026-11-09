@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { LottieSlot } from "./LottieSlot";
+import { emitMoment } from "@/lib/prompts";
 
 type Tone = "info" | "success" | "error";
 type ToastItem = { id: number; message: string; tone: Tone };
@@ -34,7 +35,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 
   const api = useMemo<ToastApi>(
-    () => ({ show, success: (m) => show(m, "success"), error: (m) => show(m, "error") }),
+    () => ({ show, success: (m) => {
+        show(m, "success");
+        emitMoment("action");
+      }, error: (m) => show(m, "error") }),
     [show]
   );
 

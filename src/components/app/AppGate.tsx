@@ -12,6 +12,7 @@ import AnnouncementBanner from "@/components/announcements/AnnouncementBanner";
 import { usersApi } from "@/lib/api";
 import { browserTimezone } from "@/lib/age";
 import { registerServiceWorker } from "@/lib/push";
+import { captureInstallEvent } from "@/lib/installPrompt";
 
 export default function AppGate({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -24,6 +25,7 @@ export default function AppGate({ children }: { children: ReactNode }) {
   // The service worker makes the installed app open offline and lets notifications show up.
   useEffect(() => {
     void registerServiceWorker();
+    captureInstallEvent();
   }, []);
 
   // Streaks and deadlines run on the member's own clock, so save it once.

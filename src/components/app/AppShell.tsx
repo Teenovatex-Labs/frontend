@@ -11,6 +11,7 @@ import useIconHover from "@/lib/useIconHover";
 import Sidebar from "./Sidebar";
 import AlfredCompanion from "@/components/alfred/AlfredCompanion";
 import LiveUpdates from "./LiveUpdates";
+import PromptHost from "./PromptHost";
 
 const STORAGE_KEY = "tx_sidebar_collapsed";
 
@@ -123,6 +124,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     </div>
     <LiveUpdates />
     <AlfredCompanion />
+    <PromptHost />
     </AlfredProvider>
   );
 }

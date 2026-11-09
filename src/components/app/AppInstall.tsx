@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
+import { captureInstallEvent, isStandalone, runInstall, useInstallEvent, useJustInstalled } from "@/lib/installPrompt";
 import { currentSubscription, disablePush, enablePush, pushSupported, registerServiceWorker } from "@/lib/push";
 import { useToast } from "@/components/ui/Toast";
-
-type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 
 // Settings card: put TeenovateX on the home screen, and get notifications on this device.
 export default function AppInstallSection() {
   const toast = useToast();
-  const [install, setInstall] = useState<InstallEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
+  const install = useInstallEvent();
+  const justInstalled = useJustInstalled();
+  const [standalone, setStandalone] = useState(false);
+  const installed = standalone || justInstalled;
   const [on, setOn] = useState(false);
   const [busy, setBusy] = useState(false);
   const [supported, setSupported] = useState(false);
@@ -21,19 +22,9 @@ export default function AppInstallSection() {
     void registerServiceWorker();
     setSupported(pushSupported());
     setBlocked(typeof Notification !== "undefined" && Notification.permission === "denied");
-    setInstalled(window.matchMedia("(display-mode: standalone)").matches);
+    setStandalone(isStandalone());
+    captureInstallEvent();
     void currentSubscription().then((s) => setOn(!!s));
-    const before = (e: Event) => {
-      e.preventDefault();
-      setInstall(e as InstallEvent);
-    };
-    const done = () => setInstalled(true);
-    window.addEventListener("beforeinstallprompt", before);
-    window.addEventListener("appinstalled", done);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", before);
-      window.removeEventListener("appinstalled", done);
-    };
   }, []);
 
   const toggle = async () => {
@@ -72,7 +63,7 @@ export default function AppInstallSection() {
             <span className="block text-muted">{installed ? "You're using the installed app." : install ? "Opens like any other app." : "In your browser menu, choose “Add to Home screen” or “Install”."}</span>
           </span>
           {!installed && install && (
-            <button type="button" className="btn-secondary btn-sm" onClick={() => void install.prompt().then(() => setInstall(null))}>Install</button>
+            <button type="button" className="btn-secondary btn-sm" onClick={() => void runInstall()}>Install</button>
           )}
         </div>
 

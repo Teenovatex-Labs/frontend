@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { LottieSlot } from "./LottieSlot";
+import { emitMoment } from "@/lib/prompts";
 
 const SEEN_PREFIX = "tx-seen:";
 
@@ -43,6 +44,7 @@ export default function CelebrationCard({
   closeLabel?: string;
   className?: string;
 }) {
+  useEffect(() => emitMoment("celebrate"), []);
   return (
     <div role="status" className={`flex items-center gap-4 border-2 border-ink bg-yellow/40 p-3 shadow-[3px_3px_0_var(--ink)] ${className}`}>
       <LottieSlot src={lottie} label="" loop={false} className="h-24 w-24 shrink-0" />
