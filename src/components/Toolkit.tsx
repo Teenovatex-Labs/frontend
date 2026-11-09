@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { headerHeight } from "@/lib/headerHeight";
+import Reveal from "./Reveal";
 
 const FEATURES = [
   {
@@ -90,7 +92,8 @@ export default function Toolkit() {
 
     const recompute = () => {
       const horizontal = Math.max(0, track.scrollWidth - track.clientWidth);
-      setStickyTop(Math.min(0, window.innerHeight - sticky.offsetHeight));
+      const header = headerHeight();
+      setStickyTop(header + Math.min(0, window.innerHeight - header - sticky.offsetHeight));
       setPinHeight(sticky.offsetHeight + horizontal * SCROLL_RATIO);
     };
     recompute();
@@ -183,16 +186,12 @@ export default function Toolkit() {
               className="pointer-events-none mx-auto -mt-16 mb-8 block w-[240px] opacity-40 md:-mt-24 md:w-[300px] lg:hidden"
             />
             <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="eyebrow text-rose">02 / From curious to creating</p>
+              <Reveal from="left"><p className="eyebrow text-rose">02 / From curious to creating</p>
                 <h2 className="mt-6 text-[38px] leading-[1.04] md:text-[54px]">
                   Everything you need to
                   <br />
                   <span className="font-serif italic font-normal">start your next thing.</span>
-                </h2>
-              </div>
-
-              <div className="max-w-[310px]">
+                </h2></Reveal><Reveal from="right" delay={0.1} className="max-w-[310px]">
                 <p>From finding a collaborator to getting feedback on your work.</p>
                 <p className="mt-3 text-xs leading-relaxed text-muted">
                   Some platform features are still coming soon. You can join the
@@ -221,13 +220,7 @@ export default function Toolkit() {
                   >
                     →
                   </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            ref={trackRef}
+                </div></Reveal></div></div><Reveal from="right" delay={0.2}><div ref={trackRef}
             className="feature-track mt-8 flex gap-5 overflow-x-auto px-5 pb-6 md:px-[max(56px,calc((100vw-1280px)/2))]"
             role="region"
             aria-label="TeenovateX features, scroll horizontally"
@@ -257,10 +250,7 @@ export default function Toolkit() {
                   <p className="mt-4 text-sm leading-relaxed opacity-85">{feature.body}</p>
                 </div>
               </article>
-            ))}
-          </div>
-
-          <div className="wrap flex items-center justify-between gap-5">
+            ))}</div></Reveal><div className="wrap flex items-center justify-between gap-5">
             <span className="text-xs">← Swipe, scroll or use the arrows →</span>
           </div>
         </div>

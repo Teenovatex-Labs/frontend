@@ -9,6 +9,7 @@ import { XIcon } from "@animateicons/react/lucide/x-icon";
 import useIconHover from "@/lib/useIconHover";
 import { KIND_LABEL, MOMENTS, type Moment, type StoryKind } from "@/lib/story";
 import Link from "next/link";
+import Reveal from "./Reveal";
 
 type Filter = "all" | StoryKind;
 
@@ -179,23 +180,16 @@ export default function Teenovators() {
 
       <div className="wrap">
         <div className="grid gap-8 md:grid-cols-[1.3fr_1fr] md:items-end md:gap-16">
-          <div>
-            <p className="eyebrow text-rose">04 / The story so far</p>
+          <Reveal from="left"><p className="eyebrow text-rose">04 / The story so far</p>
             <h2 className="mt-6 text-[40px] leading-[1.05] md:text-[64px]">
               Receipts,
               <br />
               <span className="font-serif font-normal italic">
                 in <span className="highlight">photographs.</span>
               </span>
-            </h2>
-          </div>
-          <p className="max-w-md text-muted">
+            </h2></Reveal><Reveal from="right" delay={0.12}><p className="max-w-md text-muted">
             Our first events, the day the founders finally shared a room, and the Teenovators who made
-            it real. Drag through it, or tap any photo for the story behind it.
-          </p>
-        </div>
-
-        <div role="group" aria-label="Filter the photo wall" className="mt-10 flex flex-wrap gap-2.5">
+            it real. Drag through it, or tap any photo for the story behind it. </p></Reveal></div><Reveal from="up" delay={0.1}><div role="group" aria-label="Filter the photo wall" className="mt-10 flex flex-wrap gap-2.5">
           {FILTERS.map((f) => (
             <button
               key={f.id}
@@ -210,11 +204,7 @@ export default function Teenovators() {
             >
               {f.label}
             </button>
-          ))}
-        </div>
-      </div>
-
-      <LayoutGroup>
+          ))}</div></Reveal></div><LayoutGroup>
         <div
           ref={scroller}
           onScroll={onScroll}

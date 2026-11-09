@@ -18,7 +18,8 @@ export default function Header() {
   const close = () => setOpen(false);
 
   return (
-    <header className="wrap flex items-center justify-between border-b border-line py-7 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+    <header className="sticky top-0 z-50 w-full border-b border-line bg-cream/90 backdrop-blur-md supports-[backdrop-filter]:bg-cream/80">
+      <div className="wrap flex h-[var(--header-h)] items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr]">
       <Link href="/" aria-label="TeenovateX home" className="flex items-center">
         <img src="/assets/logo-long5.svg" alt="TeenovateX" className="h-8 w-auto lg:h-9" />
       </Link>
@@ -47,7 +48,7 @@ export default function Header() {
           nav and the auth buttons become separate columns of the header
           grid (links centred, auth on the right). */}
       <div
-        className="absolute inset-x-0 top-[89px] z-10 grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,0.68,0,1.01)] lg:static lg:contents"
+        className="absolute inset-x-0 top-[var(--header-h)] z-10 grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,0.68,0,1.01)] lg:static lg:contents"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className={`min-h-0 overflow-hidden ${open ? "visible" : "invisible"} lg:visible lg:contents`}>
@@ -119,6 +120,7 @@ export default function Header() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </header>
   );

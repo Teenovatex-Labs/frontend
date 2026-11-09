@@ -8,6 +8,7 @@ import { LinkedinIcon } from "@animateicons/react/lucide/linkedin-icon";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import type { IconHandle } from "@animateicons/react";
 import useIconHover from "@/lib/useIconHover";
+import Reveal from "./Reveal";
 
 type AnimatedIconProps = { size?: number; className?: string };
 
@@ -24,6 +25,7 @@ const SOCIALS: {
 
 export default function Footer() {
   return (
+    <Reveal from="up" distance={60}>
     <footer className="wrap">
       <div className="grid gap-8 py-10 md:grid-cols-3 md:items-start md:gap-10">
         <Link href="/" aria-label="TeenovateX home" className="flex items-center">
@@ -61,6 +63,7 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    </Reveal>
   );
 }
 

@@ -1,3 +1,4 @@
+import Reveal from "./Reveal";
 const INTERESTS = [
   "Software & coding",
   "AI & robotics",
@@ -8,7 +9,7 @@ const INTERESTS = [
 export default function InterestStrip() {
   return (
     <div className="bg-ink py-4 text-cream" aria-label="Community interests">
-      <div className="wrap grid grid-cols-2 gap-3 text-center text-sm font-medium md:flex md:items-center md:justify-between md:text-left">
+      <Reveal from="up" distance={40} className="wrap grid grid-cols-2 gap-3 text-center text-sm font-medium md:flex md:items-center md:justify-between md:text-left">
         {INTERESTS.map((interest, i) => (
           <span key={interest} className="flex items-center gap-5">
             {interest}
@@ -19,7 +20,7 @@ export default function InterestStrip() {
             )}
           </span>
         ))}
-      </div>
+      </Reveal>
     </div>
   );
 }

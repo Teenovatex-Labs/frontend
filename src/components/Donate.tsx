@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { DONATE, donateUrl, formatMoney } from "@/lib/donate";
 import Link from "next/link";
+import Reveal from "./Reveal";
 
 const SEGMENTS = 8;
 const TIERS = [
@@ -81,8 +82,7 @@ export default function Donate() {
         className="pointer-events-none absolute -bottom-24 -left-24 w-[520px] max-w-none opacity-[0.05] invert"
       />
 
-      <div className="wrap relative grid gap-12 md:grid-cols-[1.05fr_1fr] md:items-center md:gap-20">
-        <div>
+      <div className="wrap relative grid gap-12 md:grid-cols-[1.05fr_1fr] md:items-center md:gap-20"><Reveal from="left">
           <p className="eyebrow text-pink">05 / Keep the lights on</p>
           <h2 className="mt-6 text-[40px] leading-[1.05] md:text-[62px]">
             Help the next teenager
@@ -111,10 +111,7 @@ export default function Donate() {
                 </Link>
               ))}
             </div>
-          </div>
-        </div>
-
-        <div className="relative border border-cream bg-cream p-6 text-ink shadow-[8px_8px_0_var(--pink)] md:p-8">
+          </div></Reveal><Reveal from="right" delay={0.12} className="relative border border-cream bg-cream p-6 text-ink shadow-[8px_8px_0_var(--pink)] md:p-8">
           <div className="grid grid-cols-[auto_1fr] items-center gap-6 md:gap-8">
             <div className="flex flex-col items-center">
               <PowerCell lit={lit} reduce={reduce} />
@@ -205,9 +202,6 @@ export default function Donate() {
               See our public finances
             </a>
             .
-          </p>
-        </div>
-      </div>
-    </section>
+          </p></Reveal></div></section>
   );
 }

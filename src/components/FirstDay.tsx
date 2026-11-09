@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Reveal from "./Reveal";
 
 const STEPS = [
   {
@@ -21,7 +22,7 @@ const STEPS = [
 export default function FirstDay() {
   return (
     <section className="wrap grid gap-10 py-16 md:grid-cols-2 md:gap-[90px] md:py-24">
-      <div className="mx-auto w-[90%] max-w-[500px] -rotate-1 overflow-hidden rounded-[50%_50%_7px_7px] border border-ink bg-[#f5d0df] p-[18px] md:mx-0 md:w-full">
+      <Reveal from="left"><div className="mx-auto w-[90%] max-w-[500px] -rotate-1 overflow-hidden rounded-[50%_50%_7px_7px] border border-ink bg-[#f5d0df] p-[18px] md:mx-0 md:w-full">
         <Image
           src="/community.webp"
           alt="Hands sharing ideas, notes and a laptop around a table"
@@ -31,11 +32,7 @@ export default function FirstDay() {
         />
         <p className="mt-3.5 border-t border-ink pt-3.5 text-center text-xs">
           A conversation is a good first step.
-        </p>
-      </div>
-
-      <div>
-        <p className="eyebrow text-rose">Your first day</p>
+        </p></div></Reveal><Reveal from="right" delay={0.1}><p className="eyebrow text-rose">Your first day</p>
         <h2 className="mb-6 mt-6 text-[37px] leading-tight md:text-[45px]">
           Joined?
           <br />
@@ -51,8 +48,6 @@ export default function FirstDay() {
               </div>
             </li>
           ))}
-        </ol>
-      </div>
-    </section>
+        </ol></Reveal></section>
   );
 }
