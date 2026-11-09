@@ -15,13 +15,13 @@ export default function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-5">
+    <header className="flex flex-wrap items-end justify-between gap-4 md:gap-5">
       <div>
         <p className="eyebrow text-rose">{eyebrow}</p>
-        <h1 className="mt-3 text-[36px] leading-[1.05] md:text-[56px]">
+        <h1 className="mt-3 text-[clamp(37px,10vw,48px)] leading-[.99] tracking-[-.045em] md:text-[56px] md:leading-[1.05]">
           {title} {accent && <span className="font-serif font-normal italic">{accent}</span>}
         </h1>
-        {children && <p className="mt-3 max-w-[520px] text-muted">{children}</p>}
+        {children && <p className="mt-3 max-w-[520px] text-sm leading-relaxed text-muted md:text-base">{children}</p>}
       </div>
       {action}
     </header>
