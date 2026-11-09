@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ApiError, uploadsApi } from "@/lib/api";
 import { messagesApi, peopleApi, rewardsApi, safetyApi, type Honor } from "@/lib/services";
 import Badge from "@/components/ui/Badge";
+import { badgeArtUrl } from "@/lib/badgeArt";
 import { LottieSlot } from "@/components/ui/LottieSlot";
 import ReportButton from "@/components/safety/ReportDialog";
 import { shrinkImage } from "@/lib/image";
@@ -242,7 +243,14 @@ function HonorsRow({ honors, isMe, username }: { honors: Honor[]; isMe: boolean;
     <div className="mt-5">
       {fresh && (
         <div role="status" className="mb-4 flex items-center gap-4 border-2 border-ink bg-yellow/40 p-3 shadow-[3px_3px_0_var(--ink)]">
-          <LottieSlot src="/lottie/badge-unlock.json" label="" loop={false} className="h-24 w-24 shrink-0" />
+          <div className="relative h-24 w-24 shrink-0">
+            <LottieSlot src="/lottie/badge-unlock.json" label="" loop={false} className="absolute inset-0 h-24 w-24" />
+            {badgeArtUrl(fresh) && (
+              <div className="absolute inset-0 grid place-items-center">
+                <img src={badgeArtUrl(fresh)!} alt="" className="badge-art-pop h-14 w-14 object-contain" />
+              </div>
+            )}
+          </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium">New honour unlocked: {fresh.name}</p>
             <p className="text-xs text-muted">{fresh.description}</p>
@@ -265,7 +273,7 @@ function HonorsRow({ honors, isMe, username }: { honors: Honor[]; isMe: boolean;
             title={h.criteria_text}
             className={`flex items-center gap-3 border p-3 text-left ${h.featured || picked.includes(h.id) ? "border-ink bg-yellow/40 shadow-[3px_3px_0_var(--ink)]" : "border-ink bg-white"} ${featuring ? "cursor-pointer" : ""}`}
           >
-            {(h.image_url ?? h.fallback_url) && <img src={h.image_url ?? h.fallback_url ?? undefined} alt="" className="h-11 w-11 shrink-0 rounded-full border border-ink object-contain" />}
+            {badgeArtUrl(h) && <img src={badgeArtUrl(h)!} alt="" className="h-11 w-11 shrink-0 rounded-full border border-ink bg-cream object-contain" />}
             <span>
               <span className="block text-sm font-medium">{h.name} <span className="rounded-full bg-cream px-1.5 py-0.5 text-[10px]">{h.tier}</span></span>
               <span className="block text-xs text-muted">{h.description}</span>
