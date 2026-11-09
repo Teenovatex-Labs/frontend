@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi, badgesAdminApi, type BadgeDefinition, type BadgeTier } from "@/lib/services";
 import { keys } from "@/lib/labs";
@@ -8,6 +8,8 @@ import { ApiError } from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
 import Skeleton from "@/components/ui/Skeleton";
 import Dialog from "@/components/ui/Dialog";
+import BadgeArtPicker from "@/components/admin/BadgeArtPicker";
+import { badgeArtUrl } from "@/lib/badgeArt";
 
 const TIERS: BadgeTier[] = ["standard", "high", "top"];
 
@@ -25,18 +27,39 @@ export default function BadgesAdminPage() {
   const [description, setDescription] = useState("");
   const [criteria, setCriteria] = useState("");
   const [tier, setTier] = useState<BadgeTier>("standard");
+  const [art, setArt] = useState<File | null>(null);
+  const resetCreate = () => { setCreating(false); setSlug(""); setName(""); setDescription(""); setCriteria(""); setTier("standard"); setArt(null); };
   const create = useMutation({
-    mutationFn: () => badgesAdminApi.create({ slug, name, description, tier, criteria_text: criteria }),
-    onSuccess: () => { toast.success("Badge created."); setCreating(false); setSlug(""); setName(""); setDescription(""); setCriteria(""); void refresh(); },
+    mutationFn: async () => {
+      const made = await badgesAdminApi.create({ slug, name, description, tier, criteria_text: criteria });
+      if (!art) return { art: "none" as const };
+      try { await badgesAdminApi.uploadImage(made.id, art); return { art: "ok" as const }; } catch (e) { return { art: "failed" as const, error: e }; }
+    },
+    onSuccess: (r) => {
+      resetCreate();
+      void refresh();
+      if (r.art === "failed") fail(r.error), toast.error("The badge was created but its artwork didn't upload. Open Edit to try again.");
+      else toast.success("Badge created.");
+    },
     onError: fail,
   });
 
-  const [uploadingFor, setUploadingFor] = useState<string | null>(null);
-  const fileInput = useRef<HTMLInputElement>(null);
-  const upload = useMutation({
-    mutationFn: (file: File) => badgesAdminApi.uploadImage(uploadingFor!, file),
-    onSuccess: () => { toast.success("Image updated."); setUploadingFor(null); void refresh(); },
-    onError: fail,
+  const [editing, setEditing] = useState<BadgeDefinition | null>(null);
+  const [eName, setEName] = useState("");
+  const [eDescription, setEDescription] = useState("");
+  const [eCriteria, setECriteria] = useState("");
+  const [eTier, setETier] = useState<BadgeTier>("standard");
+  const [eArt, setEArt] = useState<File | null>(null);
+  const openEdit = (b: BadgeDefinition) => { setEditing(b); setEName(b.name); setEDescription(b.description); setECriteria(b.criteria_text); setETier(b.tier); setEArt(null); };
+  const save = useMutation({
+    mutationFn: async () => {
+      const b = editing!;
+      const changed = eName !== b.name || eDescription !== b.description || eCriteria !== b.criteria_text || eTier !== b.tier;
+      if (changed) await badgesAdminApi.update(b.id, { name: eName, description: eDescription, criteria_text: eCriteria, tier: eTier });
+      if (eArt) await badgesAdminApi.uploadImage(b.id, eArt);
+    },
+    onSuccess: () => { toast.success("Badge saved."); setEditing(null); setEArt(null); void refresh(); },
+    onError: (e) => { fail(e); void refresh(); },
   });
 
   const toggleActive = useMutation({
@@ -69,14 +92,14 @@ export default function BadgesAdminPage() {
             {badges.data?.items.map((b) => (
               <div key={b.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-ink bg-white p-4">
                 <div className="flex items-center gap-3">
-                  {b.image_url && <img src={b.image_url} alt="" className="h-12 w-12 rounded-full border border-ink object-contain" />}
+                  {badgeArtUrl(b) ? <img src={badgeArtUrl(b)!} alt="" className="h-12 w-12 rounded-full border border-ink bg-cream object-contain" /> : <span className="grid h-12 w-12 place-items-center rounded-full border border-dashed border-ink text-[10px] text-muted">No art</span>}
                   <div>
                     <p className="font-semibold">{b.name} <span className="ml-1 rounded-full bg-cream px-2 py-0.5 text-[11px]">{b.tier}</span> {!b.active && <span className="ml-1 rounded-full bg-line px-2 py-0.5 text-[11px]">inactive</span>}</p>
                     <p className="text-sm text-muted">{b.description} · {b.awards} awarded</p>
                   </div>
                 </div>
                 <div className="flex gap-2 text-sm">
-                  <button onClick={() => { setUploadingFor(b.id); setTimeout(() => fileInput.current?.click(), 0); }} className="btn-secondary text-xs">Image</button>
+                  <button onClick={() => openEdit(b)} className="btn-secondary text-xs">Edit</button>
                   <button onClick={() => toggleActive.mutate(b)} className="btn-secondary text-xs">{b.active ? "Deactivate" : "Activate"}</button>
                   <button onClick={() => setAwarding(b)} className="btn text-xs">Award</button>
                 </div>
@@ -84,11 +107,11 @@ export default function BadgesAdminPage() {
             ))}
           </div>
         )}
-        <input ref={fileInput} type="file" accept="image/svg+xml,image/png,image/webp" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) upload.mutate(f); }} />
       </div>
 
-      <Dialog open={creating} onClose={() => setCreating(false)} title="New badge">
+      <Dialog open={creating} onClose={resetCreate} title="New badge">
         <form onSubmit={(e) => { e.preventDefault(); create.mutate(); }} className="flex flex-col gap-3">
+          <BadgeArtPicker current={null} file={art} onFile={setArt} />
           <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="slug-like-this" required className="rounded-md border border-ink bg-white px-3 py-2 text-sm" />
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" required className="rounded-md border border-ink bg-white px-3 py-2 text-sm" />
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" required rows={2} className="rounded-md border border-ink bg-white px-3 py-2 text-sm" />
@@ -97,8 +120,24 @@ export default function BadgesAdminPage() {
             {TIERS.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
           <div className="flex gap-3">
-            <button type="button" className="btn-secondary" onClick={() => setCreating(false)}>Cancel</button>
+            <button type="button" className="btn-secondary" onClick={resetCreate}>Cancel</button>
             <button type="submit" disabled={create.isPending} className="btn disabled:opacity-60">Create</button>
+          </div>
+        </form>
+      </Dialog>
+
+      <Dialog open={!!editing} onClose={() => setEditing(null)} title={`Edit ${editing?.name ?? ""}`}>
+        <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="flex flex-col gap-3">
+          <BadgeArtPicker current={editing ? badgeArtUrl(editing) : null} file={eArt} onFile={setEArt} />
+          <input value={eName} onChange={(e) => setEName(e.target.value)} placeholder="Name" required minLength={2} className="rounded-md border border-ink bg-white px-3 py-2 text-sm" />
+          <textarea value={eDescription} onChange={(e) => setEDescription(e.target.value)} placeholder="Short description" required rows={2} className="rounded-md border border-ink bg-white px-3 py-2 text-sm" />
+          <textarea value={eCriteria} onChange={(e) => setECriteria(e.target.value)} placeholder="Criteria (what earns this)" required minLength={10} rows={2} className="rounded-md border border-ink bg-white px-3 py-2 text-sm" />
+          <select value={eTier} onChange={(e) => setETier(e.target.value as BadgeTier)} className="rounded-md border border-ink bg-white px-3 py-2 text-sm">
+            {TIERS.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <div className="flex gap-3">
+            <button type="button" className="btn-secondary" onClick={() => setEditing(null)}>Cancel</button>
+            <button type="submit" disabled={save.isPending} className="btn disabled:opacity-60">Save</button>
           </div>
         </form>
       </Dialog>

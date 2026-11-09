@@ -589,3 +589,14 @@
 @media (prefers-reduced-motion: reduce) {
   .confetti { display: none; }
 }
+
+/* The uploaded badge artwork settles in as the unlock animation plays around it. */
+@keyframes badge-art-pop {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.badge-art-pop { animation: badge-art-pop 600ms cubic-bezier(0.2, 0.8, 0.2, 1) 250ms both; }
+@media (prefers-reduced-motion: reduce) {
+  .badge-art-pop { animation: none; }
+}
