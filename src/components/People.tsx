@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import FoundersOrbit from "./FoundersOrbit";
 import FounderModal from "./FounderModal";
+import Reveal from "./Reveal";
 
 export type Founder = {
   initials: string;
@@ -71,7 +72,7 @@ const FOUNDERS: Founder[] = [
     contribution: "He brings member reality into decisions and tracks whether TeenovateX is creating direction.",
     strengths: ["Community trust", "Member advocacy", "Impact storytelling"],
     focus: ["Rebuild onboarding", "Create a member feedback loop", "Connect members to timely opportunities"],
-    worksWith: ["Adam Lawal", "Aisha", "Anas Abubakar Masama"],
+    worksWith: ["Adam Lawal", "Aisha Onola", "Anas Abubakar Masama"],
     success: "Members can explain what TeenovateX helped them discover, build or become confident enough to attempt.",
   },
   {
@@ -86,12 +87,12 @@ const FOUNDERS: Founder[] = [
     contribution: "He keeps the organisation moving when enthusiasm fades and makes the comeback operationally believable.",
     strengths: ["Execution discipline", "Ecosystem intelligence", "Accountability"],
     focus: ["Run the weekly operating review", "Unblock cross-team delivery", "Turn relationships into practical leverage"],
-    worksWith: ["Anas Abubakar Masama", "Adeyemi Gabriel", "Raufu Abdulrahman"],
+    worksWith: ["Anas Abubakar Masama", "Adeyemi Gabriel", "Koded"],
     success: "Promises become finished work, missed commitments surface early and no important task becomes ownerless.",
   },
   {
-    initials: "RA",
-    name: "Raufu Abdulrahman",
+    initials: "KO",
+    name: "Koded",
     role: "Chief Technology Officer",
     unit: "Technology",
     bg: "bg-muted",
@@ -101,12 +102,12 @@ const FOUNDERS: Founder[] = [
     contribution: "He turns product intent into dependable technology and prevents the rebuild from becoming another fragile prototype.",
     strengths: ["Systems architecture", "Full-stack delivery", "Technical leadership"],
     focus: ["Set the platform architecture", "Define engineering standards", "Build a healthy release process"],
-    worksWith: ["Wisdom Ofogba", "Aisha", "Sanni Shazily"],
+    worksWith: ["Wisdom Ofogba", "Ajolaye Dennis", "Aisha Onola"],
     success: "The platform is secure, maintainable and easy for the engineering team to improve without breaking member trust.",
   },
   {
-    initials: "MU",
-    name: "Muaz",
+    initials: "OM",
+    name: "Oyebisi Muaz",
     role: "Brand and Design Lead",
     unit: "Brand",
     bg: "bg-rose",
@@ -116,7 +117,7 @@ const FOUNDERS: Founder[] = [
     contribution: "He gives every initiative a shared visual language and a stronger signal of care.",
     strengths: ["Identity systems", "Visual direction", "Quality control"],
     focus: ["Complete the new identity", "Build reusable brand rules", "Direct the comeback campaign look"],
-    worksWith: ["Aisha", "Anas Abubakar Masama", "Sanni Shazily"],
+    worksWith: ["Aisha Onola", "Anas Abubakar Masama", "Sanni Shazily"],
     success: "Every public touchpoint looks related, considered and recognisable without feeling too childish or too corporate.",
   },
   {
@@ -177,7 +178,7 @@ const FOUNDERS: Founder[] = [
     contribution: "He helps technically ambitious members see research and deep engineering as futures they can begin exploring now.",
     strengths: ["Energy systems", "Machine learning", "Technical research"],
     focus: ["Define the first research track", "Create a reading and experiment culture", "Guide members toward publishable work"],
-    worksWith: ["Quadri Lasisi", "Adam Lawal", "Raufu Abdulrahman"],
+    worksWith: ["Quadri Lasisi", "Adam Lawal", "Koded"],
     success: "Members can move from curiosity to a researched question, a documented experiment and a stronger technical direction.",
   },
   {
@@ -208,12 +209,12 @@ const FOUNDERS: Founder[] = [
     contribution: "He makes the member experience tangible while protecting quality between design and production.",
     strengths: ["Interface engineering", "Responsive systems", "Product polish"],
     focus: ["Rebuild the public website", "Create reusable UI foundations", "Protect accessibility and performance"],
-    worksWith: ["Raufu Abdulrahman", "Aisha", "Muaz"],
+    worksWith: ["Koded", "Ajolaye Dennis", "Aisha Onola"],
     success: "The interface feels considered on mobile and desktop, loads quickly and stays easy for the team to extend.",
   },
   {
-    initials: "AI",
-    name: "Aisha",
+    initials: "AO",
+    name: "Aisha Onola",
     role: "Product and Editorial Designer",
     unit: "Product experience",
     bg: "bg-ink",
@@ -224,8 +225,23 @@ const FOUNDERS: Founder[] = [
     contribution: "She makes the system usable and gives the brand a human digital expression.",
     strengths: ["UI and UX", "Editorial design", "Newsletter systems"],
     focus: ["Complete the website experience", "Design the TeenCoffee system", "Test key journeys with teenagers"],
-    worksWith: ["Muaz", "Wisdom Ofogba", "Yasin Lasisi"],
+    worksWith: ["Oyebisi Muaz", "Wisdom Ofogba", "Yasin Lasisi"],
     success: "A teenager can understand TeenovateX, find what matters and take the next step without needing a group chat explanation.",
+  },
+  {
+    initials: "AD",
+    name: "Ajolaye Dennis",
+    role: "Backend Engineer",
+    unit: "Product engineering",
+    bg: "bg-yellow",
+    bio: "Builds the server side of the platform: the APIs and data that members' accounts, projects and progress depend on.",
+    mandate: "Keep the backend dependable, secure and easy to build on, so the rest of the product can move quickly.",
+    speciality: "APIs, databases and server-side logic.",
+    contribution: "He works beside Koded and Wisdom so that what members see on screen is backed by services that hold up.",
+    strengths: ["Backend engineering", "APIs and data", "Reliability"],
+    focus: ["Build and maintain the platform's APIs", "Keep member data safe and consistent", "Give the frontend what it needs to ship"],
+    worksWith: ["Koded", "Wisdom Ofogba"],
+    success: "Members never think about the backend, because everything they do just works.",
   },
 ];
 
@@ -237,7 +253,7 @@ export default function People() {
       <div className="wrap grid gap-10 py-16 md:grid-cols-2 md:gap-16 md:py-24">
         {/* Bottom padding reserves the height of the corner logo (54vw wide,
             1632x1109 aspect) so the text never runs into it. */}
-        <div className="md:pb-[calc(min(37vw,585px)+32px)]">
+        <Reveal from="left" className="md:pb-[calc(min(37vw,585px)+32px)]">
           <p className="eyebrow text-rose">03 / The humans behind it</p>
           <h2 className="mt-6 max-w-2xl text-4xl md:text-5xl">
             Meet the people
@@ -246,11 +262,7 @@ export default function People() {
           </h2>
           <p className="mt-5 max-w-md text-muted">
             A focused team of builders, operators and researchers. Each person owns a different part of the same comeback.
-          </p>
-        </div>
-
-        <div>
-          <FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
+          </p></Reveal><Reveal from="right" delay={0.12}><FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
 
           <p className="mt-12 text-muted md:text-right">Tap anyone in the orbit to open their role in the system.</p>
 
@@ -268,12 +280,7 @@ export default function People() {
               >
                 Apply to the core team <span aria-hidden="true">↗</span>
               </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Flush in the section's bottom-left corner — no padding or margin.
+            </div></div></Reveal></div>{/* Flush in the section's bottom-left corner — no padding or margin.
           The artwork's dark band bleeds off its own left and bottom edges. */}
       <img
         src="/assets/logo-long-1.svg"

@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 :root {
+  --header-h: 68px;
   --cream: #fff9eb;
   --ink: #262822;
   --yellow: #f5e89e;
@@ -17,7 +18,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 30px;
+    scroll-padding-top: calc(var(--header-h) + 16px);
     /* Decorative, animated or carousel elements must never make the page scroll sideways. `clip` (unlike `hidden`) keeps sticky headers working. */
     overflow-x: clip;
   }
@@ -194,10 +195,10 @@
     isolation: isolate;
     overflow: hidden;
     /* The hero fills the rest of the first screen: 100vh minus the header
-       (95px, 101px from the lg breakpoint). svh keeps it right when mobile
+       (--header-h). svh keeps it right when mobile
        browser bars show. */
-    min-height: calc(100vh - 95px);
-    min-height: calc(100svh - 95px);
+    min-height: calc(100vh - var(--header-h));
+    min-height: calc(100svh - var(--header-h));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -206,8 +207,8 @@
 
   @media (min-width: 1024px) {
     .hero-canvas {
-      min-height: calc(100vh - 101px);
-      min-height: calc(100svh - 101px);
+      min-height: calc(100vh - var(--header-h));
+      min-height: calc(100svh - var(--header-h));
     }
   }
 
@@ -536,4 +537,8 @@
 .badge-art-pop { animation: badge-art-pop 600ms cubic-bezier(0.2, 0.8, 0.2, 1) 250ms both; }
 @media (prefers-reduced-motion: reduce) {
   .badge-art-pop { animation: none; }
+}
+
+@media (min-width: 1024px) {
+  :root { --header-h: 76px; }
 }

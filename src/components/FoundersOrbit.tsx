@@ -11,7 +11,7 @@ type OrbitNode = {
 
 const RING_A_ANGLES = [15, 135, 255];
 const RING_B_ANGLES = [0, 72, 144, 216, 288];
-const RING_C_ANGLES = [36, 108, 180, 252, 324];
+const RING_C_ANGLES = [30, 90, 150, 210, 270, 330];
 
 function zip(founders: Founder[], angles: number[]): OrbitNode[] {
   return founders.map((founder, i) => ({ angle: angles[i], founder }));
@@ -105,7 +105,7 @@ export default function FoundersOrbit({
   const [preview, setPreview] = useState<Founder | null>(null);
   const ringA = zip(founders.slice(0, 3), RING_A_ANGLES);
   const ringB = zip(founders.slice(3, 8), RING_B_ANGLES);
-  const ringC = zip(founders.slice(8, 13), RING_C_ANGLES);
+  const ringC = zip(founders.slice(8), RING_C_ANGLES);
 
   return (
     <div className="founders-orbit relative mx-auto aspect-square w-full max-w-[640px] overflow-hidden">

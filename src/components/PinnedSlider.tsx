@@ -1,6 +1,8 @@
 "use client";
 
 import { Children, useEffect, useRef, useState, type ReactNode } from "react";
+import { headerHeight } from "@/lib/headerHeight";
+import Reveal from "./Reveal";
 
 // Vertical pixels scrolled per horizontal pixel the cards travel. Higher = slower, calmer.
 const SCROLL_RATIO = 1.6;
@@ -52,7 +54,8 @@ export default function PinnedSlider({
     if (!track || !sticky) return;
     const recompute = () => {
       const horizontal = Math.max(0, track.scrollWidth - track.clientWidth);
-      setStickyTop(Math.min(0, window.innerHeight - sticky.offsetHeight));
+      const header = headerHeight();
+      setStickyTop(header + Math.min(0, window.innerHeight - header - sticky.offsetHeight));
       setPinHeight(sticky.offsetHeight + horizontal * SCROLL_RATIO);
     };
     recompute();
@@ -108,25 +111,18 @@ export default function PinnedSlider({
       <div ref={stickyRef} className="sticky overflow-hidden py-8 md:py-8" style={{ top: stickyTop }}>
         {background}
         <div className="wrap relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-10">
-          <div>{header}</div>
-          <div className="max-w-[340px]">
-            {blurb}
+          <Reveal from="left"><div>{header}</div></Reveal>
+          <Reveal from="right" delay={0.1} className="max-w-[340px]">{blurb}
             <div className="mt-4 flex items-center gap-5">
               <button type="button" onClick={() => scrollToIndex(index - 1)} disabled={index === 0} aria-label="Previous" className="flex h-11 w-11 items-center justify-center rounded-full border border-ink bg-cream text-xl transition-colors hover:enabled:bg-pink disabled:opacity-35">←</button>
               <span className="text-sm font-medium">{String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}</span>
               <button type="button" onClick={() => scrollToIndex(index + 1)} disabled={index === count - 1} aria-label="Next" className="flex h-11 w-11 items-center justify-center rounded-full border border-ink bg-cream text-xl transition-colors hover:enabled:bg-pink disabled:opacity-35">→</button>
-            </div>
-          </div>
-        </div>
-
-        <div
-          ref={trackRef}
+            </div></Reveal></div><Reveal from="right" delay={0.2}><div ref={trackRef}
           className="feature-track relative mt-5 flex gap-5 overflow-x-auto px-5 pb-6 md:px-[max(56px,calc((100vw-1280px)/2))]"
           role="region"
           aria-label={label}
         >
-          {cards}
-        </div>
+          {cards}</div></Reveal>
       </div>
     </div>
   );
