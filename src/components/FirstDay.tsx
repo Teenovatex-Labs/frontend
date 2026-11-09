@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import Reveal from "./Reveal";
 
 const STEPS = [
@@ -48,6 +49,10 @@ export default function FirstDay() {
               </div>
             </li>
           ))}
-        </ol></Reveal></section>
+        </ol>
+        <Link href="/story" className="btn-secondary btn-sm mt-7">
+          See how it started <span aria-hidden="true">↗︎</span>
+        </Link>
+      </Reveal></section>
   );
 }

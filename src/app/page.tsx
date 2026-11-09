@@ -5,7 +5,6 @@ import About from "@/components/About";
 import Toolkit from "@/components/Toolkit";
 import FirstDay from "@/components/FirstDay";
 import People from "@/components/People";
-import Teenovators from "@/components/Teenovators";
 import Donate from "@/components/Donate";
 import Join from "@/components/Join";
 import Footer from "@/components/Footer";
@@ -21,7 +20,6 @@ export default function Home() {
         <Toolkit />
         <FirstDay />
         <People />
-        <Teenovators />
         <Donate />
       </main>
       {/* One yellow band: the call to action and the footer share a single background. */}
