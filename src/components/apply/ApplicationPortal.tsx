@@ -13,6 +13,7 @@ import { ArrowLeftIcon } from "@animateicons/react/lucide/arrow-left-icon";
 import { ArrowRightIcon } from "@animateicons/react/lucide/arrow-right-icon";
 import ReviewStep from "@/components/apply/ReviewStep";
 import SubmittedCelebration from "@/components/apply/SubmittedCelebration";
+import CelebrationCard, { useFirstTime } from "@/components/ui/CelebrationCard";
 import { useToast } from "@/components/ui/Toast";
 import { ApiError } from "@/lib/api";
 import {
@@ -51,6 +52,7 @@ export default function ApplicationPortal({ token }: { token: string }) {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
+  const [showAccepted, markAcceptedSeen] = useFirstTime(app?.status === "accepted" ? `accepted:${app.reference}` : null);
   const [canSubmitInterview, setCanSubmitInterview] = useState(false);
   const toast = useToast();
 
@@ -121,6 +123,12 @@ export default function ApplicationPortal({ token }: { token: string }) {
       {app.clarifications.filter((c) => c.status === "open").map((c) => (
         <ClarificationCard key={c.id} id={c.id} question={c.question} token={token} onAnswered={load} />
       ))}
+
+      {showAccepted && (
+        <CelebrationCard lottie="/lottie/accepted.json" title={`Welcome to TeenovateX, ${app.full_name.trim().split(/\s+/)[0] || "there"}!`} onClose={markAcceptedSeen}>
+          Your application was accepted.
+        </CelebrationCard>
+      )}
 
       {app.status === "accepted" && app.guardian?.required && (
         <GuardianPanel token={token} status={app.guardian.status} />

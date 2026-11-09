@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { LottieSlot } from "./LottieSlot";
 
 type Tone = "info" | "success" | "error";
 type ToastItem = { id: number; message: string; tone: Tone };
@@ -56,6 +57,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               role={t.tone === "error" ? "alert" : "status"}
               className={`pointer-events-auto flex max-w-[380px] items-start gap-3 border border-ink px-4 py-3 text-sm font-medium shadow-[4px_4px_0_var(--ink)] ${TONES[t.tone]}`}
             >
+              {t.tone === "success" && <LottieSlot src="/lottie/saved.json" label="" loop={false} className="-my-1 -ml-1 h-9 w-9 shrink-0" />}
               <span className="flex-1">{t.message}</span>
               <button type="button" onClick={() => dismiss(t.id)} aria-label="Dismiss" className="-mr-1 text-ink/75 hover:text-ink">
                 ×

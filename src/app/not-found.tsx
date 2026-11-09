@@ -8,7 +8,7 @@ export default function NotFound() {
   return (
     <main className="grid min-h-[70vh] place-items-center px-6 py-16 text-center">
       <div>
-        <LottieSlot src="/lottie/empty.json" label="" poster="/assets/logo-nobg.svg" className="mx-auto h-48 w-48" />
+        <LottieSlot src="/lottie/not-found.json" label="" poster="/assets/logo-nobg.svg" className="mx-auto h-48 w-48" />
         <p className="eyebrow text-rose">404</p>
         <h1 className="mt-3 text-[32px] tracking-[-0.03em] md:text-[44px]">
           This page <span className="font-serif font-normal italic">wandered off.</span>

@@ -5,6 +5,7 @@ import { SendIcon } from "@animateicons/react/lucide/send-icon";
 import useIconHover from "@/lib/useIconHover";
 import { ApiError } from "@/lib/api";
 import { answerQuestion, getInterview, nextQuestion, questionHelp, type HelpAction, type AnswerPayload, type InterviewQuestion, type InterviewState } from "@/lib/admissions";
+import { LottieSlot } from "@/components/ui/LottieSlot";
 
 /** A short, adaptive chat with Alfred: one question at a time, answered in order. */
 export default function InterviewChat({ token, locked, onProgress }: { token: string; locked: boolean; onProgress?: (canSubmit: boolean) => void }) {
@@ -124,6 +125,11 @@ export default function InterviewChat({ token, locked, onProgress }: { token: st
         ))}
         {state.next && (
           <div className="self-start rounded-xl rounded-bl-sm border border-ink bg-pink/30 px-3.5 py-2 text-sm max-w-[85%]">{state.next.question}</div>
+        )}
+        {busy && (
+          <div className="self-start" role="status" aria-label="Alfred is thinking">
+            <LottieSlot src="/lottie/thinking.json" label="" className="h-24 w-24" />
+          </div>
         )}
         {!state.next && state.can_submit && (
           <p className="self-start rounded-xl rounded-bl-sm border border-ink bg-yellow/40 px-3.5 py-2 text-sm">
