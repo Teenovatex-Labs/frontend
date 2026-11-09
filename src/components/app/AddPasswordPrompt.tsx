@@ -7,7 +7,7 @@ import FormField from "@/components/FormField";
 import { newPasswordSchema, fieldErrors } from "@/lib/validation";
 
 // Shown to a Google-only account (has_google, no password yet) so it isn't
-// stuck signing in one way forever, and, more importantly, so someone else
+// stuck signing in one way forever — and, more importantly, so someone else
 // can't register that same email later and squat on it: once this account
 // has its own password, googleAuth's email-match linking no longer treats
 // it as an abandoned/unverified row up for grabs.
@@ -51,7 +51,7 @@ export default function AddPasswordPrompt() {
             <div>
               <p className="font-semibold">Add a password to your account</p>
               <p className="text-sm text-muted">
-                You signed up with Google, set a password so you can log in either way.
+                You signed up with Google — set a password so you can log in either way.
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-3">

@@ -2,7 +2,7 @@
 
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 
-/** The fast-path into an account, Google auth, dressed as a card that
+/** The fast-path into an account — Google auth, dressed as a card that
  * belongs on this site rather than a bare stock button dropped in. */
 export default function GoogleAuthCard({
   text,

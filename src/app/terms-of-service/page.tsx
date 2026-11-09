@@ -18,7 +18,7 @@ export default function TermsOfServicePage() {
 
         <div className="mt-6 rounded-md border border-ink bg-pink/20 p-4 text-sm">
           <strong>This is a draft, not legal advice.</strong> It covers the basics honestly, but a lawyer should
-          review it, particularly the age/eligibility and liability sections, before it&rsquo;s the
+          review it &mdash; particularly the age/eligibility and liability sections &mdash; before it&rsquo;s the
           real terms people agree to.
         </div>
 
@@ -35,7 +35,7 @@ export default function TermsOfServicePage() {
             <h2 className="text-xl font-semibold">2. Who can use this</h2>
             <p className="mt-2 text-muted">
               TeenovateX is built for teenagers. This draft doesn&rsquo;t yet set an exact minimum age or a
-              parental-consent requirement, that needs to be decided (and actually enforced at signup)
+              parental-consent requirement &mdash; that needs to be decided (and actually enforced at signup)
               before this section is final. If you&rsquo;re signing up on behalf of, or with permission from, a
               parent or guardian where required, make sure that&rsquo;s actually true.
             </p>
@@ -72,7 +72,7 @@ export default function TermsOfServicePage() {
             <h2 className="text-xl font-semibold">5. Your projects &amp; content</h2>
             <p className="mt-2 text-muted">
               You keep ownership of what you submit. By posting a project, you give TeenovateX a license to
-              display it on the platform (and reasonably promote it, e.g. on a leaderboard or social post),
+              display it on the platform (and reasonably promote it, e.g. on a leaderboard or social post) &mdash;
               nothing more. You&rsquo;re responsible for making sure you actually have the rights to whatever
               you submit.
             </p>
@@ -98,7 +98,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-xl font-semibold">8. No warranty</h2>
             <p className="mt-2 text-muted">
-              TeenovateX is provided &ldquo;as is.&rdquo; We&rsquo;re a young, actively-changing platform,
+              TeenovateX is provided &ldquo;as is.&rdquo; We&rsquo;re a young, actively-changing platform &mdash;
               things will occasionally break, and we don&rsquo;t guarantee uninterrupted availability.
             </p>
           </section>

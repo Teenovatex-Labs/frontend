@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  // Re-fetches the current user, e.g. after adding/changing a password,
+  // Re-fetches the current user — e.g. after adding/changing a password,
   // so `has_password` reflects it without a full page reload.
   const refreshUser: AuthContextValue["refreshUser"] = async () => {
     setUser(await authApi.me());

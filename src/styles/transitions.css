@@ -1,15 +1,15 @@
 /* ==========================================================================
    Reusable motion primitives (Transitions.dev), kept independent of any one
    feature. Pull the matching one in whenever a new component fits its shape
-  , don't re-derive a bespoke version of any of these from scratch.
+   — don't re-derive a bespoke version of any of these from scratch.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
    Number pop-in
    For: any digit/character that should visibly land when it first appears
-   or changes, a stat ticking up, a step indicator, a single-character
+   or changes — a stat ticking up, a step indicator, a single-character
    swap. For a full numeric readout that rolls place-by-place (a counter, a
-   total, a price), prefer the `torph` package's <TextMorph> instead, this
+   total, a price), prefer the `torph` package's <TextMorph> instead — this
    is for simpler one-off digit/character pop-ins that don't need place-value
    matching.
 
@@ -79,7 +79,7 @@
 /* --------------------------------------------------------------------------
    Notification badge
    For: an unread-count / status dot anchored to a bell, avatar, or any
-   icon-button trigger, the classic "1" pill in the corner of an icon.
+   icon-button trigger — the classic "1" pill in the corner of an icon.
 
   Usage:
     <!-- Place .t-badge inside your trigger (bell icon, button, etc.). -->
@@ -92,7 +92,7 @@
     </button>
 
   State: toggle data-open="true" / "false" on .t-badge.
-  Only the badge slides + pops, the trigger itself stays put.
+  Only the badge slides + pops — the trigger itself stays put.
 -------------------------------------------------------------------------- */
 
 :root {
@@ -155,7 +155,7 @@
 
 /* --------------------------------------------------------------------------
    Banner stacking (Sonner-style)
-   For: notifications, toasts, status banners, anything that queues up and
+   For: notifications, toasts, status banners — anything that queues up and
    collapses into a peekable stack.
 
   Usage:
@@ -198,7 +198,7 @@
      push-back depths switch to the bottom edge, which they can do
      freely because the swap happens at identity. */
   transform-origin: 50% 50%;
-  /* Explicit blur(0) rather than an unset filter, blur → none is
+  /* Explicit blur(0) rather than an unset filter — blur → none is
      not reliably interpolated, and the cross-blur would snap. */
   filter: blur(0);
   will-change: transform, opacity, filter;
@@ -228,7 +228,7 @@
 }
 /* Spread: newest stays put, older ones climb one banner height
    each (100% = the banner's own height). Driven by a class, not
-   :hover, the gaps between spread banners belong to no element. */
+   :hover — the gaps between spread banners belong to no element. */
 .t-stack.is-spread .t-stack-banner[data-depth="1"],
 .t-stack.is-spread .t-stack-banner[data-depth="2"] {
   opacity: 1;

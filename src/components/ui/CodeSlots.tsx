@@ -518,7 +518,7 @@ function Slot({ mv, drop, char, active, rise, sink, status, slotDisabled }: Slot
   // The original targets these via Tailwind v4's `in-data-*` ancestor
   // variants (the row's data-status/data-disabled); this project is on
   // Tailwind v3, which has no ancestor-attribute selector, so the same
-  // three states are computed here instead, same result, just from props
+  // three states are computed here instead — same result, just from props
   // already in scope rather than a CSS selector reaching up to the row.
   const bgClass =
     status === "error"

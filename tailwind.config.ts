@@ -18,9 +18,8 @@ const config: Config = {
         rose: "#8d355b",
       },
       fontFamily: {
-        sans: ["var(--font-body)", "Georgia", "serif"],
-        serif: ["var(--font-body)", "Georgia", "serif"],
-        display: ["var(--font-display)", "Arial Black", "sans-serif"],
+        sans: ["var(--font-poppins)", "sans-serif"],
+        serif: ["var(--font-playfair)", "Georgia", "serif"],
       },
       letterSpacing: {
         tightest: "-0.175em",

@@ -5,14 +5,14 @@ import { motion } from "framer-motion";
 
 type Phrase = {
   text: string;
-  /** Extra classes for this line only, e.g. the italic/rose treatment on
+  /** Extra classes for this line only — e.g. the italic/rose treatment on
    * the last beat of a headline. */
   className?: string;
 };
 
 type FocusRect = { x: number; y: number; width: number; height: number };
 
-/** Cycles through a headline's lines one at a time, the current line
+/** Cycles through a headline's lines one at a time — the current line
  * sharpens while the rest blur, and a glowing corner-bracket frame glides
  * to track whichever one is active. Adapted from the reference-site
  * "TrueFocus" component (single-word, horizontal) into a line-by-line,

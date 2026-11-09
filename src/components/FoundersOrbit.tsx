@@ -62,8 +62,8 @@ function OrbitNodeView({
           style={{ width: Math.max(size, 44), height: Math.max(size, 44) }}
         >
           <span
-            className={`flex aspect-square shrink-0 items-center justify-center overflow-hidden rounded-full border border-ink shadow-[2px_2px_0_var(--cream)] ${founder.bg} ${
-              founder.photo ? "" : founder.fg ?? ""
+            className={`flex aspect-square shrink-0 items-center justify-center overflow-hidden rounded-full border border-ink shadow-[2px_2px_0_var(--cream)] ${
+              founder.photo ? "" : `${founder.bg} ${founder.fg ?? ""}`
             }`}
             style={{ width: size, height: size }}
           >
@@ -88,7 +88,7 @@ function OrbitNodeView({
 
 // Ring radii/sizes are solved (not eyeballed) so that adjacent rings never collide.
 // Two rings spin at different speeds, so their relative angle sweeps through zero
-// periodically, at that moment two nodes sit at the same angle, radius apart. The
+// periodically — at that moment two nodes sit at the same angle, radius apart. The
 // radius gap between rings must exceed the sum of their avatar radii at all times,
 // checked against the narrowest real container width (~335px on mobile).
 const RING_A = { radius: 20, size: 50, textClass: "text-sm" };
@@ -110,8 +110,8 @@ export default function FoundersOrbit({
   return (
     <div className="founders-orbit relative mx-auto aspect-square w-full max-w-[640px] overflow-hidden">
       {/* The rotating rings are square divs; a rotated square's axis-aligned
-          bounding box grows up to ~1.41x at 45 degrees, which, without this
-          overflow-hidden, periodically pushed past the viewport edge and
+          bounding box grows up to ~1.41x at 45 degrees, which — without this
+          overflow-hidden — periodically pushed past the viewport edge and
           caused the whole page to scroll horizontally, even though the
           visible avatar content itself always stays within these bounds. */}
       <svg viewBox="0 0 400 400" className="absolute inset-0 h-full w-full" aria-hidden="true">
