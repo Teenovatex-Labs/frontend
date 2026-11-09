@@ -1,19 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins, Playfair_Display } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+// Self-hosted (latin subset) so the build never depends on Google Fonts.
+const poppins = localFont({
+  src: [
+    { path: "../fonts/poppins-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/poppins-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/poppins-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/poppins-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-poppins",
   display: "swap",
 });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["500", "600"],
-  style: ["normal", "italic"],
+const playfair = localFont({
+  src: [
+    { path: "../fonts/playfair-display-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/playfair-display-latin-500-italic.woff2", weight: "500", style: "italic" },
+    { path: "../fonts/playfair-display-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/playfair-display-latin-600-italic.woff2", weight: "600", style: "italic" },
+  ],
   variable: "--font-playfair",
   display: "swap",
 });
