@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { DONATE, donateUrl, formatMoney } from "@/lib/donate";
-import { openContact } from "@/lib/contactBus";
+import Link from "next/link";
 
 const SEGMENTS = 8;
 const TIERS = [
@@ -102,14 +102,13 @@ export default function Donate() {
                 { label: "Sponsor an event", topic: "sponsor" as const },
                 { label: "Partner with us", topic: "partner" as const },
               ].map((o) => (
-                <button
+                <Link
                   key={o.topic}
-                  type="button"
-                  onClick={() => openContact(o.topic)}
+                  href={`/contact?topic=${o.topic}`}
                   className="btn-secondary btn-sm on-dark"
                 >
                   {o.label} <span aria-hidden="true">↗︎</span>
-                </button>
+                </Link>
               ))}
             </div>
           </div>

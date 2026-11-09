@@ -8,7 +8,7 @@ import { ArrowRightIcon } from "@animateicons/react/lucide/arrow-right-icon";
 import { XIcon } from "@animateicons/react/lucide/x-icon";
 import useIconHover from "@/lib/useIconHover";
 import { KIND_LABEL, MOMENTS, type Moment, type StoryKind } from "@/lib/story";
-import { openContact } from "@/lib/contactBus";
+import Link from "next/link";
 
 type Filter = "all" | StoryKind;
 
@@ -288,9 +288,9 @@ export default function Teenovators() {
                     and it could be the next one on this wall.
                   </p>
                 </div>
-                <button type="button" onClick={() => openContact("hello")} className="btn self-start">
+                <Link href="/contact?topic=hello" className="btn self-start">
                   Send us yours <span>↗︎</span>
-                </button>
+                </Link>
               </div>
             </motion.article>
           </AnimatePresence>
