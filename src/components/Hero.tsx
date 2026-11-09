@@ -2,12 +2,6 @@ import { appUrl } from "@/lib/hosts";
 import Link from "next/link";
 import TrueFocus from "./TrueFocus";
 
-const STATS = [
-  { value: "1,000", suffix: "+", label: "Active members" },
-  { value: "Global", suffix: "", label: "Reach" },
-  { value: "100", suffix: "%", label: "Free for teens" },
-];
-
 export default function Hero() {
   return (
     <section className="w-full">
@@ -51,9 +45,10 @@ export default function Hero() {
             <h1 className="text-left text-[52px] leading-[1.13] tracking-[-0.05em] md:text-[91px]">
               <TrueFocus
                 phrases={[
-                  { text: "What if" },
-                  { text: "you actually" },
-                  { text: "built it?", className: "whitespace-nowrap font-serif italic font-medium text-rose" },
+                  { text: "Build the" },
+                  { text: "Technology" },
+                  { text: "you Wish" },
+                  { text: "Existed", className: "whitespace-nowrap font-serif italic font-medium text-rose" },
                 ]}
               />
             </h1>
@@ -77,25 +72,6 @@ export default function Hero() {
           <p className="mx-auto mt-5 max-w-[270px] text-center text-[10px] text-muted md:max-w-none">
             Your questions. Your experiments. Your next step.
           </p>
-        </div>
-      </div>
-
-      <div className="wrap">
-        <div className="grid grid-cols-3 gap-0 border-t border-line py-6 text-center md:py-9">
-          {STATS.map((stat, i) => (
-            <div
-              key={stat.label}
-              className={`px-2 ${i > 0 ? "border-l border-line" : ""}`}
-            >
-              <strong className="text-[27px] tracking-[-0.03em] md:text-[42px]">
-                {stat.value}
-                <span className="text-rose">{stat.suffix}</span>
-              </strong>
-              <span className="mt-2 block text-[10px] text-muted md:text-xs">
-                {stat.label}
-              </span>
-            </div>
-          ))}
         </div>
       </div>
     </section>

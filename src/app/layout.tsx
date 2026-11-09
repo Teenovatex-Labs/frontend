@@ -19,7 +19,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "TeenovateX Labs | What if you actually built it?",
+  title: "TeenovateX Labs | Build the Technology you Wish Existed",
   description:
     "A youth-led tech community for teenagers to connect, explore technology and build ideas together. Find your people at TeenovateX Labs.",
 };
