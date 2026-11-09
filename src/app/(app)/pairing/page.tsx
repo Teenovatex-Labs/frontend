@@ -7,9 +7,12 @@ import { keys } from "@/lib/labs";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
+import CelebrationCard, { useFirstTime } from "@/components/ui/CelebrationCard";
 
 export default function PairingPage() {
   const mine = useQuery({ queryKey: keys.pairings, queryFn: pairingApi.mine });
+  const firstPairing = mine.data?.items[0]?.id ?? null;
+  const [isNew, markSeen] = useFirstTime(firstPairing ? `pairing:${firstPairing}` : null);
   return (
     <main className="mx-auto w-full max-w-[760px] px-5 py-10 md:px-10 md:py-14">
       <PageHeader eyebrow="Together" title="Your" accent="pairing.">The team matches members who can help each other grow. Your partner and goal show up here.</PageHeader>
@@ -20,6 +23,7 @@ export default function PairingPage() {
           <EmptyState title="No pairing right now.">If the team finds a good match, you'll get a notification.</EmptyState>
         ) : (
           <div className="flex flex-col gap-4">
+            {isNew && <CelebrationCard lottie="/lottie/match-found.json" title="You've been paired!" onClose={markSeen}>Say hello to your partner.</CelebrationCard>}
             {mine.data.items.map((p) => (
               <article key={p.id} className="border border-ink bg-white p-5 shadow-[3px_3px_0_var(--ink)]">
                 <p className="text-sm text-muted">Paired with</p>

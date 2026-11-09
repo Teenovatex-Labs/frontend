@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
+import Milestones from "@/components/rewards/Milestones";
 import { eventsApi, inboxApi, labsApi, labsDeepApi, learnApi, votesApi } from "@/lib/services";
 import { keys, timeAgo } from "@/lib/labs";
 import { eventDay, eventTime } from "@/lib/dates";
@@ -59,6 +60,8 @@ export default function HomePage() {
       <p className="mt-4 max-w-[520px] text-muted">
         {user.streak > 1 ? `${user.streak} days in a row. Keep it going.` : "Good to see you. Here's what's happening."}
       </p>
+
+      <Milestones userId={user.id} points={user.points} level={user.level.level} levelTitle={user.level.title} rank={user.rank ?? null} />
 
       <div className="mt-10 grid gap-5 sm:grid-cols-3">
         <StatTile label="Points" value={user.points.toLocaleString()} tone="yellow" />

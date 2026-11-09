@@ -10,6 +10,7 @@ import { messagesApi } from "@/lib/services";
 import { keys, timeAgo } from "@/lib/labs";
 import Avatar from "@/components/ui/Avatar";
 import Skeleton from "@/components/ui/Skeleton";
+import { LottieSlot } from "@/components/ui/LottieSlot";
 
 // Two panes on a big screen (list + open chat). On a phone only one shows at a time.
 export default function MessagesLayout({ children }: { children: ReactNode }) {
@@ -52,6 +53,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
             <p className="p-5 text-sm text-muted">Couldn&rsquo;t load your chats.</p>
           ) : list.data.conversations.length === 0 ? (
             <div className="p-5 text-sm text-muted">
+              <LottieSlot src="/lottie/empty-messages.json" label="" className="mx-auto h-32 w-32" />
               <p className="font-medium text-ink">No chats yet.</p>
               <p className="mt-2">Message anyone by their username, from their profile. Find people on <Link className="underline underline-offset-4" href="/leaderboard">the leaderboard</Link> or on a lab you like.</p>
             </div>

@@ -61,7 +61,7 @@ export default function NotificationsPage() {
         ) : inbox.isError ? (
           <EmptyState title="That didn't load." action={<button className="btn-secondary" onClick={() => inbox.refetch()}>Try again</button>} />
         ) : inbox.data.length === 0 ? (
-          <EmptyState title="All quiet." action={<Link href="/labs" className="btn-secondary">Explore labs</Link>}>
+          <EmptyState lottie="/lottie/empty-notifications.json" title="All quiet." action={<Link href="/labs" className="btn-secondary">Explore labs</Link>}>
             When someone votes for your lab or messages you, you&rsquo;ll see it here.
           </EmptyState>
         ) : (

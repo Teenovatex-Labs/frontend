@@ -11,6 +11,7 @@ import Avatar from "@/components/ui/Avatar";
 import Dialog from "@/components/ui/Dialog";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
+import CelebrationCard, { useFirstTime } from "@/components/ui/CelebrationCard";
 import { useToast } from "@/components/ui/Toast";
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -24,6 +25,9 @@ export default function ChallengePage() {
   const fail = (e: unknown) => toast.error(e instanceof ApiError ? e.message : "That didn't work.");
   const c = useQuery({ queryKey: keys.challenge(id), queryFn: () => challengesApi.get(id) });
   const refresh = () => { void qc.invalidateQueries({ queryKey: keys.challenge(id) }); void qc.invalidateQueries({ queryKey: keys.challenges }); };
+
+  const placed = c.data && c.data.results_published && c.data.my_results.length > 0 ? c.data.my_results[0].place : null;
+  const [showResult, markResultSeen] = useFirstTime(placed ? `challenge:${id}` : null);
 
   const [editing, setEditing] = useState<ChallengeEntry | "new" | null>(null);
   const [title, setTitle] = useState("");
@@ -69,6 +73,12 @@ export default function ChallengePage() {
       <h1 className="mt-2 text-[34px] leading-[1.1] tracking-[-0.03em] md:text-[44px]">{ch.title}</h1>
       <p className="mt-2 text-sm text-muted">Entries {when(ch.starts_at)} to {when(ch.ends_at)}</p>
       <p className="mt-5 whitespace-pre-wrap text-lg">{ch.description}</p>
+
+      {showResult && placed && (
+        <CelebrationCard className="mt-6" lottie="/lottie/challenge-complete.json" title={`Results are in: you placed ${ordinal(placed)}.`} onClose={markResultSeen}>
+          {ch.title}
+        </CelebrationCard>
+      )}
 
       <h2 className="mt-8 text-xl font-bold">Rules</h2>
       <p className="mt-2 whitespace-pre-wrap text-sm">{ch.rules}</p>

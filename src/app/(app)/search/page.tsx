@@ -62,7 +62,7 @@ function SearchInner() {
       ) : results.isError ? (
         <div className="mt-8"><EmptyState title="That didn't load." action={<button className="btn-secondary" onClick={() => results.refetch()}>Try again</button>} /></div>
       ) : total === 0 ? (
-        <div className="mt-8"><EmptyState title={`Nothing for “${q}”.`}>Try a different word, or check the spelling.</EmptyState></div>
+        <div className="mt-8"><EmptyState lottie="/lottie/empty-search.json" title={`Nothing for “${q}”.`}>Try a different word, or check the spelling.</EmptyState></div>
       ) : (
         <>
           {r!.labs.length > 0 && (
