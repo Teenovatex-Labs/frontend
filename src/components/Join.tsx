@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Join() {
   return (
-    <section id="join" className="relative overflow-hidden border-y border-ink bg-yellow py-14 md:py-[75px]">
+    <section id="join" className="relative overflow-hidden border-t border-ink bg-yellow py-14 md:py-[75px]">
       <img
         src="/assets/logo-long6.svg"
         alt=""
