@@ -14,6 +14,7 @@ const TOOLBAR_ROOM = 48; // keeps the hover buttons under him on screen
 const DRAG_THRESHOLD = 5; // px of movement before a press becomes a drag
 const TOOLS_LINGER_MS = 1_400;
 const PANEL_WIDTH = 284;
+const mobileDockRoom = () => typeof window !== "undefined" && window.innerWidth < 1024 ? 98 : TOOLBAR_ROOM;
 
 // He is small on purpose: a companion, not a mascot taking over the page.
 const size = () => (typeof window !== "undefined" && window.innerWidth < 520 ? { w: 76, h: 95 } : { w: 96, h: 120 });
@@ -24,13 +25,13 @@ function clamp(p: Point): Point {
   // never change where he can stand, which is what used to make him jump.
   return {
     x: Math.round(Math.max(EDGE, Math.min(window.innerWidth - w - EDGE, p.x))),
-    y: Math.round(Math.max(EDGE, Math.min(window.innerHeight - h - TOOLBAR_ROOM, p.y))),
+    y: Math.round(Math.max(EDGE, Math.min(window.innerHeight - h - mobileDockRoom(), p.y))),
   };
 }
 
 const home = (): Point => {
   const { w, h } = size();
-  return clamp({ x: window.innerWidth - w - 20, y: window.innerHeight - h - TOOLBAR_ROOM });
+  return clamp({ x: window.innerWidth - w - 20, y: window.innerHeight - h - mobileDockRoom() });
 };
 
 function loadPosition(): Point {
@@ -180,7 +181,7 @@ export default function AlfredCompanion() {
         onClick={() => setMinimized(false)}
         aria-label="Bring Alfred back"
         title="Bring Alfred back"
-        className="group fixed bottom-5 right-5 z-[45] grid h-14 w-14 place-items-center rounded-full border border-ink bg-yellow shadow-[3px_3px_0_var(--ink)] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+        className="group fixed bottom-[calc(100px+env(safe-area-inset-bottom))] right-5 z-[45] grid h-14 w-14 place-items-center rounded-full border border-ink bg-yellow shadow-[3px_3px_0_var(--ink)] transition-transform hover:-translate-y-0.5 active:translate-y-0 lg:bottom-5"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/alfred/face.webp" alt="" width={44} height={44} className="h-11 w-11 object-contain" />

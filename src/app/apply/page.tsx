@@ -41,7 +41,7 @@ function ApplyContent() {
   return (
     <>
       <Header />
-      <main className="wrap max-w-[640px] py-14">
+      <main className={`wrap py-14 ${token ? "max-w-[920px]" : "max-w-[640px]"}`}>
         <p className="eyebrow text-rose">Admissions</p>
         <h1 className="mt-2 text-[34px] leading-[1.1] tracking-[-0.03em] md:text-[42px]">
           Apply to <span className="font-serif italic font-medium text-rose">TeenovateX.</span>

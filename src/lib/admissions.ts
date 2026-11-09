@@ -103,8 +103,11 @@ export const requestGuardian = (token: string, parent_email: string) =>
 
 /** How a question is answered. Typed answers have no spec. */
 export type QuestionSpec = { options?: string[]; min?: number; max?: number; low?: string; high?: string };
-export type QuestionFormat = "text" | "choice" | "multi" | "scale" | "slider";
-export type InterviewQuestion = { position: number; question: string; format: QuestionFormat | string; spec: QuestionSpec | null };
+export type QuestionFormat = "text" | "choice" | "multi" | "scale" | "slider" | "rank";
+/** What Alfred said on the way into a question, in answer to the last one. Absent when he had nothing to add. */
+export type LeadIn = { type: string; text: string };
+export type AlfredTone = "playful" | "balanced" | "plain";
+export type InterviewQuestion = { position: number; question: string; format: QuestionFormat | string; spec: QuestionSpec | null; kind?: "new" | "follow_up"; lead_in?: LeadIn | null };
 export type AnswerPayload = { answer?: string; choice?: string[]; value?: number; note?: string };
 export type InterviewState = {
   /** The most questions Alfred will ask. He may stop sooner once he has heard enough. */
@@ -113,7 +116,9 @@ export type InterviewState = {
   answered: number;
   complete: boolean;
   can_submit: boolean;
-  questions: { position: number; question: string; format: string; spec: QuestionSpec | null; answer: string | null; alternatives_left?: number }[];
+  /** How the applicant asked Alfred to talk. */
+  tone?: AlfredTone;
+  questions: { position: number; question: string; format: string; spec: QuestionSpec | null; answer: string | null; alternatives_left?: number; kind?: "new" | "follow_up"; lead_in?: LeadIn | null }[];
   next?: InterviewQuestion | null;
 };
 
@@ -128,6 +133,9 @@ export const answerQuestion = (token: string, position: number, payload: AnswerP
     token,
     { method: "PUT", body: JSON.stringify(payload) }
   );
+
+export const setAlfredTone = (token: string, tone: AlfredTone) =>
+  applicantRequest<InterviewState>("/applications/interview/tone", token, { method: "PUT", body: JSON.stringify({ tone }) });
 
 export type HelpAction = "hint" | "alternative" | "skip";
 export const questionHelp = (token: string, position: number, action: HelpAction) =>

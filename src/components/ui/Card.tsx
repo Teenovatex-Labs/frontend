@@ -13,7 +13,7 @@ export default function Card({
   return (
     <div
       {...props}
-      className={`border border-ink shadow-[5px_5px_0_var(--ink)] ${TONES[tone]} ${
+      className={`rounded-[20px] border border-ink shadow-[4px_4px_0_var(--ink)] lg:rounded-none lg:shadow-[5px_5px_0_var(--ink)] ${TONES[tone]} ${
         lift ? "transition-transform hover:-translate-y-1" : ""
       } ${className}`}
     />

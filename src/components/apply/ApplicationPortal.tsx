@@ -25,7 +25,7 @@ import {
   withdrawApplication,
   type ApplicationView,
 } from "@/lib/admissions";
-import InterviewChat from "@/components/apply/InterviewChat";
+import AlfredInterview from "@/components/apply/AlfredInterview";
 import AttachmentsPanel from "@/components/apply/AttachmentsPanel";
 import TagListEditor from "@/components/apply/TagListEditor";
 
@@ -143,7 +143,7 @@ export default function ApplicationPortal({ token }: { token: string }) {
           <StepRail steps={STEPS} current={step} />
 
           {step === 0 && <AboutYouForm app={app} token={token} onSaved={setApp} />}
-          {step === 1 && <InterviewChat token={token} locked={locked} onProgress={setCanSubmitInterview} />}
+          {step === 1 && <AlfredInterview token={token} locked={locked} onProgress={setCanSubmitInterview} />}
           {step === 2 && <AttachmentsPanel token={token} locked={locked} />}
           {step === 3 && <ReviewStep app={app} token={token} onEdit={setStep} onSubmit={handleSubmit} submitting={submitting} canSubmit={canSubmit} />}
 

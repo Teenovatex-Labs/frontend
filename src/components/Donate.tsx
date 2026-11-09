@@ -83,7 +83,7 @@ export default function Donate() {
       />
 
       <div className="wrap relative grid gap-12 md:grid-cols-[1.05fr_1fr] md:items-center md:gap-20"><Reveal from="left">
-          <p className="eyebrow text-pink">05 / Keep the lights on</p>
+          <p className="eyebrow text-pink">04 / Keep the lights on</p>
           <h2 className="mt-6 text-[40px] leading-[1.05] md:text-[62px]">
             Help the next teenager
             <br />
@@ -93,6 +93,10 @@ export default function Donate() {
             TeenovateX is youth-led and free for every teen who joins. Your gift helps keep it that way,
             and keeps the doors open for the ones who haven&rsquo;t found us yet.
           </p>
+
+          <Link href="/story" className="btn-secondary btn-sm on-dark mt-8">
+            See what your gift builds on: our story <span aria-hidden="true">↗︎</span>
+          </Link>
 
           <div className="mt-10 border-t border-cream/20 pt-6">
             <p className="text-sm text-cream/60">Not giving money? Give something else.</p>

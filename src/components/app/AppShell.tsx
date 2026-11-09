@@ -2,13 +2,11 @@
 
 import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { MenuIcon } from "@animateicons/react/lucide/menu-icon";
-import { XIcon } from "@animateicons/react/lucide/x-icon";
+import { BellIcon } from "@animateicons/react/lucide/bell-icon";
+import { SearchIcon } from "@animateicons/react/lucide/search-icon";
 import { AlfredProvider } from "@/context/AlfredContext";
-import useIconHover from "@/lib/useIconHover";
 import Sidebar from "./Sidebar";
+import MobileDock from "./MobileDock";
 import AlfredCompanion from "@/components/alfred/AlfredCompanion";
 import LiveUpdates from "./LiveUpdates";
 import PromptHost from "./PromptHost";
@@ -16,12 +14,7 @@ import PromptHost from "./PromptHost";
 const STORAGE_KEY = "tx_sidebar_collapsed";
 
 export default function AppShell({ children }: { children: ReactNode }) {
-  const reduce = useReducedMotion();
-  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const [drawer, setDrawer] = useState(false);
-  const menuIcon = useIconHover();
-  const closeIcon = useIconHover();
 
   useEffect(() => {
     try {
@@ -42,20 +35,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  useEffect(() => setDrawer(false), [pathname]);
-
-  useEffect(() => {
-    if (!drawer) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setDrawer(false);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [drawer]);
-
   return (
     <AlfredProvider>
     <div className="min-h-screen" style={{ "--sb": collapsed ? "88px" : "296px" } as CSSProperties}>
@@ -63,62 +42,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <Sidebar collapsed={collapsed} onToggle={toggle} />
       </div>
 
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between bg-ink px-5 text-cream lg:hidden">
-        <Link href="/home" aria-label="TeenovateX home" className="flex items-center gap-2.5">
-          <img src="/assets/logo-pink-nobg.svg" alt="" className="h-8 w-8" />
-          <span className="text-[17px] font-semibold tracking-[-0.03em]">
-            Teenovate<span className="text-pink">X</span>
-          </span>
+      <header className="sticky top-0 z-30 flex h-[66px] items-center justify-between border-b border-ink/10 bg-cream/95 px-4 text-ink backdrop-blur-xl lg:hidden">
+        <Link href="/home" aria-label="TeenovateX home" className="flex min-h-11 items-center gap-2">
+          <img src="/assets/logo-pink-nobg.svg" alt="" className="h-9 w-9 rounded-full border border-ink bg-ink p-1" />
+          <span className="text-[17px] font-bold tracking-[-0.045em]">Teenovate<span className="text-rose">X</span></span>
         </Link>
-        <button
-          type="button"
-          onClick={() => setDrawer(true)}
-          aria-label="Open menu"
-          aria-expanded={drawer}
-          onMouseEnter={menuIcon.onMouseEnter}
-          onMouseLeave={menuIcon.onMouseLeave}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-cream/25 hover:border-pink"
-        >
-          <MenuIcon ref={menuIcon.ref} size={22} />
-        </button>
+        <div className="flex items-center gap-2">
+          <Link href="/search" aria-label="Search" className="grid h-11 w-11 place-items-center rounded-full border border-ink/20 bg-white"><SearchIcon size={20} /></Link>
+          <Link href="/notifications" aria-label="Notifications" className="grid h-11 w-11 place-items-center rounded-full border border-ink/20 bg-pink"><BellIcon size={20} /></Link>
+        </div>
       </header>
-
-      <AnimatePresence>
-        {drawer && (
-          <>
-            <motion.div
-              key="scrim"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setDrawer(false)}
-              className="fixed inset-0 z-40 bg-ink/60 backdrop-blur-sm lg:hidden"
-            />
-            <motion.div
-              key="drawer"
-              initial={reduce ? false : { x: "-105%" }}
-              animate={{ x: 0 }}
-              exit={reduce ? undefined : { x: "-105%" }}
-              transition={{ type: "spring", stiffness: 320, damping: 34 }}
-              className="fixed inset-y-3 left-3 z-50 w-[min(320px,calc(100vw-24px))] lg:hidden"
-            >
-              <Sidebar collapsed={false} onToggle={toggle} mobile onNavigate={() => setDrawer(false)} />
-              <button
-                type="button"
-                onClick={() => setDrawer(false)}
-                aria-label="Close menu"
-                onMouseEnter={closeIcon.onMouseEnter}
-                onMouseLeave={closeIcon.onMouseLeave}
-                className="absolute -right-3 top-6 flex h-8 w-8 items-center justify-center rounded-full border border-ink bg-pink text-ink"
-              >
-                <XIcon ref={closeIcon.ref} size={16} />
-              </button>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      <div className="transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:pl-[calc(var(--sb)+56px)]">
+      <MobileDock />
+      <div className="tx-mobile-app-shell pb-[calc(104px+env(safe-area-inset-bottom))] transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:pb-0 lg:pl-[calc(var(--sb)+56px)]">
         {children}
       </div>
     </div>
