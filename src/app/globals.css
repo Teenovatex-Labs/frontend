@@ -542,3 +542,17 @@
 @media (min-width: 1024px) {
   :root { --header-h: 76px; }
 }
+
+/* The member app keeps its editorial shape on a phone, with room for the dock. */
+@media (max-width: 1023px) {
+  .tx-mobile-app-shell { min-width: 0; overflow-x: clip; }
+  .tx-mobile-app-shell main { min-width: 0; }
+  .tx-mobile-app-shell main[class*="max-w"]:not(.tx-home) { padding-top: 28px; padding-inline: 18px; }
+  .tx-mobile-app-shell main > header { padding-top: 2px; }
+  .tx-mobile-app-shell main > header h1 { letter-spacing: -.045em; }
+  .tx-mobile-app-shell main > header > :last-child:not(:first-child) { max-width: 100%; }
+  .tx-home-panel { border-radius: 20px; box-shadow: 4px 4px 0 var(--ink); }
+  .tx-home-panel h2 { font-weight: 700; }
+  .tx-home-panel a { touch-action: manipulation; }
+  .tx-mobile-app-shell main button, .tx-mobile-app-shell main a { touch-action: manipulation; }
+}

@@ -15,7 +15,7 @@ import Skeleton from "@/components/ui/Skeleton";
 
 function Panel({ title, href, cta, children }: { title: string; href: string; cta: string; children: React.ReactNode }) {
   return (
-    <Card className="flex flex-col p-5 md:p-6">
+    <Card className="tx-home-panel flex flex-col p-5 md:p-6">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-[20px] tracking-[-0.02em]">{title}</h2>
         <Link href={href} className="text-sm text-rose underline underline-offset-4 hover:text-ink">
@@ -52,18 +52,34 @@ export default function HomePage() {
   const remaining = votes.data?.votes_remaining;
 
   return (
-    <main className="mx-auto w-full max-w-[1080px] px-5 py-10 md:px-10 md:py-16">
-      <p className="eyebrow text-rose">Home</p>
-      <h1 className="mt-4 text-[40px] leading-[1.05] md:text-[64px]">
+    <main className="tx-home mx-auto w-full max-w-[1080px] px-4 py-6 sm:px-5 md:px-10 md:py-16">
+      <div className="flex items-center justify-between gap-3 md:block">
+        <p className="eyebrow text-rose">Your world at TX</p>
+        <span className="rounded-full border border-ink bg-yellow px-3 py-1 text-[10px] font-bold uppercase tracking-wider md:hidden">Keep creating ✦</span>
+      </div>
+      <h1 className="mt-4 text-[clamp(43px,11vw,64px)] leading-[.98] tracking-[-.055em] md:text-[64px]">
         Hey <span className="font-serif font-normal italic">{first}.</span>
       </h1>
-      <p className="mt-4 max-w-[520px] text-muted">
+      <p className="mt-3 max-w-[520px] text-sm text-muted md:mt-4 md:text-base">
         {user.streak > 1 ? `${user.streak} days in a row. Keep it going.` : "Good to see you. Here's what's happening."}
       </p>
 
+      <div className="mt-5 md:hidden">
+        <Link href="/labs" className="group flex min-h-[162px] flex-col justify-between overflow-hidden rounded-[24px] border-2 border-ink bg-ink p-5 text-cream shadow-[5px_6px_0_var(--pink)]">
+          <div className="flex items-start justify-between"><span className="text-[11px] font-semibold uppercase tracking-[.17em] text-pink">Your next big thing</span><span aria-hidden="true" className="text-3xl text-pink transition-transform group-hover:-rotate-12">✳</span></div>
+          <div className="flex items-end justify-between gap-3"><div><p className="font-serif text-[34px] italic leading-none">Make your mark.</p><p className="mt-2 text-xs text-cream/75">Discover ideas. Build yours. Find your crew.</p></div><span aria-hidden="true" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-yellow text-xl text-ink">↗</span></div>
+        </Link>
+      </div>
+
       <Milestones userId={user.id} points={user.points} level={user.level.level} levelTitle={user.level.title} rank={user.rank ?? null} />
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-3 gap-2 md:hidden" aria-label="Your progress at a glance">
+        <div className="flex min-h-[106px] flex-col justify-between rounded-[19px] border border-ink bg-yellow p-3 shadow-[3px_3px_0_var(--ink)]"><span className="text-[10px] font-bold uppercase tracking-wider">Points</span><strong className="text-[clamp(23px,7vw,32px)] leading-none">{user.points.toLocaleString()}</strong></div>
+        <div className="flex min-h-[106px] flex-col justify-between rounded-[19px] border border-ink bg-pink p-3 shadow-[3px_3px_0_var(--ink)]"><span className="text-[10px] font-bold uppercase tracking-wider">Day streak</span><strong className="text-[clamp(23px,7vw,32px)] leading-none">{user.streak} <span className="text-lg" aria-hidden="true">✦</span></strong></div>
+        <div className="flex min-h-[106px] flex-col justify-between rounded-[19px] border border-ink bg-white p-3 shadow-[3px_3px_0_var(--ink)]"><span className="text-[10px] font-bold uppercase tracking-wider">Rank</span><strong className="text-[clamp(20px,6vw,32px)] leading-none">{user.rank ? `#${user.rank}` : "—"}</strong></div>
+      </div>
+
+      <div className="mt-10 hidden gap-5 md:grid md:grid-cols-3">
         <StatTile label="Points" value={user.points.toLocaleString()} tone="yellow" />
         <StatTile
           label="Day streak"
@@ -75,7 +91,7 @@ export default function HomePage() {
         <StatTile label="Rank" value={user.rank ? `#${user.rank}` : "Unranked"} className="sm:-rotate-1" />
       </div>
 
-      <div className="mt-5 border border-ink bg-white p-4 shadow-[5px_5px_0_var(--ink)] md:p-5">
+      <div className="mt-6 rounded-[20px] border border-ink bg-white p-4 shadow-[4px_4px_0_var(--ink)] md:mt-5 md:rounded-none md:p-5 md:shadow-[5px_5px_0_var(--ink)]">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <p className="text-lg">
             Level {user.level.level}: <span className="font-serif italic">{user.level.title}</span>
@@ -89,7 +105,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="mt-10 grid gap-6 md:grid-cols-2">
+      <div className="mt-8 grid gap-5 md:mt-10 md:grid-cols-2 md:gap-6">
         <Panel title="Today's quest" href="/labs" cta="Explore labs">
           <QuestCard />
         </Panel>
