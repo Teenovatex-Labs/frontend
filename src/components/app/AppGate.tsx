@@ -12,6 +12,7 @@ import AnnouncementBanner from "@/components/announcements/AnnouncementBanner";
 import { usersApi } from "@/lib/api";
 import { browserTimezone } from "@/lib/age";
 import { registerServiceWorker } from "@/lib/push";
+import DevicePrompts from "./DevicePrompts";
 
 export default function AppGate({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -45,6 +46,7 @@ export default function AppGate({ children }: { children: ReactNode }) {
       <AnnouncementBanner />
       <AddPasswordPrompt />
       {children}
+      <DevicePrompts />
     </AppShell>
   );
 }
