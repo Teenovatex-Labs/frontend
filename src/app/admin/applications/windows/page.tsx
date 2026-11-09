@@ -6,9 +6,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cohortsApi } from "@/lib/services";
 import { keys } from "@/lib/labs";
 import { ApiError } from "@/lib/api";
+import { ROOT_DOMAIN, SITE_ORIGIN } from "@/lib/hosts";
 import { useToast } from "@/components/ui/Toast";
 import Skeleton from "@/components/ui/Skeleton";
 import Dialog from "@/components/ui/Dialog";
+
+// Applicants apply on the public site, not on the admin host this page is served from.
+const testLink = (key: string) => {
+  let origin = SITE_ORIGIN;
+  if (!origin && typeof window !== "undefined") {
+    // On any teenovatex.org subdomain the public site is the bare domain; elsewhere (local, previews) stay on this origin.
+    origin = window.location.hostname.endsWith(`.${ROOT_DOMAIN}`) ? `https://${ROOT_DOMAIN}` : window.location.origin;
+  }
+  return `${origin}/apply?test=${key}`;
+};
 
 const toInput = (iso: string) => iso.slice(0, 16);
 
@@ -51,7 +62,7 @@ export default function WindowsPage() {
   });
   const copyLink = async (key: string) => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/apply?test=${key}`);
+      await navigator.clipboard.writeText(testLink(key));
       toast.success("Private test link copied.");
     } catch {
       toast.error("Couldn't copy. Select the link and copy it by hand.");
@@ -113,7 +124,7 @@ export default function WindowsPage() {
                 {w.is_test && w.test_key && (
                   <div className="mt-3 rounded-md border border-line bg-cream p-3 text-sm">
                     <p className="font-semibold">Private test link</p>
-                    <p className="mt-1 break-all font-mono text-xs">{typeof window !== "undefined" ? window.location.origin : ""}/apply?test={w.test_key}</p>
+                    <p className="mt-1 break-all font-mono text-xs">{testLink(w.test_key)}</p>
                     <button onClick={() => void copyLink(w.test_key!)} className="btn-secondary mt-2 text-xs">Copy link</button>
                     <p className="mt-2 text-xs text-muted">
                       Use your own address with a tag, such as you+applicant1@your-domain.com. A test window can only email team addresses, creates no
