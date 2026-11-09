@@ -529,6 +529,7 @@ export type ApplicationSummary = {
   submitted_at: string | null;
   claimed_by: string | null;
   window_id: string;
+  interview_invited_at?: string | null;
 };
 export type ApplicationAnswer = { id: string; position: number; question: string; source: string; criterion: string | null; answer: string };
 export type ApplicationAttachment = { id: string; kind: "image" | "link" | "pdf"; url: string; filename: string | null; scan_status: string };
@@ -585,6 +586,8 @@ export const admissionsAdminApi = {
     request<{ message: string }>(`/admin/applications/${id}/reverse`, { method: "POST", body: json(data) }, write()),
   askClarification: (id: string, question: string) =>
     request<{ id: string; due_at: string }>(`/admin/applications/${id}/clarification`, { method: "POST", body: json({ question }) }, write()),
+  inviteToInterview: (id: string, details: string) =>
+    request<{ message: string }>(`/admin/applications/${id}/interview-invite`, { method: "POST", body: json({ details }) }, write()),
   reviewerLink: (id: string, attId: string) => request<{ url: string }>(`/admin/applications/${id}/attachments/${attId}/link`, {}, authed),
 };
 

@@ -61,6 +61,13 @@ export default function ApplicationReviewPage() {
     onError: fail,
   });
 
+  const [callDetails, setCallDetails] = useState("");
+  const invite = useMutation({
+    mutationFn: () => admissionsAdminApi.inviteToInterview(id, callDetails.trim()),
+    onSuccess: () => { toast.success("Invitation sent."); setCallDetails(""); void refresh(); },
+    onError: fail,
+  });
+
   if (app.isPending) return <Skeleton className="h-96 w-full" />;
   if (app.isError || !app.data) return <p className="text-muted">Couldn&rsquo;t load that application.</p>;
 
@@ -211,6 +218,16 @@ export default function ApplicationReviewPage() {
                   {r.note && <p className="text-muted">{r.note}</p>}
                 </div>
               ))}
+            </section>
+          )}
+
+          {isMine && ["submitted", "under_review", "shortlisted"].includes(a.status) && (
+            <section className="rounded-md border border-ink bg-white p-4">
+              <h2 className="font-bold">Invite to a short call</h2>
+              {a.interview_invited_at && <p className="mt-1 text-sm text-muted">Invited {new Date(a.interview_invited_at).toLocaleString()}.</p>}
+              <textarea value={callDetails} onChange={(e) => setCallDetails(e.target.value)} placeholder="When, how long and where (for example: Friday 4pm WAT, 15 minutes, Google Meet link)" rows={2} maxLength={800} className="mt-2 w-full rounded-md border border-ink bg-cream px-3 py-2 text-sm" />
+              <button onClick={() => invite.mutate()} disabled={invite.isPending || callDetails.trim().length < 10} className="btn-secondary mt-2 text-xs disabled:opacity-60">Send invitation</button>
+              <p className="mt-2 text-xs text-muted">Not a decision. The email says it is not a test and that a parent or guardian is welcome.</p>
             </section>
           )}
 
