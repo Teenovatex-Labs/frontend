@@ -41,14 +41,13 @@ export default function Hero() {
           className="pointer-events-none absolute right-[42%] top-[60%] hidden w-[125px] -rotate-2 lg:block xl:w-[145px]"
         />
         <div className="wrap">
-          <div className="max-w-[560px]">
-            <h1 className="text-left text-[52px] leading-[1.13] tracking-[-0.05em] md:text-[91px]">
+          <div className="max-w-[620px]">
+            <h1 className="text-left text-[40px] leading-[1.13] tracking-[-0.05em] md:text-[72px]">
               <TrueFocus
                 phrases={[
                   { text: "Build the" },
-                  { text: "Technology" },
-                  { text: "you Wish" },
-                  { text: "Existed", className: "whitespace-nowrap font-serif italic font-medium text-rose" },
+                  { text: "Technology you" },
+                  { text: "Wish Existed", className: "whitespace-nowrap font-serif italic font-medium text-rose" },
                 ]}
               />
             </h1>
