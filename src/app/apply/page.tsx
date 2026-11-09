@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import TestBanner from "@/components/apply/TestBanner";
 import { ApiError } from "@/lib/api";
 import { getApplicantToken, getWindow, requestReminder, setApplicantToken, type WindowStatus } from "@/lib/admissions";
 import dynamic from "next/dynamic";
@@ -15,6 +16,8 @@ const ApplicationPortal = dynamic(() => import("@/components/apply/ApplicationPo
 function ApplyContent() {
   const params = useSearchParams();
   const urlToken = params.get("token");
+  // A private test link (?test=KEY) opens the rehearsal window instead of the real one.
+  const testKey = params.get("test");
   const [token, setToken] = useState<string | null>(null);
   const [windowStatus, setWindowStatus] = useState<WindowStatus | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -32,8 +35,8 @@ function ApplyContent() {
   useEffect(() => {
     if (token) return;
     setLoadFailed(false);
-    getWindow().then(setWindowStatus).catch(() => setLoadFailed(true));
-  }, [token, attempt]);
+    getWindow(testKey).then(setWindowStatus).catch(() => setLoadFailed(true));
+  }, [token, attempt, testKey]);
 
   return (
     <>
@@ -48,6 +51,7 @@ function ApplyContent() {
         </p>
 
         <div className="mt-8">
+          {(testKey || windowStatus?.window?.is_test) && !token && <TestBanner />}
           {token ? (
             <ApplicationPortal token={token} />
           ) : loadFailed ? (
@@ -59,7 +63,7 @@ function ApplyContent() {
           ) : windowStatus === null ? (
             <p className="text-sm text-muted">Loading…</p>
           ) : windowStatus.state === "open" ? (
-            <StartApplyForm />
+            <StartApplyForm testKey={testKey} />
           ) : (
             <ClosedNotice nextOpensAt={windowStatus.next_opens_at} />
           )}

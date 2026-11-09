@@ -531,6 +531,8 @@ export type ApplicationSummary = {
   window_id: string;
   waitlist_offer?: { sent_at: string; expires_at: string | null; state: "pending" | "accepted" | "declined" | "expired" } | null;
   interview_invited_at?: string | null;
+  /** True when the application belongs to a test (rehearsal) window. */
+  is_test?: boolean;
 };
 export type ApplicationAnswer = { id: string; position: number; question: string; source: string; criterion: string | null; answer: string };
 export type ApplicationAttachment = { id: string; kind: "image" | "link" | "pdf"; url: string; filename: string | null; scan_status: string };
@@ -570,9 +572,9 @@ export type ApplicationEvidence = {
 };
 
 export const admissionsAdminApi = {
-  list: (filters: { status?: string; window_id?: string; claimed?: "mine" | "none"; page?: number }) =>
+  list: (filters: { status?: string; window_id?: string; claimed?: "mine" | "none"; page?: number; include_test?: "1" }) =>
     request<Paged<ApplicationSummary>>(`/admin/applications${qs(filters)}`, {}, authed),
-  stats: (window_id?: string) => request<{ counts: Record<string, number>; unclaimed: number }>(`/admin/applications/stats${qs({ window_id })}`, {}, authed),
+  stats: (window_id?: string, include_test?: "1") => request<{ counts: Record<string, number>; unclaimed: number }>(`/admin/applications/stats${qs({ window_id, include_test })}`, {}, authed),
   get: (id: string) => request<ApplicationDetail>(`/admin/applications/${id}`, {}, authed),
   evidence: (id: string) => request<ApplicationEvidence>(`/admin/applications/${id}/evidence`, { method: "POST" }, write()),
   summarise: (id: string) => request<{ summary: string; machine_written: true; notice: string }>(`/admin/applications/${id}/summary`, { method: "POST" }, write()),
@@ -602,16 +604,82 @@ export type Cohort = {
   note: string | null;
   state: "upcoming" | "open" | "closed";
   released: boolean;
+  is_test?: boolean;
+  /** Private link key of a test window. Only admins ever receive it. */
+  test_key?: string | null;
   applications?: Record<string, number>;
 };
 export const cohortsApi = {
   list: () => request<{ items: Cohort[] }>("/admin/cohorts", {}, authed),
+  createTest: (days = 7) => request<Cohort>("/admin/cohorts/test", { method: "POST", body: json({ days }) }, write()),
+  purgeTest: (id: string) => request<{ purged: number }>(`/admin/cohorts/${id}`, { method: "DELETE" }, write()),
   create: (data: { opens_at: string; closes_at: string; decisions_publish_at: string; target_size?: number | null; note?: string | null }) =>
     request<Cohort>("/admin/cohorts", { method: "POST", body: json(data) }, write()),
   update: (id: string, data: Partial<{ opens_at: string; closes_at: string; decisions_publish_at: string; target_size: number | null; note: string | null }>) =>
     request<Cohort>(`/admin/cohorts/${id}`, { method: "PATCH", body: json(data) }, write()),
   release: (id: string, allow_undecided?: boolean) =>
     request<{ released: number; invited: number; still_under_review: number }>(`/admin/cohorts/${id}/release`, { method: "POST", body: json({ allow_undecided }) }, write()),
+};
+
+export type WindowHistory = {
+  id: string;
+  is_test: boolean;
+  note: string | null;
+  opens_at: string;
+  closes_at: string;
+  decisions_publish_at: string;
+  state: "upcoming" | "open" | "closed";
+  released: boolean;
+  target_size: number | null;
+  started: number;
+  submitted: number;
+  drafts: number;
+  accepted: number;
+  declined: number;
+  waitlisted: number;
+  withdrawn: number;
+  undecided: number;
+  results_released: number;
+  joined: number;
+  /** Records already removed under the retention rules. */
+  deleted: number;
+};
+export type HistoryApplicant = {
+  id: string;
+  reference: string;
+  full_name: string;
+  age: number;
+  country: string;
+  status: ApplicationStatus | "draft";
+  outcome_released: boolean | null;
+  applicant_sees: string;
+  started_at: string;
+  submitted_at: string | null;
+  decided_at: string | null;
+  reviewer: string | null;
+  decided_by: string | null;
+  reviews: number;
+  average_score: number | null;
+  questions: number;
+  files: number;
+  interview_invited: boolean;
+  waitlist_offer: string | null;
+  guardian: string | null;
+  joined: boolean;
+  delete_on: string | null;
+};
+export type HistoryWindowDetail = {
+  window: Pick<WindowHistory, "id" | "is_test" | "note" | "opens_at" | "closes_at" | "decisions_publish_at" | "state" | "released">;
+  drafts: number;
+  items: HistoryApplicant[];
+  total: number;
+  page: number;
+  pages: number;
+};
+export const historyApi = {
+  windows: (include_test?: boolean) => request<{ items: WindowHistory[] }>(`/admin/admissions-history${qs({ include_test: include_test ? "1" : undefined })}`, {}, authed),
+  applicants: (id: string, filters: { status?: string; q?: string; page?: number }) =>
+    request<HistoryWindowDetail>(`/admin/admissions-history/${id}/applicants${qs(filters)}`, {}, authed),
 };
 
 export type OnboardingStep = { key: string; title: string; required: boolean; link: string | null; done: boolean; self_reported: boolean };

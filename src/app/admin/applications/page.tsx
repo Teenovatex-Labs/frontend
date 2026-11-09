@@ -28,11 +28,14 @@ export default function ApplicationsDashboard() {
   const [status, setStatus] = useState<ApplicationStatus | "">("");
   const [claimed, setClaimed] = useState<"" | "mine" | "none">("");
   const [page, setPage] = useState(1);
+  // Rehearsals stay out of the real queue and counts unless asked for.
+  const [includeTest, setIncludeTest] = useState(false);
+  const inc = includeTest ? ("1" as const) : undefined;
 
-  const stats = useQuery({ queryKey: keys.admin("applications-stats"), queryFn: () => admissionsAdminApi.stats(), refetchInterval: 60_000 });
+  const stats = useQuery({ queryKey: keys.admin("applications-stats", inc), queryFn: () => admissionsAdminApi.stats(undefined, inc), refetchInterval: 60_000 });
   const list = useQuery({
-    queryKey: keys.admin("applications", { status, claimed, page }),
-    queryFn: () => admissionsAdminApi.list({ status: status || undefined, claimed: claimed || undefined, page }),
+    queryKey: keys.admin("applications", { status, claimed, page, inc }),
+    queryFn: () => admissionsAdminApi.list({ status: status || undefined, claimed: claimed || undefined, page, include_test: inc }),
   });
 
   const counts = stats.data?.counts ?? {};
@@ -41,7 +44,10 @@ export default function ApplicationsDashboard() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-[32px] tracking-[-0.03em] md:text-[44px]">Applications</h1>
-        <Link href="/admin/applications/windows" className="btn-secondary text-sm">Windows</Link>
+        <div className="flex gap-2">
+          <Link href="/admin/applications/history" className="btn-secondary text-sm">History</Link>
+          <Link href="/admin/applications/windows" className="btn-secondary text-sm">Windows</Link>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -61,6 +67,11 @@ export default function ApplicationsDashboard() {
             {f.label}
           </button>
         ))}
+        <span className="mx-1 h-6 w-px bg-line" />
+        <label className="flex items-center gap-2 rounded-full border border-ink px-3.5 py-1.5 text-sm font-semibold">
+          <input type="checkbox" checked={includeTest} onChange={(e) => { setIncludeTest(e.target.checked); setPage(1); }} />
+          Include test applications
+        </label>
         <span className="mx-1 h-6 w-px bg-line" />
         {(["", "mine", "none"] as const).map((c) => (
           <button
@@ -89,7 +100,7 @@ export default function ApplicationsDashboard() {
               <tbody className="divide-y divide-line">
                 {list.data.items.map((a) => (
                   <tr key={a.id}>
-                    <td className="px-4 py-3"><p className="font-medium">{a.full_name}</p><p className="text-xs text-muted">{a.reference}</p></td>
+                    <td className="px-4 py-3"><p className="font-medium">{a.full_name}{a.is_test && <span className="ml-2 rounded-full bg-ink px-2 py-0.5 text-[10px] font-bold text-cream">TEST</span>}</p><p className="text-xs text-muted">{a.reference}</p></td>
                     <td className="px-4 py-3"><span className={`rounded-full px-2 py-0.5 text-[11px] ${STATUS_TONE[a.status] ?? "bg-cream"}`}>{a.status.replace("_", " ")}</span></td>
                     <td className="px-4 py-3 tabular-nums">{a.age}</td>
                     <td className="px-4 py-3">{a.country}</td>

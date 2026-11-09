@@ -22,7 +22,7 @@ const STEPS: Step[] = [
 
 const EDUCATION_LEVELS = ["Middle school", "High school", "College / University", "Not currently in school"];
 
-export default function StartApplyForm() {
+export default function StartApplyForm({ testKey }: { testKey?: string | null } = {}) {
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [attempt, setAttempt] = useState(0);
@@ -96,7 +96,7 @@ export default function StartApplyForm() {
     }
     setSubmitting(true);
     try {
-      await startApplication({ ...result.data, school: result.data.school || null });
+      await startApplication({ ...result.data, school: result.data.school || null, ...(testKey && { test_key: testKey }) });
       setDone(true);
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : "Something went wrong. Try again.");

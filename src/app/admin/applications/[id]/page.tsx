@@ -90,7 +90,7 @@ export default function ApplicationReviewPage() {
 
       <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-[28px] tracking-[-0.03em] md:text-[36px]">{a.full_name}</h1>
+          <h1 className="text-[28px] tracking-[-0.03em] md:text-[36px]">{a.full_name}{a.is_test && <span className="ml-3 rounded-full bg-ink px-2 py-0.5 align-middle text-xs font-bold text-cream">TEST</span>}</h1>
           <p className="text-sm text-muted">{a.reference} · {a.status.replace("_", " ")} · age {a.age} · {a.city}, {a.country}</p>
         </div>
         {!a.claimed_by && (
