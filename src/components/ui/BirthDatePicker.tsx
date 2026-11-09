@@ -21,7 +21,7 @@ export default function BirthDatePicker({ value, onChange, error }: Props) {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
     return m ? { y: Number(m[1]), mo: Number(m[2]), d: Number(m[3]) } : null;
   }, [value]);
-  const [draft, setDraft] = useState({ y: thisYear - 15, mo: 6, d: 15 });
+  const [draft, setDraft] = useState({ y: thisYear - 16, mo: 6, d: 15 });
   const cur = parsed ?? draft;
 
   const update = (next: { y: number; mo: number; d: number }) => {
@@ -33,7 +33,7 @@ export default function BirthDatePicker({ value, onChange, error }: Props) {
 
   return (
     <div className="space-y-3">
-      <WheelPicker label="Year you were born" unit="year" min={thisYear - 80} max={thisYear} majorEvery={5} value={cur.y} onChange={(y) => update({ ...cur, y })} />
+      <WheelPicker label="Year you were born" unit="year" min={thisYear - 70} max={thisYear - 10} majorEvery={5} value={cur.y} onChange={(y) => update({ ...cur, y })} />
       <WheelPicker label="Month" unit={MONTHS[cur.mo - 1]} min={1} max={12} majorEvery={3} value={cur.mo} onChange={(mo) => update({ ...cur, mo })} />
       <WheelPicker label="Day" unit="day of the month" min={1} max={daysIn(cur.y, cur.mo)} majorEvery={5} value={Math.min(cur.d, daysIn(cur.y, cur.mo))} onChange={(d) => update({ ...cur, d })} />
       {error && <p role="alert" className="text-sm font-bold text-rose">{error}</p>}
