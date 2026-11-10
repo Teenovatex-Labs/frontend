@@ -61,7 +61,7 @@ export const LINKS: NavItem[] = [
     id: "whatsapp",
     label: "WhatsApp community",
     icon: WhatsAppIcon,
-    external: "https://chat.whatsapp.com/HYphvnsGa4PAnoPxReTpHW",
+    external: "https://chat.whatsapp.com/J22yOS2b7joD1A5RZZOo2E",
   },
   {
     id: "support",
