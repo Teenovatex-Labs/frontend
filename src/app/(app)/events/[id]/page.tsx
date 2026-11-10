@@ -9,6 +9,7 @@ import { keys } from "@/lib/labs";
 import { eventDay, eventTime, startsIn } from "@/lib/dates";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
+import PageHeader from "@/components/ui/PageHeader";
 import RsvpButton from "@/components/events/RsvpButton";
 
 export default function EventPage() {
@@ -39,13 +40,11 @@ export default function EventPage() {
 
   return (
     <main className="mx-auto w-full max-w-[760px] px-5 py-10 md:px-10 md:py-14">
-      <Link href="/events" className="text-sm text-muted underline underline-offset-4 hover:text-ink">← All events</Link>
-      {status && <p className="eyebrow mt-6 text-rose">{status}</p>}
-      <h1 className="mt-2 text-[36px] leading-[1.05] md:text-[52px]">{e.title}</h1>
-      <p className="mt-4 text-muted">
+      <Link href="/events" className="mb-5 inline-flex min-h-11 items-center text-sm font-semibold text-rose hover:underline">← All events</Link>
+      <PageHeader eyebrow={status || "Event"} title={e.title}>
         {eventDay(e.starts_at)} · {eventTime(e.starts_at)}
         {e.ends_at ? ` to ${eventTime(e.ends_at)}` : ""}
-      </p>
+      </PageHeader>
       {e.location && (
         <p className="mt-1 text-muted">
           {/^https?:\/\//.test(e.location) ? (
@@ -55,7 +54,7 @@ export default function EventPage() {
           )}
         </p>
       )}
-      <p className="mt-6 whitespace-pre-line text-lg">{e.description}</p>
+      <p className="mt-8 whitespace-pre-line text-lg leading-relaxed">{e.description}</p>
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
         <RsvpButton event={e} over={over} />

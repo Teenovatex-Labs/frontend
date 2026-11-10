@@ -97,6 +97,7 @@ export default function NotificationsPage() {
           {tab === "all" ? "Everything" : "Unread"}<span className={`rounded-full px-2 py-0.5 text-[11px] ${filter === tab ? "bg-cream/20" : "bg-ink/10"}`}>{tab === "all" ? items.length : fresh.length}</span>
         </button>)}
       </div>
+      <p className="mt-3 text-xs text-muted sm:hidden">Swipe right to mark an update as read. Swipe left to dismiss it.</p>
 
       <div className="mt-8">
         {inbox.isPending ? <div className="space-y-4" aria-busy="true">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-28 w-full rounded-[20px]" />)}</div>
@@ -111,7 +112,7 @@ export default function NotificationsPage() {
             <div className="mb-4 flex items-center gap-3"><span className="text-[11px] font-bold tracking-[.18em] text-rose">{section.number}</span><h3 className="text-lg tracking-[-.025em]">{section.title}</h3><span aria-hidden="true" className="h-px flex-1 bg-ink/25" /><span className="text-xs font-semibold text-muted">{section.items.length}</span></div>
             <ul className="space-y-3">{section.items.map((n, index) => {
               const kind = kindOf(n.type);
-              return <motion.li key={n.id} initial={reduced ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, delay: Math.min(index, 6) * 0.035, ease: [0.22, 1, 0.36, 1] }} className={`group relative flex items-start gap-4 overflow-hidden rounded-[20px] border-2 border-ink p-4 transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_var(--ink)] sm:items-center sm:gap-5 sm:p-5 ${n.read ? "bg-[#f5f1e8]" : "bg-white shadow-[4px_4px_0_var(--pink)]"}`}>
+              return <motion.li key={n.id} initial={reduced ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, delay: Math.min(index, 6) * 0.035, ease: [0.22, 1, 0.36, 1] }} drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.2} onDragEnd={(_, info) => { if (!window.matchMedia("(max-width: 639px)").matches) return; if (info.offset.x > 100 && !n.read) readOne.mutate(n.id); if (info.offset.x < -100) remove.mutate(n.id); }} style={{ touchAction: "pan-y" }} className={`group relative flex items-start gap-4 overflow-hidden rounded-[20px] border-2 border-ink p-4 transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_var(--ink)] sm:items-center sm:gap-5 sm:p-5 ${n.read ? "bg-[#f5f1e8]" : "bg-white shadow-[4px_4px_0_var(--pink)]"}`}>
                 {!n.read && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5 bg-rose" />}
                 <div aria-hidden="true" className={`grid h-14 w-14 shrink-0 -rotate-3 place-items-center rounded-[16px] border-2 border-ink shadow-[3px_3px_0_var(--ink)] transition-transform duration-300 group-hover:rotate-0 sm:h-16 sm:w-16 ${kind.color}`}><HugeiconsIcon icon={kind.icon} size={28} strokeWidth={1.75} /></div>
                 <button type="button" onClick={() => open(n)} disabled={n.read && !n.link} className="min-w-0 flex-1 text-left disabled:cursor-default" aria-label={`${n.read ? "" : "Unread: "}${n.message}${n.link ? ". Open update" : ""}`}>

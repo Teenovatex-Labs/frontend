@@ -18,6 +18,7 @@ import { LabCover } from "@/components/labs/LabCard";
 import VoteButton from "@/components/labs/VoteButton";
 import ReportButton from "@/components/safety/ReportDialog";
 import Tabs from "@/components/ui/Tabs";
+import PageHeader from "@/components/ui/PageHeader";
 import Milestones from "@/components/labs/Milestones";
 import UpdatesTab from "@/components/labs/UpdatesTab";
 import BoardTab from "@/components/labs/BoardTab";
@@ -105,11 +106,11 @@ export default function LabPage() {
 
   return (
     <main className="mx-auto w-full max-w-[880px] px-5 py-10 md:px-10 md:py-14">
-      <Link href="/labs" className="text-sm text-muted underline underline-offset-4 hover:text-ink">
+      <Link href="/labs" className="mb-5 inline-flex min-h-11 items-center text-sm font-semibold text-rose hover:underline">
         ← All labs
       </Link>
 
-      <div className="mt-5 overflow-hidden border border-ink shadow-[6px_6px_0_var(--ink)]">
+      <div className="overflow-hidden rounded-[22px] border border-ink shadow-[6px_6px_0_var(--ink)]">
         <LabCover lab={data} className="aspect-[16/8]" />
       </div>
       {isOwner && (
@@ -122,13 +123,7 @@ export default function LabPage() {
         </div>
       )}
 
-      <div className="mt-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="eyebrow text-rose">{categoryLabel(data.category)}</p>
-          <h1 className="mt-2 text-[36px] leading-[1.05] md:text-[52px]">{data.name}</h1>
-        </div>
-        <VoteButton labId={data.id} count={data.vote_count} voted={!!data.has_voted_today} own={isOwner} />
-      </div>
+      <div className="mt-8"><PageHeader eyebrow={categoryLabel(data.category)} title={data.name} action={<VoteButton labId={data.id} count={data.vote_count} voted={!!data.has_voted_today} own={isOwner} />}>{data.short_description}</PageHeader></div>
 
       <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
         <Link href={`/u/${data.user.username}`} className="flex items-center gap-2 text-ink hover:underline">

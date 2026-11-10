@@ -12,6 +12,7 @@ import TextAreaField from "@/components/TextAreaField";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
 import PostCard from "@/components/community/PostCard";
+import PageHeader from "@/components/ui/PageHeader";
 import { useToast } from "@/components/ui/Toast";
 
 export default function SpacePage() {
@@ -56,19 +57,18 @@ export default function SpacePage() {
 
   return (
     <main className="mx-auto w-full max-w-[760px] px-5 py-10 md:px-10 md:py-14">
-      <Link href="/community" className="text-sm text-muted underline underline-offset-4 hover:text-ink">← All spaces</Link>
+      <Link href="/community" className="mb-5 inline-flex min-h-11 items-center text-sm font-semibold text-rose hover:underline">← All spaces</Link>
       {missing ? (
         <div className="mt-8"><EmptyState title="We couldn't find that space." /></div>
       ) : (
         <>
-          <h1 className="mt-5 text-[36px] leading-[1.05] md:text-[52px]">{info?.name ?? <Skeleton className="h-12 w-64" />}</h1>
-          {info && <p className="mt-2 max-w-[520px] text-muted">{info.description}</p>}
+          <PageHeader eyebrow="Community space" title={info?.name ?? <Skeleton className="h-12 w-64" />}>{info?.description}</PageHeader>
 
           <div className="mt-6">
             {!composing ? (
               <button className="btn" onClick={() => setComposing(true)}>New post <span aria-hidden="true">↗︎</span></button>
             ) : (
-              <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4 border border-ink bg-white p-5 shadow-[5px_5px_0_var(--ink)]">
+              <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4 rounded-[22px] border border-ink bg-white p-5 shadow-[5px_5px_0_var(--ink)]">
                 <FormField label="Title" name="title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} autoFocus />
                 <TextAreaField label="What do you want to say?" name="body" rows={5} maxLength={5000} value={body} onChange={(e) => setBody(e.target.value)} />
                 <p className="text-xs text-muted">Keep phone numbers, emails and addresses private, and keep it kind.</p>

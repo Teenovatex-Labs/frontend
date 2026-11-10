@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BellIcon } from "@animateicons/react/lucide/bell-icon";
-import { SearchIcon } from "@animateicons/react/lucide/search-icon";
 import useIconHover from "@/lib/useIconHover";
 import { AlfredProvider } from "@/context/AlfredContext";
 import { useAuth } from "@/context/AuthContext";
@@ -12,8 +12,15 @@ import MobileDock from "./MobileDock";
 import AlfredCompanion from "@/components/alfred/AlfredCompanion";
 import LiveUpdates from "./LiveUpdates";
 import PromptHost from "./PromptHost";
+import SearchLauncher from "./SearchLauncher";
 
 const STORAGE_KEY = "tx_sidebar_collapsed";
+const routeNames: Record<string, string> = {
+  home: "Your space", labs: "Labs", community: "Community", events: "Events",
+  learn: "Learn", challenges: "Challenges", leaderboard: "Leaderboard",
+  messages: "Messages", notifications: "Notifications", pairing: "My pairing",
+  search: "Search", settings: "Settings", profile: "Your profile",
+};
 
 function HeaderIconLink({
   href,
@@ -23,7 +30,7 @@ function HeaderIconLink({
 }: {
   href: string;
   label: string;
-  icon: typeof SearchIcon | typeof BellIcon;
+  icon: typeof BellIcon;
   className: string;
 }) {
   const { ref, onMouseEnter, onMouseLeave } = useIconHover();
@@ -42,6 +49,8 @@ function HeaderIconLink({
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const pathname = usePathname();
+  const section = routeNames[pathname.split("/")[1]] ?? "TeenovateX";
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -85,18 +94,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <Sidebar collapsed={collapsed} onToggle={toggle} />
       </div>
 
-      <header className="sticky top-0 z-30 flex h-[66px] items-center justify-between border-b border-ink/10 bg-cream/95 px-4 text-ink backdrop-blur-xl lg:hidden">
-        <Link href="/home" aria-label="TeenovateX home" className="flex min-h-11 items-center gap-2">
-          <img src="/assets/logo-pink-nobg.svg" alt="" className="h-9 w-9 rounded-full border border-ink bg-ink p-1" />
-          <span className="text-[17px] font-bold tracking-[-0.045em]">Teenovate<span className="text-rose">X</span></span>
-        </Link>
+      <header className="tx-mobile-topbar sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-ink/10 bg-cream/95 px-4 text-ink backdrop-blur-xl lg:hidden">
+        <div className="flex min-w-0 items-center gap-3">
+          <Link href="/home" aria-label="TeenovateX home" className="grid h-11 w-11 shrink-0 place-items-center rounded-[15px] border border-ink bg-ink shadow-[2px_2px_0_var(--pink)]">
+            <img src="/assets/logo-pink-nobg.svg" alt="" className="h-8 w-8" />
+          </Link>
+          <div className="min-w-0 leading-tight"><p className="text-[9px] font-bold uppercase tracking-[.17em] text-rose">TeenovateX / Member</p><p className="truncate text-[17px] font-semibold tracking-[-.04em]">{section}</p></div>
+        </div>
         <div className="flex items-center gap-2">
-          <HeaderIconLink
-            href="/search"
-            label="Search"
-            icon={SearchIcon}
-            className="bg-white hover:bg-yellow hover:border-ink"
-          />
+          <SearchLauncher />
           <HeaderIconLink
             href="/notifications"
             label="Notifications"
@@ -107,6 +113,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </header>
       <MobileDock />
       <div className="tx-mobile-app-shell pb-[calc(104px+env(safe-area-inset-bottom))] transition-[padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:pb-0 lg:pl-[calc(var(--sb)+56px)]">
+        <div className="tx-desktop-topbar hidden items-center justify-between gap-6 border-b border-ink/10 px-10 py-5 lg:flex">
+          <div className="flex items-center gap-3"><span className="h-2 w-2 rounded-full bg-rose" /><span className="text-[11px] font-bold uppercase tracking-[.18em] text-rose">Your world at TX</span><span className="text-ink/35">/</span><span className="text-sm font-semibold">{section}</span></div>
+          <div className="flex items-center gap-3 text-sm"><span className="text-muted">{user?.full_name?.split(" ")[0] ? `Good to see you, ${user.full_name.split(" ")[0]}` : "Good to see you"}</span><Link href="/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-full border border-ink bg-pink transition-transform hover:-translate-y-0.5"><BellIcon size={19} /></Link></div>
+        </div>
         {children}
       </div>
     </div>

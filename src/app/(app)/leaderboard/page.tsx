@@ -58,7 +58,7 @@ export default function LeaderboardPage() {
                   <li key={r.username}>
                     <Link
                       href={`/u/${r.username}`}
-                      className={`flex items-center gap-4 border border-ink p-3 pr-5 shadow-[4px_4px_0_var(--ink)] transition-transform hover:-translate-y-0.5 ${me ? "bg-yellow" : "bg-white"}`}
+                      className={`flex items-center gap-4 rounded-[18px] border border-ink p-3 pr-5 shadow-[4px_4px_0_var(--ink)] transition-transform hover:-translate-y-0.5 ${me ? "bg-yellow" : "bg-white"}`}
                     >
                       <span
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink text-sm font-semibold tabular-nums ${MEDALS[r.rank - 1] ?? "bg-cream"}`}
@@ -114,7 +114,7 @@ function PastSeasons({ me }: { me?: string }) {
         <ol className="mt-4 space-y-3">
           {rows.map((r) => (
             <li key={r.username}>
-              <Link href={`/u/${r.username}`} className={`flex items-center gap-4 border border-ink p-3 pr-5 ${r.username === me ? "bg-yellow" : "bg-white"}`}>
+              <Link href={`/u/${r.username}`} className={`flex items-center gap-4 rounded-[18px] border border-ink p-3 pr-5 ${r.username === me ? "bg-yellow" : "bg-white"}`}>
                 <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink text-sm font-semibold tabular-nums ${MEDALS[r.rank - 1] ?? "bg-cream"}`}>{r.rank}</span>
                 <Avatar name={r.username} src={r.avatar_url} size={40} />
                 <span className="min-w-0 flex-1 truncate font-medium">@{r.username}</span>

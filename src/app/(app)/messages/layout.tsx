@@ -36,9 +36,9 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
   const list = useQuery({ queryKey: keys.inboxChats, queryFn: messagesApi.list, refetchInterval: 15_000 });
 
   return (
-    <main className="mx-auto flex h-[calc(100svh-0px)] w-full max-w-[1100px] gap-0 px-0 md:px-6 md:py-6 lg:h-screen">
-      <aside className={`${inThread ? "hidden md:flex" : "flex"} w-full flex-col border-ink bg-cream md:w-[320px] md:shrink-0 md:border md:bg-white`} aria-label="Conversations">
-        <h1 className="border-b border-ink px-5 py-4 text-[24px] tracking-[-0.03em]">Messages</h1>
+    <main className="mx-auto flex h-[calc(100dvh-172px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] min-h-[340px] w-full max-w-[1200px] gap-0 px-3 pt-4 md:px-6 md:pt-6 lg:h-[calc(100dvh-84px)] lg:pb-6">
+      <aside className={`${inThread ? "hidden md:flex" : "flex"} w-full flex-col overflow-hidden rounded-[22px] border border-ink bg-white shadow-[4px_4px_0_var(--pink)] md:w-[320px] md:shrink-0 md:rounded-r-none`} aria-label="Conversations">
+        <div className="border-b border-ink bg-ink px-5 py-4 text-cream"><p className="text-[10px] font-bold uppercase tracking-[.17em] text-pink">Your conversations / TX</p><h1 className="mt-1 text-[26px] tracking-[-0.04em]">Messages.</h1></div>
         <form onSubmit={go} className="border-b border-ink p-3">
           <div className="flex items-center gap-2">
             <input value={who} onChange={(e) => setWho(e.target.value)} placeholder="Message a username" aria-label="Username to message" maxLength={30} className="min-w-0 flex-1 rounded-full border border-ink bg-white px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-rose" />
@@ -63,7 +63,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
                 const active = pathname === `/messages/${c.id}`;
                 return (
                   <li key={c.id}>
-                    <Link href={`/messages/${c.id}`} className={`flex items-center gap-3 border-b border-line px-4 py-3 transition-colors ${active ? "bg-yellow" : "hover:bg-yellow/40"}`}>
+                    <Link href={`/messages/${c.id}`} className={`flex min-h-[74px] items-center gap-3 border-b border-line px-4 py-3 transition-colors ${active ? "bg-yellow" : "hover:bg-yellow/40"}`}>
                       <Avatar name={c.with.username} src={c.with.avatar_url} size={44} />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-baseline justify-between gap-2">
@@ -83,7 +83,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
           )}
         </div>
       </aside>
-      <section className={`${inThread ? "flex" : "hidden md:flex"} min-w-0 flex-1 flex-col md:border-y md:border-r md:border-ink`}>{children}</section>
+      <section className={`${inThread ? "flex" : "hidden md:flex"} min-w-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-ink bg-white shadow-[4px_4px_0_var(--pink)] md:rounded-l-none md:border-l-0`}>{children}</section>
     </main>
   );
 }

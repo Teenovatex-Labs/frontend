@@ -75,8 +75,8 @@ export default function EventsPage() {
             {visibleEvents.map((e) => {
               const soon = startsIn(e.starts_at, e.ends_at);
               return (
-                <li key={e.id} className="flex flex-col gap-4 border border-ink bg-white p-5 shadow-[5px_5px_0_var(--ink)] sm:flex-row sm:items-center">
-                  <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center border border-ink bg-yellow text-center">
+                <li key={e.id} className="flex flex-col gap-4 rounded-[22px] border border-ink bg-white p-5 shadow-[5px_5px_0_var(--ink)] sm:flex-row sm:items-center">
+                  <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-[16px] border border-ink bg-yellow text-center shadow-[2px_2px_0_var(--ink)]">
                     <span className="text-[11px] font-semibold uppercase tracking-wide">
                       {new Date(e.starts_at).toLocaleDateString(undefined, { month: "short" })}
                     </span>
