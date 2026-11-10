@@ -3,7 +3,6 @@ import Hero from "@/components/Hero";
 import InterestStrip from "@/components/InterestStrip";
 import About from "@/components/About";
 import Toolkit from "@/components/Toolkit";
-import FirstDay from "@/components/FirstDay";
 import People from "@/components/People";
 import Donate from "@/components/Donate";
 import Join from "@/components/Join";
@@ -18,7 +17,6 @@ export default function Home() {
         <InterestStrip />
         <About />
         <Toolkit />
-        <FirstDay />
         <People />
         <Donate />
       </main>

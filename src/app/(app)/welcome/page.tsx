@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ApiError } from "@/lib/api";
 import { onboardingApi, type OnboardingState } from "@/lib/services";
 import { keys, timeAgo } from "@/lib/labs";
+import FirstDayGuidance from "@/components/app/FirstDayGuidance";
 
 const NOTES: Record<string, string> = {
   welcome: "Your first week: read the code of conduct, make your profile, join the group, say hello, and join HCB. Nothing here is a test.",
@@ -112,6 +113,7 @@ export default function WelcomePage() {
                   )}
                   {NOTES[s.key] && !s.done && <p className="mt-1 text-sm text-muted">{NOTES[s.key]}</p>}
                   {s.key === "profile" && !s.done && <BioEditor onSaved={(d) => qc.setQueryData(keys.admin("onboarding-me"), d)} />}
+                  {s.key === "intro" && state.data.status === "onboarding" && <FirstDayGuidance />}
                   {s.key === "intro" && !s.done && <IntroEditor state={state.data} onSaved={(d) => qc.setQueryData(keys.admin("onboarding-me"), d)} />}
                 </div>
                 {s.done ? (
