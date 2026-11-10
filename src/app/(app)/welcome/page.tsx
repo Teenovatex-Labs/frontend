@@ -19,8 +19,8 @@ const NOTES: Record<string, string> = {
   welcome: "This is your first week. Take the steps at your own pace; the team is here if you need help.",
   conduct: "Open the code of conduct, read the community expectations, then confirm that you agree.",
   safeguarding: "TeenovateX is for teenagers, so we take safety seriously. Never share your address, school or passwords. If anything online or in the group feels wrong, tell a moderator straight away, or email hello@teenovatex.org. You will never be in trouble for telling us.",
-  whatsapp: "This is a members-only invitation. Open the link, join the community, then confirm here. If the link is missing, ask hello@teenovatex.org for your invitation.",
-  hcb: "Use your official Hack Club Dashboard invitation, then return here to confirm you joined. If the link is missing, ask hello@teenovatex.org for your invitation.",
+  whatsapp: "Join using the private link here or the invitation the team sent you. Confirm only after you have joined. If you have no invitation, ask hello@teenovatex.org.",
+  hcb: "Join using your official Hack Club Dashboard invitation, then confirm here. If you have no invitation, ask hello@teenovatex.org.",
 };
 
 function BioEditor({ onSaved }: { onSaved: (s: OnboardingState) => void }) {
@@ -153,7 +153,7 @@ export default function WelcomePage() {
                 {s.done ? (
                   <CircleCheckIcon size={20} />
                 ) : s.self_reported ? (
-                  <button type="button" onClick={() => confirm.mutate(s.key)} disabled={confirm.isPending || ((s.key === "whatsapp" || s.key === "hcb") && !s.link)} className="btn-secondary text-xs disabled:opacity-60">
+                  <button type="button" onClick={() => confirm.mutate(s.key)} disabled={confirm.isPending} className="btn-secondary text-xs disabled:opacity-60">
                     {s.key === "conduct" ? "I read and agree" : "I’ve done this"}
                   </button>
                 ) : null}
