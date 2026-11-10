@@ -84,13 +84,17 @@ export default function Header() {
                   href={link.href}
                   onClick={close}
                   style={{ transitionDelay: open ? `${i * 60 + 80}ms` : "0ms" }}
-                  className={`group flex items-center gap-3 py-2 text-sm font-semibold transition-all duration-300 ease-out lg:gap-2 lg:py-0 lg:transition-none ${
+                  className={`group relative flex items-center gap-3 py-2 text-sm font-semibold transition-all duration-300 ease-out lg:gap-2 lg:py-1 ${
                     open ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0 lg:translate-x-0 lg:opacity-100"
                   }`}
                 >
-                  <span className={`h-2 w-2 shrink-0 rounded-full border border-ink ${link.dot} lg:hidden`} aria-hidden="true" />
-                  <span className="group-hover:text-rose group-hover:underline group-hover:underline-offset-8">
+                  <span className={`h-2 w-2 shrink-0 rounded-full border border-ink ${link.dot} transition-transform duration-200 ease-out group-hover:scale-125 lg:hidden`} aria-hidden="true" />
+                  <span className="relative transition-colors duration-200 group-hover:text-rose">
                     {link.label}
+                    <span
+                      aria-hidden="true"
+                      className="absolute -bottom-1 left-0 hidden h-[2px] w-full origin-left scale-x-0 rounded-full bg-rose transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 lg:block"
+                    />
                   </span>
                 </a>
               ))}
