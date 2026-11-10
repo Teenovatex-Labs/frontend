@@ -16,7 +16,7 @@ import { keys } from "@/lib/labs";
 import Avatar from "@/components/ui/Avatar";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
-import StatTile from "@/components/ui/StatTile";
+import AnimatedStatTile from "@/components/ui/AnimatedStatTile";
 import { useToast } from "@/components/ui/Toast";
 import LabCard from "@/components/labs/LabCard";
 import { LabGridSkeleton } from "@/components/labs/LabGrid";
@@ -160,11 +160,12 @@ export default function PersonPage() {
         </ul>
       )}
 
-      <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatTile label="Level" value={p.level.level} hint={p.level.title} tone="yellow" />
-        <StatTile label="Points" value={p.points.toLocaleString()} hint={`#${p.rank} overall`} tone="pink" />
-        <StatTile label="Day streak" value={p.streak} />
-        <StatTile label="Labs" value={p.lab_count} tone="white" />
+      <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-5">
+        <AnimatedStatTile label="Level" value={p.level.level} hint={p.level.title} tone="yellow" />
+        <AnimatedStatTile label="Points" value={p.points.toLocaleString()} animation="points" tone="pink" />
+        <AnimatedStatTile label="Rank" value={`#${p.rank}`} animation="rank" hint="Overall" tone="white" />
+        <AnimatedStatTile label="Day streak" value={p.streak} animation="streak" />
+        <AnimatedStatTile label="Labs" value={p.lab_count} tone="white" />
       </div>
 
       {p.honors.length > 0 && (

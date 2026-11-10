@@ -8,7 +8,7 @@ import Milestones from "@/components/rewards/Milestones";
 import { eventsApi, inboxApi, labsApi, labsDeepApi, learnApi, votesApi } from "@/lib/services";
 import { keys, timeAgo } from "@/lib/labs";
 import { eventDay, eventTime } from "@/lib/dates";
-import StatTile from "@/components/ui/StatTile";
+import AnimatedStatTile from "@/components/ui/AnimatedStatTile";
 import QuestCard from "@/components/rewards/QuestCard";
 import WeeklyChallenges from "@/components/rewards/WeeklyChallenges";
 import Card from "@/components/ui/Card";
@@ -95,22 +95,18 @@ export default function HomePage() {
 
       <Milestones userId={user.id} points={user.points} level={user.level.level} levelTitle={user.level.title} rank={user.rank ?? null} />
 
-      <div className="mt-6 grid grid-cols-3 gap-2 md:hidden" aria-label="Your progress at a glance">
-        <div className="flex min-h-[106px] flex-col justify-between rounded-[19px] border border-ink bg-yellow p-3 shadow-[3px_3px_0_var(--ink)]"><span className="text-[10px] font-bold uppercase tracking-wider">Points</span><strong className="text-[clamp(23px,7vw,32px)] leading-none">{user.points.toLocaleString()}</strong></div>
-        <div className="flex min-h-[106px] flex-col justify-between rounded-[19px] border border-ink bg-pink p-3 shadow-[3px_3px_0_var(--ink)]"><span className="text-[10px] font-bold uppercase tracking-wider">Day streak</span><strong className="text-[clamp(23px,7vw,32px)] leading-none">{user.streak} <span className="text-lg" aria-hidden="true">✦</span></strong></div>
-        <div className="flex min-h-[106px] flex-col justify-between rounded-[19px] border border-ink bg-white p-3 shadow-[3px_3px_0_var(--ink)]"><span className="text-[10px] font-bold uppercase tracking-wider">Rank</span><strong className="text-[clamp(20px,6vw,32px)] leading-none">{user.rank ? `#${user.rank}` : "—"}</strong></div>
-      </div>
-
-      <div className="mt-10 hidden gap-5 md:grid md:grid-cols-3">
-        <StatTile label="Points" value={user.points.toLocaleString()} tone="yellow" />
-        <StatTile
+      <div className="mt-7 grid grid-cols-3 gap-2 md:mt-10 md:gap-5" aria-label="Your progress at a glance">
+        <AnimatedStatTile label="Points" value={user.points.toLocaleString()} tone="yellow" animation="points" compact />
+        <AnimatedStatTile
           label="Day streak"
           value={user.streak}
           tone="pink"
+          animation="streak"
+          compact
           className="sm:rotate-1"
           hint={user.streak_freezes > 0 ? `${user.streak_freezes} streak freeze${user.streak_freezes === 1 ? "" : "s"} saved` : "Earn a freeze every 7 days"}
         />
-        <StatTile label="Rank" value={user.rank ? `#${user.rank}` : "Unranked"} className="sm:-rotate-1" />
+        <AnimatedStatTile label="Rank" value={user.rank ? `#${user.rank}` : "—"} animation="rank" compact className="sm:-rotate-1" />
       </div>
 
       <div className="mt-6 rounded-[20px] border border-ink bg-white p-4 shadow-[4px_4px_0_var(--ink)] md:mt-5 md:rounded-none md:p-5 md:shadow-[5px_5px_0_var(--ink)]">
