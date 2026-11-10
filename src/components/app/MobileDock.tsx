@@ -88,6 +88,155 @@ function activeTab(pathname: string): string {
   return "more";
 }
 
+function DockItemCard({
+  item,
+  index,
+  onClose,
+}: {
+  item: NavLeaf;
+  index: number;
+  onClose: () => void;
+}) {
+  const { ref, onMouseEnter, onMouseLeave } = useIconHover();
+  const Icon = item.icon;
+  const palette = [
+    { bg: "bg-yellow", iconBox: "bg-white/80 border-ink/40 text-ink", dot: "bg-pink" },
+    { bg: "bg-white", iconBox: "bg-pink/20 border-pink text-rose", dot: "bg-yellow" },
+    { bg: "bg-pink", iconBox: "bg-white/80 border-ink/40 text-ink", dot: "bg-ink" },
+    { bg: "bg-[#e9e8df]", iconBox: "bg-white/80 border-ink/30 text-ink", dot: "bg-rose" },
+  ];
+  const color = palette[index % 4];
+
+  const content = (
+    <>
+      <div className="flex items-start justify-between gap-2">
+        <span
+          className={`grid h-8 w-8 place-items-center rounded-xl border shadow-[1px_1px_0_var(--ink)] transition-transform duration-200 group-hover:scale-110 group-active:scale-95 ${color.iconBox}`}
+        >
+          {Icon ? <Icon ref={ref} size={16} /> : <span className={`h-2 w-2 rounded-full ${color.dot}`} />}
+        </span>
+        <span
+          aria-hidden="true"
+          className="text-base font-bold leading-none text-ink/70 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-[-1px] group-hover:text-ink"
+        >
+          ↗
+        </span>
+      </div>
+      <span className="mt-2 block truncate text-[14px] font-bold tracking-tight text-ink">
+        {item.label}
+      </span>
+    </>
+  );
+
+  const baseClass = `group flex min-h-[78px] flex-col justify-between rounded-[20px] border-2 border-ink p-3 text-left transition-all duration-200 active:scale-[.96] shadow-[2px_2px_0_var(--ink)] hover:shadow-[3px_3px_0_var(--ink)] ${color.bg}`;
+
+  if (item.href) {
+    return (
+      <Link
+        href={item.href}
+        onClick={onClose}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={baseClass}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  if (item.external) {
+    return (
+      <a
+        href={item.external}
+        target="_blank"
+        rel="noopener noreferrer"
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={baseClass}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <div aria-disabled="true" className={`${baseClass} opacity-60 cursor-not-allowed`}>
+      <div className="flex items-start justify-between gap-2">
+        <span className={`grid h-8 w-8 place-items-center rounded-xl border ${color.iconBox}`}>
+          {Icon ? <Icon ref={ref} size={16} /> : <span className={`h-2 w-2 rounded-full ${color.dot}`} />}
+        </span>
+        <span className="rounded-full border border-ink bg-white/70 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-ink">
+          Soon
+        </span>
+      </div>
+      <span className="mt-2 block truncate text-[14px] font-semibold text-ink">
+        {item.label}
+      </span>
+    </div>
+  );
+}
+
+function DockTabButton({
+  tab,
+  selected,
+  onOpen,
+}: {
+  tab: (typeof tabs)[number];
+  selected: boolean;
+  onOpen: () => void;
+}) {
+  const { ref, onMouseEnter, onMouseLeave } = useIconHover();
+  const Icon = tab.icon;
+
+  const content = (
+    <>
+      <Icon ref={ref} size={22} />
+      <span className="mt-0.5 text-[10px] font-bold tracking-tight leading-none">{tab.label}</span>
+      {selected && (
+        <span
+          aria-hidden="true"
+          className="absolute -top-1 left-1/2 h-1 w-3 -translate-x-1/2 rounded-full bg-rose shadow-[0_0_6px_var(--rose)]"
+        />
+      )}
+    </>
+  );
+
+  const cls = `relative flex h-[56px] min-w-0 flex-col items-center justify-center rounded-[18px] transition-all duration-200 active:scale-95 ${
+    selected
+      ? "bg-yellow text-ink shadow-[2px_2px_0_var(--ink)] font-bold"
+      : "text-cream hover:bg-white/10 hover:text-white"
+  }`;
+
+  if (tab.id === "home") {
+    return (
+      <Link
+        href="/home"
+        aria-current={selected ? "page" : undefined}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        className={cls}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`Open ${tab.label}`}
+      aria-expanded={selected}
+      aria-controls="mobile-navigation-sheet"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className={cls}
+    >
+      {content}
+    </button>
+  );
+}
+
 export default function MobileDock() {
   const pathname = usePathname();
   const reduce = useReducedMotion();
@@ -138,24 +287,27 @@ export default function MobileDock() {
               <button ref={closeRef} type="button" onClick={() => setTray(null)} aria-label="Close navigation" className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-ink bg-pink"><XIcon size={20} /></button>
             </div>
             <div className="mt-5 grid grid-cols-2 gap-2.5">
-              {groups[tray].items.map((item, index) => {
-                const className = `flex min-h-[68px] flex-col justify-between rounded-[17px] border border-ink p-3.5 text-left text-[15px] font-semibold transition-transform active:scale-[.97] ${index % 4 === 0 ? "bg-yellow" : index % 4 === 1 ? "bg-white" : index % 4 === 2 ? "bg-pink" : "bg-[#e9e8df]"}`;
-                return item.href ? <Link key={item.id} href={item.href} onClick={() => setTray(null)} className={className}><span>{item.label}</span><span aria-hidden="true" className="self-end text-lg leading-none">↗</span></Link>
-                  : item.external ? <a key={item.id} href={item.external} target="_blank" rel="noopener noreferrer" className={className}><span>{item.label}</span><span aria-hidden="true" className="self-end text-lg leading-none">↗</span></a>
-                  : <div key={item.id} aria-disabled="true" className={`${className} opacity-55`}><span>{item.label}</span><span className="self-end text-[10px] uppercase tracking-wider">Soon</span></div>;
-              })}
+              {groups[tray].items.map((item, index) => (
+                <DockItemCard
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  onClose={() => setTray(null)}
+                />
+              ))}
             </div>
           </motion.section>
         </>}
       </AnimatePresence>
       <nav ref={dockRef} aria-label="Primary mobile navigation" className="fixed inset-x-3 bottom-[calc(10px+env(safe-area-inset-bottom))] z-[60] grid h-[70px] grid-cols-5 items-center rounded-[25px] border-2 border-ink bg-ink px-1.5 shadow-[0_10px_30px_#26282240] lg:hidden">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const selected = tray ? tray === tab.id : current === tab.id;
-          const content = <><Icon size={23} /><span className="mt-0.5 text-[10px] font-semibold leading-none">{tab.label}</span></>;
-          const cls = `relative flex h-[56px] min-w-0 flex-col items-center justify-center rounded-[18px] transition-colors ${selected ? "bg-yellow text-ink" : "text-cream hover:bg-white/10"}`;
-          return tab.id === "home" ? <Link key={tab.id} href="/home" aria-current={selected ? "page" : undefined} className={cls}>{content}</Link> : <button key={tab.id} type="button" onClick={() => setTray(tray === tab.id ? null : tab.id as Tray)} aria-label={`Open ${tab.label}`} aria-expanded={tray === tab.id} aria-controls="mobile-navigation-sheet" className={cls}>{content}</button>;
-        })}
+        {tabs.map((tab) => (
+          <DockTabButton
+            key={tab.id}
+            tab={tab}
+            selected={tray ? tray === tab.id : current === tab.id}
+            onOpen={() => setTray(tray === tab.id ? null : (tab.id as Tray))}
+          />
+        ))}
       </nav>
     </>
   );
