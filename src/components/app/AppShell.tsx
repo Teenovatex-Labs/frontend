@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } 
 import Link from "next/link";
 import { BellIcon } from "@animateicons/react/lucide/bell-icon";
 import { SearchIcon } from "@animateicons/react/lucide/search-icon";
+import useIconHover from "@/lib/useIconHover";
 import { AlfredProvider } from "@/context/AlfredContext";
 import { useAuth } from "@/context/AuthContext";
 import Sidebar from "./Sidebar";
@@ -13,6 +14,31 @@ import LiveUpdates from "./LiveUpdates";
 import PromptHost from "./PromptHost";
 
 const STORAGE_KEY = "tx_sidebar_collapsed";
+
+function HeaderIconLink({
+  href,
+  label,
+  icon: Icon,
+  className,
+}: {
+  href: string;
+  label: string;
+  icon: typeof SearchIcon | typeof BellIcon;
+  className: string;
+}) {
+  const { ref, onMouseEnter, onMouseLeave } = useIconHover();
+  return (
+    <Link
+      href={href}
+      aria-label={label}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className={`grid h-11 w-11 place-items-center rounded-full border border-ink/20 shadow-[1px_1px_0_var(--ink)] transition-all active:scale-95 ${className}`}
+    >
+      <Icon ref={ref} size={20} />
+    </Link>
+  );
+}
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -65,8 +91,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <span className="text-[17px] font-bold tracking-[-0.045em]">Teenovate<span className="text-rose">X</span></span>
         </Link>
         <div className="flex items-center gap-2">
-          <Link href="/search" aria-label="Search" className="grid h-11 w-11 place-items-center rounded-full border border-ink/20 bg-white"><SearchIcon size={20} /></Link>
-          <Link href="/notifications" aria-label="Notifications" className="grid h-11 w-11 place-items-center rounded-full border border-ink/20 bg-pink"><BellIcon size={20} /></Link>
+          <HeaderIconLink
+            href="/search"
+            label="Search"
+            icon={SearchIcon}
+            className="bg-white hover:bg-yellow hover:border-ink"
+          />
+          <HeaderIconLink
+            href="/notifications"
+            label="Notifications"
+            icon={BellIcon}
+            className="bg-pink hover:scale-105 hover:border-ink"
+          />
         </div>
       </header>
       <MobileDock />

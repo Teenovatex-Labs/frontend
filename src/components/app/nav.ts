@@ -22,6 +22,7 @@ export type NavLeaf = {
   href?: string;
   external?: string;
   soon?: boolean;
+  icon?: AnimatedIcon;
 };
 
 export type NavItem = NavLeaf & { icon: AnimatedIcon; children?: NavLeaf[] };
