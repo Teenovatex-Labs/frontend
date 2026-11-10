@@ -35,7 +35,7 @@ const FOUNDERS: Founder[] = [
     bg: "bg-yellow",
     photo: "/founders/anas.jpg",
     bio: "Sets the direction, protects the mission and makes the final calls that keep TeenovateX moving as one organisation.",
-    mandate: "Turn the comeback vision into clear priorities, credible relationships and accountable leadership.",
+    mandate: "Turn the community's vision into clear priorities, credible relationships and accountable leadership.",
     speciality: "Strategy, team, administration, partnerships, governance and final accountability.",
     contribution: "He aligns the system, removes blockers and makes sure every major commitment has an owner.",
     strengths: ["Strategic direction", "External relations", "Team alignment"],
@@ -56,7 +56,7 @@ const FOUNDERS: Founder[] = [
     speciality: "Programmes, product direction, technical quality and selected public representation.",
     contribution: "He turns possibility into things teenagers can join, use and build through.",
     strengths: ["Product thinking", "Programme design", "Public speaking"],
-    focus: ["Define the comeback programme slate", "Guide product decisions", "Represent the work clearly in public"],
+    focus: ["Define hands-on technical programmes", "Guide product decisions", "Represent the work clearly in public"],
     worksWith: ["Anas Abubakar Masama", "Quadri Lasisi", "David Uhumagho"],
     success: "TeenovateX consistently ships useful experiences instead of collecting unfinished ideas.",
   },
@@ -86,7 +86,7 @@ const FOUNDERS: Founder[] = [
     bio: "Turns founder decisions into disciplined weekly execution across every team.",
     mandate: "Build the operating discipline that carries the organisation when motivation alone is not enough.",
     speciality: "Operating cadence, cross-team delivery, accountability and strategic ecosystem intelligence.",
-    contribution: "He keeps the organisation moving when enthusiasm fades and makes the comeback operationally believable.",
+    contribution: "He keeps the organisation moving forward smoothly and makes ambitious goals operationally believable.",
     strengths: ["Execution discipline", "Ecosystem intelligence", "Accountability"],
     focus: ["Run the weekly operating review", "Unblock cross-team delivery", "Turn relationships into practical leverage"],
     worksWith: ["Anas Abubakar Masama", "Adeyemi Gabriel", "Koded"],
@@ -115,12 +115,12 @@ const FOUNDERS: Founder[] = [
     unit: "Brand",
     bg: "bg-rose",
     photo: "/founders/muaz.jpg",
-    bio: "Gives the rebrand its coherent identity, from the logo system to the standards behind every public touchpoint.",
+    bio: "Gives the brand its coherent identity, from the logo system to the standards behind every public touchpoint.",
     mandate: "Create and protect a visual identity that feels youthful, credible and unmistakably TeenovateX.",
     speciality: "Brand identity direction, logo development, visual standards and quality control.",
     contribution: "He gives every initiative a shared visual language and a stronger signal of care.",
     strengths: ["Identity systems", "Visual direction", "Quality control"],
-    focus: ["Complete the new identity", "Build reusable brand rules", "Direct the comeback campaign look"],
+    focus: ["Refine the brand identity", "Build reusable design rules", "Direct campaigns and visual storytelling"],
     worksWith: ["Aisha Onola", "Anas Abubakar Masama", "Sanni Shazily"],
     success: "Every public touchpoint looks related, considered and recognisable without feeling too childish or too corporate.",
   },
@@ -137,7 +137,7 @@ const FOUNDERS: Founder[] = [
     speciality: "Budgets, financial records, sponsor proposals and partnership administration.",
     contribution: "He turns external support into transparent, mission-aligned resources the team can depend on.",
     strengths: ["Partnership operations", "Financial discipline", "Proposal support"],
-    focus: ["Create a simple finance system", "Build the partner pipeline", "Cost every comeback initiative"],
+    focus: ["Create a simple finance system", "Build the partner pipeline", "Budget and steward every initiative"],
     worksWith: ["Anas Abubakar Masama", "Abdulbasit Fazazi", "Adam Lawal"],
     success: "The organisation can fund its priorities, explain every expense and make promises it can afford to keep.",
   },
@@ -267,10 +267,10 @@ export default function People() {
           <h2 className="mt-6 max-w-2xl text-4xl md:text-5xl">
             Meet the people
             <br />
-            making the comeback real.
+            bringing the mission to life.
           </h2>
           <p className="mt-5 max-w-md text-muted">
-            A focused team of builders, operators and researchers. Each person owns a different part of the same comeback.
+            A dedicated team of builders, operators and researchers. Each person champions a vital part of the global community.
           </p></Reveal><Reveal from="right" delay={0.12}><FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
 
           <p className="mt-12 text-muted md:text-right">Tap anyone in the orbit to open their role in the system.</p>

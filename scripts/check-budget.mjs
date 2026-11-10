@@ -6,6 +6,7 @@ const LIMITS_KB = {
   default: 215, // member app and admin pages
   "/": 280, // the landing page carries the 3D and animation
   "/auth": 240,
+  "/contact": 240, // public page with interactive form, animations, and shared header/footer
 };
 
 const log = readFileSync(process.argv[2] ?? "build.log", "utf8");
