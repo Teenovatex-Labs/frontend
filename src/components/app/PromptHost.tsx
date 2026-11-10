@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { BellRingIcon, SmartPhone01Icon } from "@hugeicons/core-free-icons";
 import { useAuth } from "@/context/AuthContext";
 import { useAlfred } from "@/context/AlfredContext";
 import { useToast } from "@/components/ui/Toast";
@@ -326,7 +328,23 @@ export default function PromptHost() {
             </div>
           ) : (
             <div className="flex items-start gap-3">
-              <LottieSlot src={copy.lottie} label="" className="h-20 w-20 shrink-0 sm:h-24 sm:w-24" />
+              <LottieSlot
+                src={copy.lottie}
+                label=""
+                eager
+                allowSlowConnection
+                className="h-20 w-20 shrink-0 sm:h-24 sm:w-24"
+                fallback={
+                  <motion.span
+                    aria-hidden="true"
+                    animate={reduce ? undefined : shown === "install" ? { y: [0, -5, 0], rotate: [-5, 2, -5] } : { rotate: [-9, 9, -7, 7, 0] }}
+                    transition={reduce ? undefined : { duration: shown === "install" ? 2.4 : 2, repeat: Infinity, repeatDelay: 0.7, ease: "easeInOut" }}
+                    className={`grid h-16 w-16 place-items-center rounded-[18px] border-2 border-ink shadow-[3px_3px_0_var(--ink)] ${shown === "install" ? "bg-yellow" : "bg-pink"}`}
+                  >
+                    <HugeiconsIcon icon={shown === "install" ? SmartPhone01Icon : BellRingIcon} size={35} strokeWidth={1.8} />
+                  </motion.span>
+                }
+              />
               <div className="min-w-0 flex-1 pr-6">
                 <h2 className="text-[19px] leading-tight tracking-[-0.03em]">{copy.title}</h2>
                 <p className="mt-1.5 text-sm text-muted">{copy.body}</p>

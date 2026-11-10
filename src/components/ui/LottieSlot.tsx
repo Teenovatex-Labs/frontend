@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { prefersLowMotion } from "@/lib/motion";
 
 type Props = {
@@ -14,6 +14,12 @@ type Props = {
   autoplay?: boolean;
   /** Shown while loading and instead of the animation for reduced-motion / data-saver visitors. */
   poster?: string;
+  /** Modal art should begin loading as soon as it opens, without waiting for an intersection callback. */
+  eager?: boolean;
+  /** For tiny assets where loading is useful even if the browser reports a slow connection. */
+  allowSlowConnection?: boolean;
+  /** Visible until the SVG is actually mounted, and for visitors who prefer less motion. */
+  fallback?: ReactNode;
 };
 
 /**
@@ -22,33 +28,35 @@ type Props = {
  * and visitors with reduced-motion, data-saver or a 2G connection get the
  * poster (or the first frame) with no animation download at all.
  */
-export function LottieSlot({ src, label, className = "", loop = true, autoplay = true, poster }: Props) {
+export function LottieSlot({ src, label, className = "", loop = true, autoplay = true, poster, eager = false, allowSlowConnection = false, fallback }: Props) {
   const host = useRef<HTMLDivElement>(null);
+  const player = useRef<HTMLDivElement>(null);
   const [lowMotion, setLowMotion] = useState(true);
-  const [near, setNear] = useState(false);
+  const [near, setNear] = useState(eager);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setLowMotion(prefersLowMotion());
-  }, []);
+    setLowMotion(prefersLowMotion({ allowSlowConnection }));
+  }, [allowSlowConnection]);
 
   useEffect(() => {
     const node = host.current;
-    if (!node || lowMotion) return;
+    if (!node || lowMotion || eager) return;
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && setNear(true)),
       { rootMargin: "200px" },
     );
     io.observe(node);
     return () => io.disconnect();
-  }, [lowMotion]);
+  }, [lowMotion, eager]);
 
   useEffect(() => {
-    const node = host.current;
+    const node = player.current;
     if (!node || !near || lowMotion) return;
     let cancelled = false;
     let anim: { destroy: () => void; play: () => void; pause: () => void } | undefined;
     let visibility: IntersectionObserver | undefined;
+    let mounted: MutationObserver | undefined;
 
     (async () => {
       const [{ default: lottie }, data] = await Promise.all([
@@ -64,11 +72,23 @@ export function LottieSlot({ src, label, className = "", loop = true, autoplay =
         animationData: data,
         rendererSettings: { progressiveLoad: true },
       });
+      // loadAnimation can return before its first SVG frame exists. Keep the
+      // fallback visible until there is actual artwork in the player.
+      mounted = new MutationObserver(() => {
+        if (node.querySelector("svg")) {
+          setReady(true);
+          mounted?.disconnect();
+        }
+      });
+      mounted.observe(node, { childList: true, subtree: true });
+      if (node.querySelector("svg")) {
+        setReady(true);
+        mounted.disconnect();
+      }
       visibility = new IntersectionObserver((entries) =>
         entries.forEach((e) => (e.isIntersecting ? anim?.play() : anim?.pause())),
       );
-      visibility.observe(node);
-      setReady(true);
+      visibility.observe(host.current ?? node);
     })().catch(() => {
       /* poster stays visible; a failed decoration must never break the page */
     });
@@ -76,6 +96,7 @@ export function LottieSlot({ src, label, className = "", loop = true, autoplay =
     return () => {
       cancelled = true;
       visibility?.disconnect();
+      mounted?.disconnect();
       anim?.destroy();
     };
   }, [near, lowMotion, src, loop, autoplay]);
@@ -83,11 +104,14 @@ export function LottieSlot({ src, label, className = "", loop = true, autoplay =
   return (
     <div
       ref={host}
-      className={className}
+      className={`relative ${className}`}
       role={label ? "img" : undefined}
       aria-label={label || undefined}
       aria-hidden={label ? undefined : true}
       style={poster && !ready ? { backgroundImage: `url(${poster})`, backgroundSize: "contain", backgroundRepeat: "no-repeat", backgroundPosition: "center" } : undefined}
-    />
+    >
+      <div ref={player} className={`absolute inset-0 ${ready ? "opacity-100" : "opacity-0"}`} />
+      {!ready && fallback && <div className="absolute inset-0 grid place-items-center">{fallback}</div>}
+    </div>
   );
 }
