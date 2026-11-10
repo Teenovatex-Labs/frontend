@@ -36,12 +36,12 @@ export default function LearnPage() {
                 <Link
                   key={t.id}
                   href={`/learn/${t.slug}`}
-                  className={`flex flex-col border border-ink p-6 shadow-[5px_5px_0_var(--ink)] transition-transform hover:-translate-y-1 ${i % 2 ? "bg-pink" : "bg-yellow"}`}
+                  className={`group flex min-h-[230px] flex-col rounded-[22px] border border-ink p-6 shadow-[5px_5px_0_var(--ink)] transition-transform hover:-translate-y-1 ${i % 2 ? "bg-pink" : "bg-yellow"}`}
                 >
                   <p className="eyebrow text-ink/75">
                     {t.lesson_count} lessons · about {t.minutes} min
                   </p>
-                  <h2 className="mt-3 text-[26px] leading-tight tracking-[-0.03em]">{t.title}</h2>
+                  <h2 className="mt-3 flex items-start justify-between gap-3 text-[26px] leading-tight tracking-[-0.03em]">{t.title}<span aria-hidden="true" className="shrink-0 text-xl transition-transform group-hover:translate-x-1">↗</span></h2>
                   <p className="mt-2 flex-1 text-sm text-ink/80">{t.description}</p>
                   <div className="mt-5">
                     <div className="h-2 overflow-hidden rounded-full border border-ink bg-cream" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Your progress">

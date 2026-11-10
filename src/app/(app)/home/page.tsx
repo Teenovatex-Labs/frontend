@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import Milestones from "@/components/rewards/Milestones";
 import { eventsApi, inboxApi, labsApi, labsDeepApi, learnApi, votesApi } from "@/lib/services";
@@ -38,6 +39,9 @@ const Nothing = ({ children }: { children: React.ReactNode }) => <p className="t
 
 export default function HomePage() {
   const { user } = useAuth();
+  const qc = useQueryClient();
+  const pullStart = useRef<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const votes = useQuery({ queryKey: keys.dailyVotes, queryFn: votesApi.daily, enabled: !!user });
   const events = useQuery({ queryKey: keys.events("upcoming"), queryFn: () => eventsApi.list("upcoming"), enabled: !!user });
   const mine = useQuery({ queryKey: keys.myLabs, queryFn: labsApi.mine, enabled: !!user });
@@ -51,19 +55,25 @@ export default function HomePage() {
   const track = tracks.data?.tracks.find((t) => t.completed_count > 0 && t.completed_count < t.lesson_count) ?? tracks.data?.tracks.find((t) => t.completed_count === 0);
   const remaining = votes.data?.votes_remaining;
   const isNewMember = user.membership_status === "active" && Date.now() - new Date(user.created_at).getTime() < 14 * 24 * 60 * 60 * 1000;
+  const refresh = async () => {
+    setRefreshing(true);
+    try { await Promise.all([keys.dailyVotes, keys.events("upcoming"), keys.myLabs, keys.inbox, keys.myTasks, keys.tracks].map((queryKey) => qc.invalidateQueries({ queryKey }))); }
+    finally { window.setTimeout(() => setRefreshing(false), 700); }
+  };
 
   return (
-    <main className="tx-home mx-auto w-full max-w-[1080px] px-4 py-6 sm:px-5 md:px-10 md:py-16">
-      <div className="flex items-center justify-between gap-3 md:block">
-        <p className="eyebrow text-rose">Your world at TX</p>
-        <span className="rounded-full border border-ink bg-yellow px-3 py-1 text-[10px] font-bold uppercase tracking-wider md:hidden">Keep creating ✦</span>
-      </div>
-      <h1 className="mt-4 text-[clamp(43px,11vw,64px)] leading-[.98] tracking-[-.055em] md:text-[64px]">
-        Hey <span className="font-serif font-normal italic">{first}.</span>
-      </h1>
-      <p className="mt-3 max-w-[520px] text-sm text-muted md:mt-4 md:text-base">
-        {user.streak > 1 ? `${user.streak} days in a row. Keep it going.` : "Good to see you. Here's what's happening."}
-      </p>
+    <main className="tx-home mx-auto w-full max-w-[1180px] px-4 py-6 sm:px-5 md:px-10 md:py-12" onTouchStart={(event) => { if (window.scrollY < 80) pullStart.current = event.touches[0].clientY; }} onTouchEnd={(event) => { if (pullStart.current !== null && event.changedTouches[0].clientY - pullStart.current > 90 && window.scrollY < 80 && !refreshing) void refresh(); pullStart.current = null; }}>
+      <div role="status" aria-live="polite" className={`overflow-hidden text-center text-xs font-semibold text-rose transition-all duration-300 ${refreshing ? "h-7 opacity-100" : "h-0 opacity-0"}`}>{refreshing ? "Catching up on your world…" : ""}</div>
+      <header className="tx-home-hero relative isolate overflow-hidden rounded-[28px] border-2 border-ink bg-ink px-6 py-8 text-cream shadow-[7px_7px_0_var(--pink)] sm:px-8 md:grid md:min-h-[320px] md:grid-cols-[1.2fr_.8fr] md:items-end md:gap-8 md:px-10 md:py-10">
+        <div aria-hidden="true" className="absolute -right-20 -top-24 -z-10 h-64 w-64 rounded-full border-[32px] border-pink/20 md:right-10 md:h-80 md:w-80" />
+        <div aria-hidden="true" className="absolute -bottom-32 right-20 -z-10 h-60 w-60 rounded-full border-[26px] border-yellow/15" />
+        <div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-pink">Your world at TX <span className="ml-1 text-cream/40">/ Home</span></p>
+          <h1 className="mt-6 text-[clamp(48px,11vw,74px)] leading-[.94] tracking-[-.065em]">Hey <span className="font-serif font-normal italic text-yellow">{first}.</span></h1>
+          <p className="mt-5 max-w-[480px] text-sm leading-relaxed text-cream/75 md:text-base">{user.streak > 1 ? `${user.streak} days in a row. Your next idea is waiting.` : "Good to see you. There's room here for whatever you make next."}</p>
+          <div className="mt-6 flex flex-wrap gap-2"><Link href="/labs/new" className="inline-flex min-h-11 items-center gap-3 rounded-full border border-yellow bg-yellow px-5 text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5">Start something <span aria-hidden="true">↗</span></Link><Link href="/community" className="inline-flex min-h-11 items-center rounded-full border border-cream/40 px-5 text-sm font-semibold text-cream transition-colors hover:bg-cream/10">Find your people</Link></div>
+        </div>
+        <div className="mt-8 flex items-end justify-between gap-4 rounded-[20px] border border-cream/30 bg-cream/10 p-5 backdrop-blur-sm md:mt-0 md:min-h-[160px] md:flex-col md:items-start"><div><p className="text-[10px] font-bold uppercase tracking-[.17em] text-pink">Your current chapter</p><p className="mt-2 font-serif text-[29px] italic leading-none text-yellow">{user.level.title}</p></div><div className="text-right md:text-left"><strong className="text-[43px] leading-none tracking-[-.08em]">{user.points.toLocaleString()}</strong><p className="text-[10px] font-bold uppercase tracking-[.15em] text-cream/70">points earned</p></div></div>
+      </header>
 
       {isNewMember && (
         <div className="mt-6 rounded-[20px] border border-ink bg-pink p-5 shadow-[4px_4px_0_var(--ink)] md:flex md:items-center md:justify-between md:gap-6 md:p-6">
@@ -79,12 +89,9 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="mt-5 md:hidden">
-        <Link href="/labs" className="group flex min-h-[162px] flex-col justify-between overflow-hidden rounded-[24px] border-2 border-ink bg-ink p-5 text-cream shadow-[5px_6px_0_var(--pink)]">
-          <div className="flex items-start justify-between"><span className="text-[11px] font-semibold uppercase tracking-[.17em] text-pink">Your next big thing</span><span aria-hidden="true" className="text-3xl text-pink transition-transform group-hover:-rotate-12">✳</span></div>
-          <div className="flex items-end justify-between gap-3"><div><p className="font-serif text-[34px] italic leading-none">Make your mark.</p><p className="mt-2 text-xs text-cream/75">Discover ideas. Build yours. Find your crew.</p></div><span aria-hidden="true" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-yellow text-xl text-ink">↗</span></div>
-        </Link>
-      </div>
+      <nav aria-label="Quick paths" className="no-scrollbar -mx-4 mt-7 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-4 md:px-0">
+        {[{ href: "/labs", label: "Explore labs", mark: "01", tone: "bg-yellow" }, { href: "/events", label: "See events", mark: "02", tone: "bg-pink" }, { href: "/learn", label: "Keep learning", mark: "03", tone: "bg-white" }, { href: "/messages", label: "Your messages", mark: "04", tone: "bg-[#d9d6f2]" }].map((item) => <Link key={item.href} href={item.href} className={`group flex min-h-[106px] min-w-[155px] snap-start flex-col justify-between rounded-[19px] border border-ink p-4 shadow-[3px_3px_0_var(--ink)] transition-transform hover:-translate-y-1 md:min-w-0 ${item.tone}`}><span className="text-[10px] font-bold tracking-[.15em] text-rose">{item.mark} / GO</span><span className="flex items-end justify-between gap-2 text-[15px] font-semibold leading-tight"><span>{item.label}</span><span aria-hidden="true" className="transition-transform group-hover:translate-x-1">↗</span></span></Link>)}
+      </nav>
 
       <Milestones userId={user.id} points={user.points} level={user.level.level} levelTitle={user.level.title} rank={user.rank ?? null} />
 

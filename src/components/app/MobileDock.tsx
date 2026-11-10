@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -26,9 +26,19 @@ import { SettingsIcon } from "@animateicons/react/lucide/settings-icon";
 import useIconHover from "@/lib/useIconHover";
 import { MAIN, LINKS, type NavLeaf } from "./nav";
 
-type Tray = "labs" | "discover" | "inbox" | "more";
+type Tray = "labs" | "discover" | "inbox" | "more" | "quick";
 
 const groups: Record<Tray, { title: string; intro: string; items: NavLeaf[] }> = {
+  quick: {
+    title: "Where to?",
+    intro: "Your shortcuts, one gesture away.",
+    items: [
+      { id: "quick-lab", label: "Start a lab", href: "/labs/new", icon: FolderPlusIcon },
+      { id: "quick-search", label: "Find anything", href: "/search", icon: SearchIcon },
+      { id: "quick-events", label: "Upcoming events", href: "/events", icon: CalendarIcon },
+      { id: "quick-messages", label: "Your messages", href: "/messages", icon: MessageCircleIcon },
+    ],
+  },
   labs: {
     title: "Make something.",
     intro: "Your ideas have a place to grow.",
@@ -179,14 +189,31 @@ function DockItemCard({
 function DockTabButton({
   tab,
   selected,
+  expanded,
   onOpen,
+  onQuick,
 }: {
   tab: (typeof tabs)[number];
   selected: boolean;
+  expanded: boolean;
   onOpen: () => void;
+  onQuick: () => void;
 }) {
   const { ref, onMouseEnter, onMouseLeave } = useIconHover();
+  const hold = useRef<number | undefined>(undefined);
+  const held = useRef(false);
   const Icon = tab.icon;
+  useEffect(() => () => window.clearTimeout(hold.current), []);
+  const startHold = () => {
+    held.current = false;
+    window.clearTimeout(hold.current);
+    hold.current = window.setTimeout(() => { held.current = true; onQuick(); }, 480);
+  };
+  const stopHold = () => window.clearTimeout(hold.current);
+  const onTap = (event: MouseEvent) => {
+    if (held.current) { event.preventDefault(); held.current = false; return; }
+    onOpen();
+  };
 
   const content = (
     <>
@@ -212,6 +239,12 @@ function DockTabButton({
       <Link
         href="/home"
         aria-current={selected ? "page" : undefined}
+        onPointerDown={startHold}
+        onPointerUp={stopHold}
+        onPointerLeave={stopHold}
+        onPointerCancel={stopHold}
+        onContextMenu={(event) => event.preventDefault()}
+        onClick={(event) => { if (held.current) { event.preventDefault(); held.current = false; } }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         className={cls}
@@ -224,9 +257,14 @@ function DockTabButton({
   return (
     <button
       type="button"
-      onClick={onOpen}
+      onClick={onTap}
+      onPointerDown={startHold}
+      onPointerUp={stopHold}
+      onPointerLeave={stopHold}
+      onPointerCancel={stopHold}
+      onContextMenu={(event) => event.preventDefault()}
       aria-label={`Open ${tab.label}`}
-      aria-expanded={selected}
+      aria-expanded={expanded}
       aria-controls="mobile-navigation-sheet"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -243,6 +281,7 @@ export default function MobileDock() {
   const [tray, setTray] = useState<Tray | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const dockRef = useRef<HTMLElement>(null);
+  const dockTouch = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => setTray(null), [pathname]);
   useEffect(() => {
@@ -262,7 +301,7 @@ export default function MobileDock() {
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     }
     document.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = previous; document.removeEventListener("keydown", onKey); dockRef.current?.querySelector<HTMLElement>('[aria-expanded="true"]')?.focus(); };
+    return () => { document.body.style.overflow = previous; document.removeEventListener("keydown", onKey); (dockRef.current?.querySelector<HTMLElement>('[aria-expanded="true"]') ?? dockRef.current?.querySelector<HTMLElement>('[aria-current="page"]'))?.focus(); };
   }, [tray]);
 
   const current = activeTab(pathname);
@@ -282,6 +321,7 @@ export default function MobileDock() {
             transition={{ type: "spring", stiffness: 360, damping: 35, mass: .9 }}
             className="fixed inset-x-3 bottom-[calc(88px+env(safe-area-inset-bottom))] z-50 max-h-[min(68vh,580px)] overflow-y-auto rounded-[28px] border-2 border-ink bg-cream p-5 shadow-[6px_7px_0_var(--ink)] lg:hidden"
           >
+            <button type="button" aria-label="Swipe down or tap to close navigation" onClick={() => setTray(null)} onTouchStart={(event) => { dockTouch.current = { x: event.touches[0].clientX, y: event.touches[0].clientY }; }} onTouchEnd={(event) => { if (dockTouch.current && event.changedTouches[0].clientY - dockTouch.current.y > 35) setTray(null); dockTouch.current = null; }} className="mx-auto mb-4 block h-2 w-14 rounded-full bg-ink/25" />
             <div className="flex items-start justify-between gap-4">
               <div><p className="eyebrow text-rose">Explore TeenovateX</p><h2 className="mt-2 font-serif text-[31px] italic leading-none">{groups[tray].title}</h2><p className="mt-2 text-sm text-muted">{groups[tray].intro}</p></div>
               <button ref={closeRef} type="button" onClick={() => setTray(null)} aria-label="Close navigation" className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-ink bg-pink"><XIcon size={20} /></button>
@@ -299,13 +339,15 @@ export default function MobileDock() {
           </motion.section>
         </>}
       </AnimatePresence>
-      <nav ref={dockRef} aria-label="Primary mobile navigation" className="fixed inset-x-3 bottom-[calc(10px+env(safe-area-inset-bottom))] z-[60] grid h-[70px] grid-cols-5 items-center rounded-[25px] border-2 border-ink bg-ink px-1.5 shadow-[0_10px_30px_#26282240] lg:hidden">
+      <nav ref={dockRef} aria-label="Primary mobile navigation" onTouchStart={(event) => { dockTouch.current = { x: event.touches[0].clientX, y: event.touches[0].clientY }; }} onTouchEnd={(event) => { if (dockTouch.current && dockTouch.current.y - event.changedTouches[0].clientY > 40 && Math.abs(dockTouch.current.x - event.changedTouches[0].clientX) < 80) { event.preventDefault(); setTray("quick"); } dockTouch.current = null; }} className="fixed inset-x-3 bottom-[calc(10px+env(safe-area-inset-bottom))] z-[60] grid h-[70px] grid-cols-5 items-center rounded-[25px] border-2 border-ink bg-ink px-1.5 shadow-[0_10px_30px_#26282240] lg:hidden">
         {tabs.map((tab) => (
           <DockTabButton
             key={tab.id}
             tab={tab}
             selected={tray ? tray === tab.id : current === tab.id}
+            expanded={tray === tab.id}
             onOpen={() => setTray(tray === tab.id ? null : (tab.id as Tray))}
+            onQuick={() => setTray("quick")}
           />
         ))}
       </nav>

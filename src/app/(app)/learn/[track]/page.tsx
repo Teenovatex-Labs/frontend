@@ -8,6 +8,7 @@ import { learnApi } from "@/lib/services";
 import { keys } from "@/lib/labs";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function TrackPage() {
   const { track } = useParams<{ track: string }>();
@@ -37,9 +38,8 @@ export default function TrackPage() {
 
   return (
     <main className="mx-auto w-full max-w-[760px] px-5 py-10 md:px-10 md:py-14">
-      <Link href="/learn" className="text-sm text-muted underline underline-offset-4 hover:text-ink">← All tracks</Link>
-      <h1 className="mt-5 text-[36px] leading-[1.05] md:text-[52px]">{t.title}</h1>
-      <p className="mt-3 max-w-[520px] text-muted">{t.description}</p>
+      <Link href="/learn" className="mb-5 inline-flex min-h-11 items-center text-sm font-semibold text-rose hover:underline">← All tracks</Link>
+      <PageHeader eyebrow="Learning track" title={t.title}>{t.description}</PageHeader>
       {next && (
         <Link href={`/learn/${t.slug}/${next.slug}`} className="btn mt-6 inline-flex">
           {done === 0 ? "Start the first lesson" : done === t.lessons.length ? "Read it again" : "Keep going"} <span aria-hidden="true">↗︎</span>
@@ -51,7 +51,7 @@ export default function TrackPage() {
           <li key={l.id}>
             <Link
               href={`/learn/${t.slug}/${l.slug}`}
-              className="flex items-center gap-4 border border-ink bg-white p-4 shadow-[4px_4px_0_var(--ink)] transition-transform hover:-translate-y-0.5"
+              className="flex items-center gap-4 rounded-[18px] border border-ink bg-white p-4 shadow-[4px_4px_0_var(--ink)] transition-transform hover:-translate-y-0.5"
             >
               <span
                 aria-hidden="true"

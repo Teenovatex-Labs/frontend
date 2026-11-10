@@ -543,16 +543,34 @@
   :root { --header-h: 76px; }
 }
 
-/* The member app keeps its editorial shape on a phone, with room for the dock. */
+/* Member workspace: one visual language across the dashboard, tuned to touch on phones. */
+.tx-mobile-app-shell {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 90% 5%, rgba(243,170,199,.19), transparent 28rem),
+    radial-gradient(circle at 8% 60%, rgba(245,232,158,.2), transparent 34rem),
+    var(--cream);
+}
+.tx-desktop-topbar { background: rgba(255,249,235,.84); backdrop-filter: blur(18px); }
+.tx-page-hero-action .btn { background: var(--yellow); color: var(--ink); }
+.tx-page-hero-action .btn:hover { background: var(--pink); }
+.tx-page-hero-action .btn-secondary { background: var(--cream); }
+.tx-mobile-app-shell main { animation: tx-enter .38s cubic-bezier(.22,1,.36,1) both; }
+@keyframes tx-enter { from { opacity: .6; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .tx-mobile-app-shell main { animation: none; } }
+
 @media (max-width: 1023px) {
   .tx-mobile-app-shell { min-width: 0; overflow-x: clip; }
   .tx-mobile-app-shell main { min-width: 0; }
-  .tx-mobile-app-shell main[class*="max-w"]:not(.tx-home) { padding-top: 28px; padding-inline: 18px; }
-  .tx-mobile-app-shell main > header { padding-top: 2px; }
+  .tx-mobile-app-shell main[class*="max-w"]:not(.tx-home) { padding-top: 22px; padding-inline: 16px; }
   .tx-mobile-app-shell main > header h1 { letter-spacing: -.045em; }
   .tx-mobile-app-shell main > header > :last-child:not(:first-child) { max-width: 100%; }
+  .tx-mobile-app-shell main > .tx-page-hero { padding: 26px 22px; }
+  .tx-page-hero-action { width: 100%; }
+  .tx-page-hero-action > * { width: 100%; }
   .tx-home-panel { border-radius: 20px; box-shadow: 4px 4px 0 var(--ink); }
   .tx-home-panel h2 { font-weight: 700; }
   .tx-home-panel a { touch-action: manipulation; }
   .tx-mobile-app-shell main button, .tx-mobile-app-shell main a { touch-action: manipulation; }
+  .tx-mobile-topbar { padding-top: env(safe-area-inset-top); height: calc(72px + env(safe-area-inset-top)); }
 }

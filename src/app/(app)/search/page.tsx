@@ -3,8 +3,8 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { searchApi } from "@/lib/services";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { searchApi, type Lab, type SearchResults } from "@/lib/services";
 import { categoryLabel, keys } from "@/lib/labs";
 import { eventDay } from "@/lib/dates";
 import PageHeader from "@/components/ui/PageHeader";
@@ -28,24 +28,37 @@ function SearchInner() {
   const initial = params.get("q") ?? "";
   const [input, setInput] = useState(initial);
   const [q, setQ] = useState(initial.trim());
+  const [online, setOnline] = useState(true);
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
+  }, []);
 
   // Wait for a pause in typing, and keep the address bar in step so a search can be shared.
   useEffect(() => {
     const t = window.setTimeout(() => {
       const next = input.trim();
       setQ(next);
-      router.replace(next ? `/search?q=${encodeURIComponent(next)}` : "/search");
+      if (online) router.replace(next ? `/search?q=${encodeURIComponent(next)}` : "/search");
     }, 300);
     return () => window.clearTimeout(t);
-  }, [input, router]);
+  }, [input, online, router]);
 
-  const results = useQuery({ queryKey: keys.search(q), queryFn: () => searchApi.find(q), enabled: q.length >= 2 });
-  const r = results.data;
+  const results = useQuery({ queryKey: keys.search(q), queryFn: () => searchApi.find(q), enabled: online && q.length >= 2 });
+  const cached = qc.getQueryData<{ projects: Lab[] }>(keys.myLabs)?.projects ?? [];
+  const localLabs = cached.filter((lab) => `${lab.name} ${lab.short_description} ${lab.category}`.toLowerCase().includes(q.toLowerCase())).map((lab) => ({ id: lab.id, name: lab.name, slug: lab.slug, short_description: lab.short_description, category: lab.category, vote_count: lab.vote_count, user: { username: lab.user.username } }));
+  const offlineResult: SearchResults = { q, labs: localLabs, people: [], posts: [], lessons: [], events: [] };
+  const r = online ? results.data : (results.data ?? offlineResult);
   const total = r ? r.labs.length + r.people.length + r.posts.length + r.lessons.length + r.events.length : 0;
 
   return (
     <main className="mx-auto w-full max-w-[760px] px-5 py-10 md:px-10 md:py-14">
-      <PageHeader eyebrow="Search" title="Find" accent="anything." />
+      <PageHeader eyebrow="Search" title="Find" accent="anything.">Search across TX when online. Your loaded labs are still searchable when your connection drops.</PageHeader>
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -55,14 +68,15 @@ function SearchInner() {
         className="mt-6 w-full rounded-md border border-ink bg-white px-4 py-3 text-[16px] outline-none focus:ring-2 focus:ring-rose"
       />
 
+      {!online && <p role="status" className="mt-5 rounded-[14px] border border-ink bg-yellow p-3 text-sm">You’re offline. Showing results already loaded in this session. Full search will return when you reconnect.</p>}
       {q.length < 2 ? (
         <p className="mt-6 text-sm text-muted">Type at least two letters.</p>
-      ) : results.isPending ? (
+      ) : online && results.isPending ? (
         <div className="mt-8 space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
-      ) : results.isError ? (
+      ) : online && results.isError ? (
         <div className="mt-8"><EmptyState title="That didn't load." action={<button className="btn-secondary" onClick={() => results.refetch()}>Try again</button>} /></div>
       ) : total === 0 ? (
-        <div className="mt-8"><EmptyState lottie="/lottie/empty-search.json" title={`Nothing for “${q}”.`}>Try a different word, or check the spelling.</EmptyState></div>
+        <div className="mt-8"><EmptyState lottie="/lottie/empty-search.json" title={`Nothing for “${q}”.`}>{online ? "Try a different word, or check the spelling." : "No loaded labs match. Try again when you reconnect."}</EmptyState></div>
       ) : (
         <>
           {r!.labs.length > 0 && (
