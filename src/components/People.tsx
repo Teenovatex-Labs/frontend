@@ -262,7 +262,7 @@ export default function People() {
       <div className="wrap grid gap-10 py-16 md:grid-cols-2 md:gap-16 md:py-24">
         {/* Bottom padding reserves the height of the corner logo (54vw wide,
             1632x1109 aspect) so the text never runs into it. */}
-        <Reveal from="left" className="md:pb-[calc(min(37vw,585px)+32px)]">
+        <Reveal from="left" className="lg:pb-[calc(min(37vw,585px)+32px)]">
           <p className="eyebrow text-rose">03 / The humans behind it</p>
           <h2 className="mt-6 max-w-2xl text-4xl md:text-5xl">
             Meet the people
@@ -271,31 +271,37 @@ export default function People() {
           </h2>
           <p className="mt-5 max-w-md text-muted">
             A dedicated team of builders, operators and researchers. Each person champions a vital part of the global community.
-          </p></Reveal><Reveal from="right" delay={0.12}><FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
+          </p>
+        </Reveal>
+        <Reveal from="right" delay={0.12}>
+          <FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
 
-          <p className="mt-12 text-muted md:text-right">Tap anyone in the orbit to open their role in the system.</p>
+          <p className="mt-8 text-sm text-muted md:mt-12 md:text-right">Tap anyone in the orbit to open their role in the system.</p>
 
-          <div className="mt-10 flex flex-col items-start gap-4 border-t border-line pt-6 text-sm">
+          <div className="mt-8 flex flex-col items-start gap-4 border-t border-line pt-6 text-sm md:mt-10">
             <p>Want to help shape the community?</p>
-            <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center">
-              <Link href="/story" className="btn-secondary btn-sm">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <Link href="/story" className="btn-secondary btn-sm text-center">
                 View the Teenovators and what they&rsquo;ve done <span aria-hidden="true">↗</span>
               </Link>
               <a
                 href="https://teenovatex.fillout.com/cftm"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-sm"
+                className="btn btn-sm text-center"
               >
                 Apply to the core team <span aria-hidden="true">↗</span>
               </a>
-            </div></div></Reveal></div>{/* Flush in the section's bottom-left corner — no padding or margin.
-          The artwork's dark band bleeds off its own left and bottom edges. */}
+            </div>
+          </div>
+        </Reveal>
+      </div>
+      {/* Flush in the section's bottom-left corner — on tablet and desktop it sits neatly in the reserved space */}
       <img
         src="/assets/logo-long-1.svg"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none block w-full max-w-[640px] md:absolute md:bottom-0 md:left-0 md:w-[54vw] md:max-w-[860px]"
+        className="pointer-events-none mt-6 block w-full max-w-[420px] lg:absolute lg:bottom-0 lg:left-0 lg:mt-0 lg:w-[46vw] lg:max-w-[720px] xl:w-[54vw] xl:max-w-[860px]"
       />
 
       {active && (

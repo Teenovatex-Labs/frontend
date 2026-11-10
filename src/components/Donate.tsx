@@ -116,7 +116,7 @@ export default function Donate() {
               ))}
             </div>
           </div></Reveal><Reveal from="right" delay={0.12} className="relative border border-cream bg-cream p-6 text-ink shadow-[8px_8px_0_var(--pink)] md:p-8">
-          <div className="grid grid-cols-[auto_1fr] items-center gap-6 md:gap-8">
+          <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-[auto_1fr] md:gap-8">
             <div className="flex flex-col items-center">
               <PowerCell lit={lit} reduce={reduce} />
               <div className="mt-3 h-6 overflow-hidden text-center">
@@ -135,13 +135,13 @@ export default function Donate() {
               </div>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <p className="eyebrow text-muted">Your gift</p>
-              <p className="mt-1 text-[52px] font-semibold leading-none tracking-[-0.05em] tabular-nums md:text-[64px]">
+              <p className="mt-1 text-[40px] font-semibold leading-none tracking-[-0.05em] tabular-nums sm:text-[48px] md:text-[64px]">
                 {formatMoney(amount)}
               </p>
 
-              <div role="group" aria-label="How often" className="mt-4 inline-flex rounded-full border border-ink p-0.5 text-sm font-semibold">
+              <div role="group" aria-label="How often" className="mt-4 inline-flex rounded-full border border-ink p-0.5 text-xs font-semibold sm:text-sm">
                 {[
                   { id: false, label: "One-time" },
                   { id: true, label: "Monthly" },
@@ -151,7 +151,7 @@ export default function Donate() {
                     type="button"
                     onClick={() => setMonthly(o.id)}
                     aria-pressed={monthly === o.id}
-                    className={`rounded-full px-4 py-1 transition-colors ${monthly === o.id ? "bg-ink text-cream" : "hover:bg-yellow"}`}
+                    className={`rounded-full px-3 py-1 transition-colors sm:px-4 ${monthly === o.id ? "bg-ink text-cream" : "hover:bg-yellow"}`}
                   >
                     {o.label}
                   </button>
