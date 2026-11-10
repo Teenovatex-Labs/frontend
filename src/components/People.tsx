@@ -35,7 +35,7 @@ const FOUNDERS: Founder[] = [
     bg: "bg-yellow",
     photo: "/founders/anas.jpg",
     bio: "Sets the direction, protects the mission and makes the final calls that keep TeenovateX moving as one organisation.",
-    mandate: "Turn the comeback vision into clear priorities, credible relationships and accountable leadership.",
+    mandate: "Turn the community's vision into clear priorities, credible relationships and accountable leadership.",
     speciality: "Strategy, team, administration, partnerships, governance and final accountability.",
     contribution: "He aligns the system, removes blockers and makes sure every major commitment has an owner.",
     strengths: ["Strategic direction", "External relations", "Team alignment"],
@@ -56,7 +56,7 @@ const FOUNDERS: Founder[] = [
     speciality: "Programmes, product direction, technical quality and selected public representation.",
     contribution: "He turns possibility into things teenagers can join, use and build through.",
     strengths: ["Product thinking", "Programme design", "Public speaking"],
-    focus: ["Define the comeback programme slate", "Guide product decisions", "Represent the work clearly in public"],
+    focus: ["Define hands-on technical programmes", "Guide product decisions", "Represent the work clearly in public"],
     worksWith: ["Anas Abubakar Masama", "Quadri Lasisi", "David Uhumagho"],
     success: "TeenovateX consistently ships useful experiences instead of collecting unfinished ideas.",
   },
@@ -86,7 +86,7 @@ const FOUNDERS: Founder[] = [
     bio: "Turns founder decisions into disciplined weekly execution across every team.",
     mandate: "Build the operating discipline that carries the organisation when motivation alone is not enough.",
     speciality: "Operating cadence, cross-team delivery, accountability and strategic ecosystem intelligence.",
-    contribution: "He keeps the organisation moving when enthusiasm fades and makes the comeback operationally believable.",
+    contribution: "He keeps the organisation moving forward smoothly and makes ambitious goals operationally believable.",
     strengths: ["Execution discipline", "Ecosystem intelligence", "Accountability"],
     focus: ["Run the weekly operating review", "Unblock cross-team delivery", "Turn relationships into practical leverage"],
     worksWith: ["Anas Abubakar Masama", "Adeyemi Gabriel", "Koded"],
@@ -115,12 +115,12 @@ const FOUNDERS: Founder[] = [
     unit: "Brand",
     bg: "bg-rose",
     photo: "/founders/muaz.jpg",
-    bio: "Gives the rebrand its coherent identity, from the logo system to the standards behind every public touchpoint.",
+    bio: "Gives the brand its coherent identity, from the logo system to the standards behind every public touchpoint.",
     mandate: "Create and protect a visual identity that feels youthful, credible and unmistakably TeenovateX.",
     speciality: "Brand identity direction, logo development, visual standards and quality control.",
     contribution: "He gives every initiative a shared visual language and a stronger signal of care.",
     strengths: ["Identity systems", "Visual direction", "Quality control"],
-    focus: ["Complete the new identity", "Build reusable brand rules", "Direct the comeback campaign look"],
+    focus: ["Refine the brand identity", "Build reusable design rules", "Direct campaigns and visual storytelling"],
     worksWith: ["Aisha Onola", "Anas Abubakar Masama", "Sanni Shazily"],
     success: "Every public touchpoint looks related, considered and recognisable without feeling too childish or too corporate.",
   },
@@ -137,7 +137,7 @@ const FOUNDERS: Founder[] = [
     speciality: "Budgets, financial records, sponsor proposals and partnership administration.",
     contribution: "He turns external support into transparent, mission-aligned resources the team can depend on.",
     strengths: ["Partnership operations", "Financial discipline", "Proposal support"],
-    focus: ["Create a simple finance system", "Build the partner pipeline", "Cost every comeback initiative"],
+    focus: ["Create a simple finance system", "Build the partner pipeline", "Budget and steward every initiative"],
     worksWith: ["Anas Abubakar Masama", "Abdulbasit Fazazi", "Adam Lawal"],
     success: "The organisation can fund its priorities, explain every expense and make promises it can afford to keep.",
   },
@@ -262,40 +262,46 @@ export default function People() {
       <div className="wrap grid gap-10 py-16 md:grid-cols-2 md:gap-16 md:py-24">
         {/* Bottom padding reserves the height of the corner logo (54vw wide,
             1632x1109 aspect) so the text never runs into it. */}
-        <Reveal from="left" className="md:pb-[calc(min(37vw,585px)+32px)]">
+        <Reveal from="left" className="lg:pb-[calc(min(37vw,585px)+32px)]">
           <p className="eyebrow text-rose">03 / The humans behind it</p>
           <h2 className="mt-6 max-w-2xl text-4xl md:text-5xl">
             Meet the people
             <br />
-            making the comeback real.
+            bringing the mission to life.
           </h2>
           <p className="mt-5 max-w-md text-muted">
-            A focused team of builders, operators and researchers. Each person owns a different part of the same comeback.
-          </p></Reveal><Reveal from="right" delay={0.12}><FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
+            A dedicated team of builders, operators and researchers. Each person champions a vital part of the global community.
+          </p>
+        </Reveal>
+        <Reveal from="right" delay={0.12}>
+          <FoundersOrbit founders={FOUNDERS} onSelect={setActive} />
 
-          <p className="mt-12 text-muted md:text-right">Tap anyone in the orbit to open their role in the system.</p>
+          <p className="mt-8 text-sm text-muted md:mt-12 md:text-right">Tap anyone in the orbit to open their role in the system.</p>
 
-          <div className="mt-10 flex flex-col items-start gap-4 border-t border-line pt-6 text-sm">
+          <div className="mt-8 flex flex-col items-start gap-4 border-t border-line pt-6 text-sm md:mt-10">
             <p>Want to help shape the community?</p>
-            <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center">
-              <Link href="/story" className="btn-secondary btn-sm">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <Link href="/story" className="btn-secondary btn-sm text-center">
                 View the Teenovators and what they&rsquo;ve done <span aria-hidden="true">↗</span>
               </Link>
               <a
                 href="https://teenovatex.fillout.com/cftm"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-sm"
+                className="btn btn-sm text-center"
               >
                 Apply to the core team <span aria-hidden="true">↗</span>
               </a>
-            </div></div></Reveal></div>{/* Flush in the section's bottom-left corner — no padding or margin.
-          The artwork's dark band bleeds off its own left and bottom edges. */}
+            </div>
+          </div>
+        </Reveal>
+      </div>
+      {/* Flush in the section's bottom-left corner — on tablet and desktop it sits neatly in the reserved space */}
       <img
         src="/assets/logo-long-1.svg"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none block w-full max-w-[640px] md:absolute md:bottom-0 md:left-0 md:w-[54vw] md:max-w-[860px]"
+        className="pointer-events-none mt-6 block w-full max-w-[420px] lg:absolute lg:bottom-0 lg:left-0 lg:mt-0 lg:w-[46vw] lg:max-w-[720px] xl:w-[54vw] xl:max-w-[860px]"
       />
 
       {active && (

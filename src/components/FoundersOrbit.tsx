@@ -121,11 +121,11 @@ export default function FoundersOrbit({
         <circle cx="200" cy="200" r="3" fill="var(--ink)" fillOpacity="0.4" />
       </svg>
 
-      <div className="pointer-events-none absolute left-1/2 top-1/2 z-[2] flex h-[62px] w-[100px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-ink bg-cream/95 px-2 text-center shadow-[3px_3px_0_var(--pink)] backdrop-blur-sm md:h-[82px] md:w-[142px] md:px-3">
-        <strong className="max-w-full truncate text-[10px] leading-tight md:text-xs">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 z-[2] flex h-[62px] w-[100px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border border-ink bg-cream/95 px-2 text-center shadow-[3px_3px_0_var(--pink)] backdrop-blur-sm sm:h-[72px] sm:w-[120px] md:h-[82px] md:w-[142px] md:px-3">
+        <strong className="max-w-full truncate text-[10px] leading-tight sm:text-xs">
           {preview?.name ?? `${founders.length} people`}
         </strong>
-        <span className="mt-1 max-w-full truncate text-[8px] leading-tight text-muted md:text-[10px]">
+        <span className="mt-1 max-w-full truncate text-[8px] leading-tight text-muted sm:text-[9px] md:text-[10px]">
           {preview?.role ?? "One connected team"}
         </span>
       </div>

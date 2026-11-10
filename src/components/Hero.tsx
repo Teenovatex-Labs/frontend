@@ -39,9 +39,7 @@ export default function Hero() {
             </h1>
 
             <p className="mt-7 max-w-[485px] text-left text-[15px] leading-[1.85] text-muted md:text-[17px]">
-              A youth-led home for teenagers curious enough to try. You
-              don&rsquo;t need a portfolio, expensive equipment, or everything
-              figured out. Tell us what interests you and show us how you think.
+              No portfolios. No prerequisites. Just raw curiosity and the nerve to start. If you’re already hacking away at ideas nobody asked for, this is where you build them.
             </p>
           </Reveal>
 
