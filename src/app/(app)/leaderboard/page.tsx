@@ -11,6 +11,9 @@ import Tabs from "@/components/ui/Tabs";
 import Avatar from "@/components/ui/Avatar";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
+import { LottieSlot } from "@/components/ui/LottieSlot";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Award01Icon } from "@hugeicons/core-free-icons";
 
 const PAGE = 20;
 const MEDALS = ["bg-yellow", "bg-pink", "bg-cream"];
@@ -29,7 +32,7 @@ export default function LeaderboardPage() {
 
   return (
     <main className="mx-auto w-full max-w-[760px] px-5 py-10 md:px-10 md:py-14">
-      <PageHeader eyebrow="Leaderboard" title="Who&rsquo;s" accent="on top.">
+      <PageHeader eyebrow="Leaderboard" title="Who&rsquo;s" accent="on top." action={<div className="flex min-w-[160px] items-center gap-2 rounded-[18px] border border-cream/40 bg-cream/10 px-3 py-2 backdrop-blur-sm"><LottieSlot src="/lottie/rank-up.json" label="" loop={false} allowSlowConnection className="h-20 w-20 shrink-0" fallback={<span className="grid h-12 w-12 place-items-center rounded-full bg-yellow text-ink"><HugeiconsIcon icon={Award01Icon} size={28} strokeWidth={1.7} /></span>} /><div><p className="text-[10px] font-bold uppercase tracking-wider text-cream/70">Your rank</p><p className="text-2xl font-semibold text-yellow">{user?.rank ? `#${user.rank}` : "—"}</p></div></div>}>
         Points come from votes on your labs, finishing lessons and showing up every day.
       </PageHeader>
 
