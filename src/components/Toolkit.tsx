@@ -31,29 +31,29 @@ const FEATURES = [
     kind: "EXPLORE / IMPROVE",
     type: "idea → attempt → aha!",
     typeClass: "font-mono text-[22px] font-medium tracking-tight text-yellow",
-    name: "AI insights",
-    title: "Work through the tricky bits.",
-    body: "Use code suggestions and progress tracking to understand your next steps.",
+    name: "Meet Alfred",
+    title: "A curious companion.",
+    body: "Ask Alfred for help finding your next step, or let him guide you through applying to join.",
     cardClass: "bg-[#292b25] text-cream",
   },
   {
     tag: "04 / TX",
-    kind: "ASK / LEARN",
+    kind: "COMING SOON",
     type: "Good question.",
     typeClass: "font-serif italic text-[46px] rotate-[5deg]",
     name: "Mentorship",
     title: "Learn from experience.",
-    body: "Access coaching and guidance from experienced mentors as you develop your skills.",
+    body: "We’re building thoughtful ways to learn from experienced mentors as you develop your skills.",
     cardClass: "bg-[#f5d8e3] mt-6",
   },
   {
     tag: "05 / TX",
-    kind: "TEAM UP / BUILD",
+    kind: "COMING SOON",
     type: "you + me + what if?",
     typeClass: "font-serif italic text-[31px]",
     name: "Collaboration",
     title: "Make room for teamwork.",
-    body: "Work in shared environments so your team can contribute to the same project in real time.",
+    body: "We’re making more room for teams to build together. Labs are already a place to begin.",
     cardClass: "bg-[#f9f4d9]",
   },
 ];
@@ -194,8 +194,8 @@ export default function Toolkit() {
                 </h2></Reveal><Reveal from="right" delay={0.1} className="max-w-[310px]">
                 <p>From finding a collaborator to getting feedback on your work.</p>
                 <p className="mt-3 text-xs leading-relaxed text-muted">
-                  Some platform features are still coming soon. You can join the
-                  WhatsApp community today.
+                  Some features are still being built. Apply when the next
+                  window opens and see what is already happening inside.
                 </p>
 
                 <div className="mt-4 flex items-center gap-5">

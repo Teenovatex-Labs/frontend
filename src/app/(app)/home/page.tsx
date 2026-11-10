@@ -50,6 +50,7 @@ export default function HomePage() {
   const first = user.full_name.split(" ")[0];
   const track = tracks.data?.tracks.find((t) => t.completed_count > 0 && t.completed_count < t.lesson_count) ?? tracks.data?.tracks.find((t) => t.completed_count === 0);
   const remaining = votes.data?.votes_remaining;
+  const isNewMember = user.membership_status === "active" && Date.now() - new Date(user.created_at).getTime() < 14 * 24 * 60 * 60 * 1000;
 
   return (
     <main className="tx-home mx-auto w-full max-w-[1080px] px-4 py-6 sm:px-5 md:px-10 md:py-16">
@@ -63,6 +64,20 @@ export default function HomePage() {
       <p className="mt-3 max-w-[520px] text-sm text-muted md:mt-4 md:text-base">
         {user.streak > 1 ? `${user.streak} days in a row. Keep it going.` : "Good to see you. Here's what's happening."}
       </p>
+
+      {isNewMember && (
+        <div className="mt-6 rounded-[20px] border border-ink bg-pink p-5 shadow-[4px_4px_0_var(--ink)] md:flex md:items-center md:justify-between md:gap-6 md:p-6">
+          <div>
+            <p className="eyebrow text-rose">Your first chapter</p>
+            <h2 className="mt-1 text-2xl tracking-tight">You belong here. Start anywhere.</h2>
+            <p className="mt-2 max-w-[560px] text-sm">Say hello to the community, explore what people are building, or follow an idea of your own. There is no perfect first move.</p>
+          </div>
+          <div className="mt-4 flex shrink-0 flex-wrap gap-2 md:mt-0">
+            <Link href="/community" className="btn btn-sm">Meet your crew</Link>
+            <Link href="/labs" className="btn-secondary btn-sm">Explore labs</Link>
+          </div>
+        </div>
+      )}
 
       <div className="mt-5 md:hidden">
         <Link href="/labs" className="group flex min-h-[162px] flex-col justify-between overflow-hidden rounded-[24px] border-2 border-ink bg-ink p-5 text-cream shadow-[5px_6px_0_var(--pink)]">

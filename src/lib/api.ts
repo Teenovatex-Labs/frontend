@@ -42,6 +42,8 @@ export type UserProfile = {
   username_set: boolean;
   timezone: string | null;
   role: "member" | "mentor" | "moderator" | "admin";
+  membership_status?: "onboarding" | "active" | "on_leave" | "inactive" | "alumni" | "removed";
+  onboarding_due_at?: string | null;
   suspended_until: string | null;
   suspended_reason: string | null;
   streak_freezes: number;

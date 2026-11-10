@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CircleCheckIcon } from "@animateicons/react/lucide/circle-check-icon";
@@ -8,14 +8,19 @@ import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 import Skeleton from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
+import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
 import { onboardingApi, type OnboardingState } from "@/lib/services";
 import { keys, timeAgo } from "@/lib/labs";
 import FirstDayGuidance from "@/components/app/FirstDayGuidance";
+import AlfredSprite from "@/components/alfred/AlfredSprite";
 
 const NOTES: Record<string, string> = {
-  welcome: "Your first week: read the code of conduct, make your profile, join the group, say hello, and join HCB. Nothing here is a test.",
+  welcome: "This is your first week. Take the steps at your own pace; the team is here if you need help.",
+  conduct: "Open the code of conduct, read the community expectations, then confirm that you agree.",
   safeguarding: "TeenovateX is for teenagers, so we take safety seriously. Never share your address, school or passwords. If anything online or in the group feels wrong, tell a moderator straight away, or email hello@teenovatex.org. You will never be in trouble for telling us.",
+  whatsapp: "Join using the private link here or the invitation the team sent you. Confirm only after you have joined. If you have no invitation, ask hello@teenovatex.org.",
+  hcb: "Join using your official Hack Club Dashboard invitation, then confirm here. If you have no invitation, ask hello@teenovatex.org.",
 };
 
 function BioEditor({ onSaved }: { onSaved: (s: OnboardingState) => void }) {
@@ -71,9 +76,21 @@ function IntroEditor({ state, onSaved }: { state: OnboardingState; onSaved: (s: 
 
 export default function WelcomePage() {
   const router = useRouter();
+  const { user, refreshUser } = useAuth();
   const qc = useQueryClient();
   const toast = useToast();
   const state = useQuery({ queryKey: keys.admin("onboarding-me"), queryFn: onboardingApi.get });
+  const refreshed = useRef(false);
+
+  useEffect(() => {
+    if (state.data?.status === "active" && user?.membership_status === "onboarding" && !refreshed.current) {
+      refreshed.current = true;
+      void refreshUser().catch(() => { refreshed.current = false; });
+    }
+  }, [state.data?.status, user?.membership_status, refreshUser]);
+
+  const completed = state.data?.steps.filter((step) => step.done).length ?? 0;
+  const total = state.data?.steps.length ?? 7;
 
   const confirm = useMutation({
     mutationFn: (step: string) => onboardingApi.confirmStep(step),
@@ -86,8 +103,8 @@ export default function WelcomePage() {
 
   return (
     <main className="mx-auto w-full max-w-[640px] px-5 py-10 md:px-10 md:py-14">
-      <PageHeader eyebrow="Welcome" title="Let's get you" accent="settled in." >
-        A few quick things before you dive in. Nothing here is a test.
+      <PageHeader eyebrow="Your first week" title="You made it" accent="inside." >
+        A few steps to make this place yours. Nothing here is a test.
       </PageHeader>
 
       <div className="mt-8">
@@ -97,21 +114,38 @@ export default function WelcomePage() {
           <p className="text-muted">Couldn&rsquo;t load your onboarding.</p>
         ) : (
           <Card className="flex flex-col gap-4 p-5 md:p-7">
+            {state.data.status === "onboarding" && (
+              <div className="flex flex-col gap-4 rounded-[18px] border border-ink bg-yellow/50 p-4 sm:flex-row sm:items-center">
+                <div className="mx-auto h-28 w-24 shrink-0 sm:mx-0"><AlfredSprite animation="greeting" runKey={0} /></div>
+                <div className="min-w-0 flex-1">
+                  <p className="eyebrow text-rose">Alfred says hello</p>
+                  <h2 className="mt-1 text-[24px] leading-tight">Welcome, {user?.full_name.split(" ")[0] ?? "Teenovator"}.</h2>
+                  <p className="mt-1 text-sm text-muted">You are accepted. Let&rsquo;s get you settled in before you enter the member space. I&rsquo;ll keep your place here.</p>
+                </div>
+              </div>
+            )}
+            <div aria-label="First week progress" className="rounded-[16px] border border-ink bg-white p-4">
+              <div className="flex items-center justify-between gap-3 text-sm"><strong>{completed} of {total} steps done</strong><span className="text-muted">{state.data.complete ? "Ready to go" : "One step at a time"}</span></div>
+              <div className="mt-3 h-2.5 overflow-hidden rounded-full border border-ink bg-cream" role="progressbar" aria-label="First week progress" aria-valuemin={0} aria-valuemax={total} aria-valuenow={completed}>
+                <div className="h-full bg-pink transition-[width] duration-500" style={{ width: `${total ? completed / total * 100 : 0}%` }} />
+              </div>
+            </div>
             {state.data.due_at && !state.data.complete && (
               <p className={`text-sm ${state.data.overdue ? "font-semibold text-rose" : "text-muted"}`}>
                 {state.data.overdue ? "This is overdue — finish it when you can." : `Finish by ${timeAgo(state.data.due_at)}.`}
               </p>
             )}
-            {state.data.steps.map((s) => (
-              <div key={s.key} className="flex items-center justify-between gap-3 rounded-md border border-ink bg-cream p-3.5">
-                <div>
-                  <p className={`font-medium ${s.done ? "line-through text-muted" : ""}`}>{s.title}</p>
+            {state.data.steps.map((s, index) => (
+              <div key={s.key} className={`flex items-start justify-between gap-3 rounded-[16px] border border-ink p-4 ${s.done ? "bg-white" : "bg-cream"}`}>
+                <div className="min-w-0 flex-1">
+                  <p className="eyebrow text-rose">Step {String(index + 1).padStart(2, "0")}</p>
+                  <p className={`mt-1 font-semibold ${s.done ? "text-muted" : ""}`}>{s.title}</p>
                   {s.link && (
                     <a href={s.link} target="_blank" rel="noreferrer" className="text-sm underline underline-offset-4">
                       Open link
                     </a>
                   )}
-                  {NOTES[s.key] && !s.done && <p className="mt-1 text-sm text-muted">{NOTES[s.key]}</p>}
+                  {NOTES[s.key] && !s.done && <p className="mt-2 text-sm text-muted">{NOTES[s.key]}</p>}
                   {s.key === "profile" && !s.done && <BioEditor onSaved={(d) => qc.setQueryData(keys.admin("onboarding-me"), d)} />}
                   {s.key === "intro" && state.data.status === "onboarding" && <FirstDayGuidance />}
                   {s.key === "intro" && !s.done && <IntroEditor state={state.data} onSaved={(d) => qc.setQueryData(keys.admin("onboarding-me"), d)} />}
@@ -120,7 +154,7 @@ export default function WelcomePage() {
                   <CircleCheckIcon size={20} />
                 ) : s.self_reported ? (
                   <button type="button" onClick={() => confirm.mutate(s.key)} disabled={confirm.isPending} className="btn-secondary text-xs disabled:opacity-60">
-                    I&rsquo;ve done this
+                    {s.key === "conduct" ? "I read and agree" : "I’ve done this"}
                   </button>
                 ) : null}
               </div>
@@ -128,7 +162,7 @@ export default function WelcomePage() {
             {state.data.complete && (
               <div className="rounded-md border border-ink bg-yellow/40 p-4 text-center">
                 <p className="font-semibold">You&rsquo;re active. Go build something.</p>
-                <button type="button" onClick={() => router.push("/home")} className="btn mt-3">Take me home</button>
+                <button type="button" onClick={() => { void refreshUser().then(() => router.push("/home")); }} className="btn mt-3">Take me home</button>
               </div>
             )}
           </Card>

@@ -91,7 +91,7 @@ export default function AlfredInterview({ token, locked, onProgress }: { token: 
       if (s.questions.length === 0 && !locked) {
         setState(s);
         setPhase("intro");
-        feel({ kind: "welcome" }, "Hi, I am Alfred. I will ask you some questions. None has a trick in it and none has a right answer. Mostly I am nosy.");
+        feel({ kind: "welcome" }, "I'm Alfred. I'm curious about how you think, not how many things you've built. We can start wherever you are.");
         return;
       }
       if (locked) {
@@ -218,7 +218,7 @@ export default function AlfredInterview({ token, locked, onProgress }: { token: 
           {phase === "intro" && (
             <motion.section key="intro" {...motionProps} className="flex flex-col gap-4 rounded-md border border-ink bg-white p-5 shadow-[4px_4px_0_var(--ink)]">
               <h3 ref={heading} tabIndex={-1} className="text-xl font-bold tracking-normal outline-none">How should I talk to you?</h3>
-              <p className="text-sm text-muted">Only changes how I sound. It never changes how anyone reads your answers.</p>
+              <p className="text-sm text-muted">Choose the conversation that feels right. This changes my tone, never how your answers are reviewed. There are no trick questions.</p>
               <div role="radiogroup" aria-label="How Alfred talks" className="grid gap-2 sm:grid-cols-3">
                 {TONES.map((t) => (
                   <label key={t.id} className="relative">

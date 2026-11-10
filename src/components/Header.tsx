@@ -108,14 +108,14 @@ export default function Header() {
                 Log in
               </Link>
               <Link
-                href={appUrl("/auth?mode=signup")}
+                href="/apply"
                 onClick={close}
                 style={{ transitionDelay: open ? `${(NAV_LINKS.length + 1) * 60 + 80}ms` : "0ms" }}
                 className={`btn btn-sm mt-1 transition-all duration-300 ease-out lg:mt-0 ${
                   open ? "translate-y-0 scale-100 opacity-100" : "translate-y-1 scale-95 opacity-0 lg:translate-y-0 lg:scale-100 lg:opacity-100"
                 }`}
               >
-                Sign up <span>↗︎</span>
+                Apply to join <span>↗︎</span>
               </Link>
             </div>
           </div>

@@ -47,8 +47,9 @@ function ApplyContent() {
           Apply to <span className="font-serif italic font-medium text-rose">TeenovateX.</span>
         </h1>
         <p className="mt-3 text-muted">
-          A short form, a chat with Alfred, and anything you want to show us. Takes about 15 minutes.
+          Tell us a little about yourself, then meet Alfred. He follows your answers and asks questions that fit you. No portfolio or previous project is required; most people finish in about 15 minutes.
         </p>
+        <p className="mt-2 text-sm text-muted">Alfred helps us understand your curiosity. People review every application and make the final decision.</p>
 
         <div className="mt-8">
           {(testKey || windowStatus?.window?.is_test) && !token && <TestBanner />}

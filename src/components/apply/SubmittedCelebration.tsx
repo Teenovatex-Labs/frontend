@@ -32,7 +32,7 @@ export default function SubmittedCelebration({ name, reference, decisionDate }: 
       <div className="relative">
         <LottieSlot src="/lottie/success.json" label="" loop={false} className="mx-auto h-28 w-28" />
         <h2 className="mt-1 text-2xl font-bold">You did it, {first}!</h2>
-        <p className="mt-2 text-[15px]">Your application is in. Alfred is very proud of you.</p>
+        <p className="mt-2 text-[15px]">Your application is in. Alfred is already arranging a tiny parade; we told him the team still needs to read it.</p>
         <p className="mt-3 inline-block rounded-md border border-ink bg-cream px-3 py-1.5 text-sm font-semibold">Reference {reference}</p>
         <p className="mx-auto mt-4 max-w-[440px] rounded-md border border-ink bg-white p-3 text-sm">
           <strong>Submitting is not an acceptance.</strong> Reviewers will read your application, and results are released together on <strong>{date}</strong>. We&apos;ll email you.

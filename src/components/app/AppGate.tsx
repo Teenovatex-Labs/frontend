@@ -2,6 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import AddPasswordPrompt from "./AddPasswordPrompt";
 import SigningIn from "@/components/auth/SigningIn";
@@ -17,10 +18,15 @@ import { captureInstallEvent } from "@/lib/installPrompt";
 export default function AppGate({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading && !user) router.replace("/auth?mode=login");
   }, [loading, user, router]);
+
+  useEffect(() => {
+    if (!loading && user?.membership_status === "onboarding" && pathname !== "/welcome") router.replace("/welcome");
+  }, [loading, user, pathname, router]);
 
   // The service worker makes the installed app open offline and lets notifications show up.
   useEffect(() => {
@@ -40,6 +46,7 @@ export default function AppGate({ children }: { children: ReactNode }) {
   }
 
   if (!user.age_confirmed || !user.username_set) return <SetupGate />;
+  if (user.membership_status === "onboarding" && pathname !== "/welcome") return <SigningIn label="Taking you to your first week" />;
 
   return (
     <AppShell>
