@@ -36,10 +36,9 @@ const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "Join in",
     links: [
-      { label: "Become a Teenovator", href: appUrl("/auth?mode=signup") },
-      { label: "Log in", href: appUrl("/auth?mode=login") },
       { label: "Apply to join", href: "/apply" },
       { label: "Check my application", href: "/apply/status" },
+      { label: "Log in", href: appUrl("/auth?mode=login") },
     ],
   },
   {

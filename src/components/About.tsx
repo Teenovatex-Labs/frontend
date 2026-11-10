@@ -111,8 +111,8 @@ export default function About() {
               by doing, and build work they can proudly point to.
             </p>
             <p className="mt-4">
-              That means hands-on Labs, meaningful projects, mentorship,
-              research, opportunities, TeenCoffee, community conversations,
+              That means hands-on Labs, meaningful projects, research,
+              opportunities, TeenCoffee, community conversations,
               and a digital home that keeps everything within reach.
             </p>
             <p className="mt-4">
@@ -151,6 +151,7 @@ export default function About() {
               wait until they are older, wait until they know enough, wait
               until somebody finally chooses them.
             </p>
+            <p className="mt-4 font-medium text-ink">You do not need a portfolio, expensive equipment, or a head start to belong here.</p>
             <p className="mt-4">
               TeenovateX exists to shorten that distance&mdash;from:
             </p>

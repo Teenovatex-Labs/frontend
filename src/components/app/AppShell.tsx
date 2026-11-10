@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BellIcon } from "@animateicons/react/lucide/bell-icon";
 import { SearchIcon } from "@animateicons/react/lucide/search-icon";
 import { AlfredProvider } from "@/context/AlfredContext";
+import { useAuth } from "@/context/AuthContext";
 import Sidebar from "./Sidebar";
 import MobileDock from "./MobileDock";
 import AlfredCompanion from "@/components/alfred/AlfredCompanion";
@@ -14,6 +15,7 @@ import PromptHost from "./PromptHost";
 const STORAGE_KEY = "tx_sidebar_collapsed";
 
 export default function AppShell({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -34,6 +36,21 @@ export default function AppShell({ children }: { children: ReactNode }) {
       return !c;
     });
   }, []);
+
+  // Accepted applicants finish their first week before entering the member navigation.
+  if (user?.membership_status === "onboarding") {
+    return (
+      <div className="min-h-screen bg-cream">
+        <header className="border-b border-ink bg-white px-5 py-3">
+          <Link href="/welcome" aria-label="TeenovateX welcome" className="inline-flex min-h-11 items-center gap-2 font-semibold">
+            <img src="/assets/logo-pink-nobg.svg" alt="" className="h-9 w-9 rounded-full bg-ink p-1" />
+            <span>Teenovate<span className="text-rose">X</span> <span className="font-serif font-normal italic">first week</span></span>
+          </Link>
+        </header>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <AlfredProvider>

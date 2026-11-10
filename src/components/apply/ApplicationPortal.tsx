@@ -39,6 +39,19 @@ const STATUS_LABEL: Record<ApplicationView["status"], string> = {
   withdrawn: "Withdrawn",
 };
 
+function nextStep(app: ApplicationView): string {
+  const decisionDate = new Date(app.window.decisions_publish_at).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
+  switch (app.status) {
+    case "draft": return app.window.state === "closed" ? "Your draft is saved for the next application window. You can pick up where you left off when it opens." : "Keep going at your own pace. Your saved answers will be here when you return.";
+    case "submitted": return `Your application is with the team. Results for this window are planned for ${decisionDate}; we'll email you when they are released.`;
+    case "shortlisted": return `Your application is still being considered. Results are planned for ${decisionDate}; we'll email you when they are released.`;
+    case "waitlisted": return "You're on the waitlist. If a place opens, we'll email you an offer and its response deadline.";
+    case "accepted": return app.guardian?.required && app.guardian.status !== "confirmed" ? "You're accepted. A parent or guardian needs to confirm before you can register; use the form below to send their link." : "You're accepted. Check your email for your private invitation to create an account, then complete your first week setup.";
+    case "declined": return "Thank you for sharing your ideas with us. You can apply again in the next application window.";
+    case "withdrawn": return "This application has been withdrawn. You can apply again in a future window.";
+  }
+}
+
 const STEPS: Step[] = [
   { id: "about", label: "About you", icon: UserIcon },
   { id: "alfred", label: "Alfred", icon: MessageCircleIcon },
@@ -114,6 +127,7 @@ export default function ApplicationPortal({ token }: { token: string }) {
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-muted">Reference {app.reference}</p>
           <p className="text-lg font-bold">{STATUS_LABEL[app.status]}</p>
+          <p className="mt-1 max-w-[650px] text-sm text-muted">{nextStep(app)}</p>
         </div>
         {app.status === "draft" && app.window.state === "closed" && (
           <p className="text-sm text-muted">Applications are closed right now. Your draft is saved for the next window.</p>

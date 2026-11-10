@@ -14,13 +14,14 @@ export default function Join() {
               on the inside.
             </span>
           </h2></Reveal><Reveal from="right" delay={0.12}><p className="max-w-[380px] text-lg">
-            Your first step is simple: create your free account. It only
-            takes a minute.
+            Your curiosity has somewhere to go. Start an application when
+            the window is open. We&rsquo;d like to meet the person behind the idea.
           </p>
+          <p className="mt-3 max-w-[380px] text-sm text-ink/70">Alfred helps us get to know you. People make every admissions decision.</p>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Link href={appUrl("/auth?mode=signup")} className="btn">
-              Become a Teenovator <span>↗︎</span>
+            <Link href="/apply" className="btn">
+              Apply to join <span>↗︎</span>
             </Link>
             <Link href={appUrl("/auth?mode=login")} className="btn-secondary on-yellow">
               Log in

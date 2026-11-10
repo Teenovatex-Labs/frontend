@@ -1,7 +1,7 @@
-import { appUrl } from "@/lib/hosts";
 import Link from "next/link";
 import TrueFocus from "./TrueFocus";
 import Reveal from "./Reveal";
+import ApplicationWindowCue from "./ApplicationWindowCue";
 
 export default function Hero() {
   return (
@@ -39,24 +39,25 @@ export default function Hero() {
             </h1>
 
             <p className="mt-7 max-w-[485px] text-left text-[15px] leading-[1.85] text-muted md:text-[17px]">
-              A youth-led home for teenagers turning curiosity into code,
-              research, technology, stories, and things the world hasn&rsquo;t
-              seen yet.
+              A youth-led home for teenagers curious enough to try. You
+              don&rsquo;t need a portfolio, expensive equipment, or everything
+              figured out. Tell us what interests you and show us how you think.
             </p>
           </Reveal>
 
           <Reveal from="up" delay={0.25} className="mx-auto mt-8 flex max-w-[820px] flex-col items-center justify-center gap-2.5 text-center md:flex-row md:gap-7">
-            <Link href={appUrl("/auth?mode=signup")} className="btn">
-              Become a Teenovator <span>↗︎</span>
+            <Link href="/apply" className="btn">
+              Apply to join <span>↗︎</span>
             </Link>
             <a href="#explore" className="btn-secondary">
               See what happens here <span>↓</span>
             </a>
           </Reveal>
 
-          <p className="mx-auto mt-5 max-w-[270px] text-center text-[10px] text-muted md:max-w-none">
-            Your questions. Your experiments. Your next step.
-          </p>
+          <div className="mx-auto mt-5 flex flex-col items-center gap-2 text-center text-xs text-muted">
+            <ApplicationWindowCue />
+            <Link href="/apply/status" className="font-semibold text-rose underline underline-offset-4 hover:text-ink">Already applied? Check your application</Link>
+          </div>
         </div>
       </div>
     </section>
