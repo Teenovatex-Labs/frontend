@@ -15,11 +15,11 @@ export const duration = {
 export const LOTTIE_MAX_BYTES = 30 * 1024;
 
 /** True when the visitor asked for less motion or is saving data. */
-export function prefersLowMotion(): boolean {
+export function prefersLowMotion({ allowSlowConnection = false }: { allowSlowConnection?: boolean } = {}): boolean {
   if (typeof window === "undefined") return true;
   const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   const nav = navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } };
   const saveData = nav.connection?.saveData === true;
   const slow = nav.connection?.effectiveType === "2g" || nav.connection?.effectiveType === "slow-2g";
-  return reduced || saveData || slow;
+  return reduced || saveData || (!allowSlowConnection && slow);
 }
