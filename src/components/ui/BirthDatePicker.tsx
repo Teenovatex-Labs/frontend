@@ -22,6 +22,7 @@ export default function BirthDatePicker({ value, onChange, error }: Props) {
     return m ? { y: Number(m[1]), mo: Number(m[2]), d: Number(m[3]) } : null;
   }, [value]);
   const [draft, setDraft] = useState({ y: thisYear - 16, mo: 6, d: 15 });
+  const [active, setActive] = useState<0 | 1 | 2>(0);
   const cur = parsed ?? draft;
 
   const update = (next: { y: number; mo: number; d: number }) => {
@@ -32,10 +33,27 @@ export default function BirthDatePicker({ value, onChange, error }: Props) {
   };
 
   return (
-    <div className="space-y-3">
-      <WheelPicker label="Year you were born" unit="year" min={thisYear - 70} max={thisYear - 10} majorEvery={5} value={cur.y} onChange={(y) => update({ ...cur, y })} />
-      <WheelPicker label="Month" unit={MONTHS[cur.mo - 1]} min={1} max={12} majorEvery={3} value={cur.mo} onChange={(mo) => update({ ...cur, mo })} />
-      <WheelPicker label="Day" unit="day of the month" min={1} max={daysIn(cur.y, cur.mo)} majorEvery={5} value={Math.min(cur.d, daysIn(cur.y, cur.mo))} onChange={(d) => update({ ...cur, d })} />
+    <div>
+      <div className="mb-2 grid grid-cols-3 gap-2" role="tablist" aria-label="Date of birth wheels">
+        {(["Year", "Month", "Day"] as const).map((label, index) => (
+          <button
+            key={label}
+            type="button"
+            role="tab"
+            aria-selected={active === index}
+            onClick={() => setActive(index as 0 | 1 | 2)}
+            className={`rounded-t-xl border border-ink px-2 py-2 text-center text-xs font-bold transition-colors ${active === index ? "bg-ink text-cream" : "bg-cream text-ink hover:bg-pink/30"}`}
+          >
+            <span className="block text-[10px] uppercase tracking-wide opacity-70">{label}</span>
+            <span className="block truncate text-base">{index === 0 ? cur.y : index === 1 ? MONTHS[cur.mo - 1] : cur.d}</span>
+          </button>
+        ))}
+      </div>
+      <div role="tabpanel" aria-label={`${["Year", "Month", "Day"][active]} wheel`}>
+        {active === 0 && <WheelPicker compact label="Year you were born" unit="year" min={thisYear - 70} max={thisYear - 10} majorEvery={5} value={cur.y} onChange={(y) => update({ ...cur, y })} />}
+        {active === 1 && <WheelPicker compact label="Month" unit={MONTHS[cur.mo - 1]} min={1} max={12} majorEvery={3} value={cur.mo} onChange={(mo) => update({ ...cur, mo })} />}
+        {active === 2 && <WheelPicker compact label="Day" unit="day of the month" min={1} max={daysIn(cur.y, cur.mo)} majorEvery={5} value={Math.min(cur.d, daysIn(cur.y, cur.mo))} onChange={(d) => update({ ...cur, d })} />}
+      </div>
       {error && <p role="alert" className="text-sm font-bold text-rose">{error}</p>}
     </div>
   );

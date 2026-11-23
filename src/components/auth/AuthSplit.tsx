@@ -62,7 +62,7 @@ export default function AuthSplit({
     <div
       key="form"
       ref={formRef}
-      className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#392a36] px-4 py-8 lg:h-screen lg:overflow-y-auto lg:px-8"
+      className="relative flex h-[100dvh] min-h-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-[#392a36] px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:h-screen lg:px-8"
     >
       <PlayfulBackdrop />
       {/* Mobile/tablet only — there's no room for the side panel, so the
@@ -72,7 +72,7 @@ export default function AuthSplit({
   );
 
   return (
-    <main className="min-h-screen lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
+    <main className="h-[100dvh] overflow-hidden lg:grid lg:h-screen lg:grid-cols-2">
       {imageSide === "left" ? [panel, form] : [form, panel]}
     </main>
   );

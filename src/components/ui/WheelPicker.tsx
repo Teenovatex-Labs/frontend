@@ -18,6 +18,7 @@ type Props = {
   /** Click on every value (vibration where supported, plus a soft tick sound). */
   haptics?: boolean;
   className?: string;
+  compact?: boolean;
 };
 
 const TICK_GAP = 14; // px between values
@@ -59,7 +60,7 @@ const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n
  * real wheel (ticks shrink, fade and bunch up toward both edges), the big number rolls like a drum as it changes, and
  * every value passed gives a small click. Arrow keys, Home/End and PageUp/PageDown work too.
  */
-export default function WheelPicker({ value, onChange, min, max, step = 1, label, unit, majorEvery = 5, haptics = true, className = "" }: Props) {
+export default function WheelPicker({ value, onChange, min, max, step = 1, label, unit, majorEvery = 5, haptics = true, className = "", compact = false }: Props) {
   const reduced = useReducedMotion();
   const id = useId();
   const count = Math.floor((max - min) / step) + 1;
@@ -250,20 +251,20 @@ export default function WheelPicker({ value, onChange, min, max, step = 1, label
   };
 
   return (
-    <div className={`select-none rounded-3xl border-2 border-ink bg-ink px-5 pb-6 pt-6 text-cream ${className}`}>
+    <div className={`select-none rounded-3xl border-2 border-ink bg-ink text-cream ${compact ? "px-4 pb-3 pt-4" : "px-5 pb-6 pt-6"} ${className}`}>
       {label && (
-        <p id={`${id}-label`} className="mb-4 text-center text-sm font-bold uppercase tracking-wide text-cream/70">
+        <p id={`${id}-label`} className={`${compact ? "mb-2 text-xs" : "mb-4 text-sm"} text-center font-bold uppercase tracking-wide text-cream/70`}>
           {label}
         </p>
       )}
       <div className="text-center">
         {/* An odometer: each digit sits in its own column and only the digits that change roll. 2006 to 2007 turns the 6 into a 7 and leaves 2, 0 and 0 where they are. Columns are counted from the right, so 9 to 10 keeps the units column in place. */}
-        <div aria-hidden className="mx-auto flex h-[4.5rem] items-center justify-center font-display text-7xl leading-none tabular-nums">
+        <div aria-hidden className={`mx-auto flex items-center justify-center font-display leading-none tabular-nums ${compact ? "h-14 text-5xl" : "h-[4.5rem] text-7xl"}`}>
           {String(shown).split("").map((ch, i, all) => (
             <Digit key={all.length - i} ch={ch} dir={dir} reduced={!!reduced} />
           ))}
         </div>
-        {unit && <p className="mt-2 text-sm text-cream/60">{unit}</p>}
+        {unit && <p className={`${compact ? "mt-1 text-xs" : "mt-2 text-sm"} text-cream/60`}>{unit}</p>}
       </div>
 
       <div
@@ -281,7 +282,7 @@ export default function WheelPicker({ value, onChange, min, max, step = 1, label
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        className="relative mt-6 h-20 cursor-grab touch-pan-y overflow-hidden rounded-xl outline-none active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-yellow"
+        className={`relative cursor-grab touch-pan-y overflow-hidden rounded-xl outline-none active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-yellow ${compact ? "mt-3 h-14" : "mt-6 h-20"}`}
       >
         {/* The marker stays put; the ruler moves under it. */}
         <span aria-hidden className="absolute left-1/2 top-0 z-10 h-3 w-1 -translate-x-1/2 rounded-full bg-[#ff7a1a]" />
