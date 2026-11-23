@@ -57,22 +57,17 @@ export default function AuthSplit({
     });
   }, [imageSide]);
 
-  const panel = <ImagePanel key="panel" ref={panelRef} {...image} adjacentEdge={imageSide === "left" ? "right" : "left"} />;
+  const panel = <ImagePanel key="panel" ref={panelRef} {...image} />;
   const form = (
     <div
       key="form"
       ref={formRef}
-      className="relative flex min-h-screen flex-col overflow-x-hidden px-5 py-6 lg:h-screen lg:overflow-y-auto"
+      className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#392a36] px-4 py-8 lg:h-screen lg:overflow-y-auto lg:px-8"
     >
+      <PlayfulBackdrop />
       {/* Mobile/tablet only — there's no room for the side panel, so the
           brand shows up as a big, unmissable watermark behind the form. */}
-      <img
-        src="/assets/illustration2-nobg.svg"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/2 w-[240%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-[0.16] lg:hidden"
-      />
-      <div className="relative m-auto w-full max-w-[440px]">{children}</div>
+      <div className="relative m-auto w-full max-w-[480px] rounded-[28px] border border-white/20 bg-cream px-5 py-8 shadow-[12px_12px_0_rgba(15,14,17,.28)] sm:px-9 sm:py-10">{children}</div>
     </div>
   );
 
@@ -83,15 +78,34 @@ export default function AuthSplit({
   );
 }
 
+function PlayfulBackdrop() {
+  const marks = ["✳", "↗", "◇", "✦", "⌁", "○", "✎", "+", "✳", "↝", "□", "✦", "⌘", "◇", "↗", "○"];
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_1px_1px,rgba(255,249,235,.18)_1px,transparent_0)] bg-[size:23px_23px]">
+      {marks.map((mark, index) => (
+        <span
+          key={index}
+          className="absolute select-none font-serif text-3xl opacity-80 motion-safe:animate-[auth-drift_8s_ease-in-out_infinite_alternate]"
+          style={{
+            left: `${5 + (index * 37) % 88}%`,
+            top: `${4 + (index * 29) % 89}%`,
+            color: ["#f3aac7", "#f5e794", "#fff9eb", "#bd91bb"][index % 4],
+            animationDelay: `${-index * 0.65}s`,
+          }}
+        >{mark}</span>
+      ))}
+      <style>{`@keyframes auth-drift { from { transform: translate3d(0,0,0) rotate(-8deg); } to { transform: translate3d(8px,-12px,0) rotate(8deg); } }`}</style>
+    </div>
+  );
+}
+
 function ImagePanel({
   src,
   flip,
-  adjacentEdge,
   ref,
 }: {
   src: string;
   flip?: boolean;
-  adjacentEdge: "left" | "right";
   ref: React.Ref<HTMLDivElement>;
 }) {
   return (
@@ -101,15 +115,6 @@ function ImagePanel({
         alt=""
         aria-hidden="true"
         className={`h-full w-full object-cover ${flip ? "-scale-x-100" : ""}`}
-      />
-      {/* Blends the panel's inner edge — whichever side touches the form —
-          into the form side's cream background instead of a sharp cut. */}
-      <div
-        className={`pointer-events-none absolute inset-y-0 w-28 ${
-          adjacentEdge === "left"
-            ? "left-0 bg-gradient-to-r from-cream to-transparent"
-            : "right-0 bg-gradient-to-l from-cream to-transparent"
-        }`}
       />
     </div>
   );
