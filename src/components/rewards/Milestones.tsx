@@ -39,6 +39,12 @@ export default function Milestones({ userId, points, level, levelTitle, rank }: 
     else if (points > before.points) setMoment({ lottie: "/lottie/points-earned.json", title: `+${(points - before.points).toLocaleString()} points`, detail: "Since you were last here." });
   }, [userId, points, level, levelTitle, rank]);
 
+  useEffect(() => {
+    if (!moment) return;
+    const timeout = window.setTimeout(() => setMoment(null), 8000);
+    return () => window.clearTimeout(timeout);
+  }, [moment]);
+
   if (!moment) return null;
   return (
     <CelebrationCard className="mt-6" lottie={moment.lottie} title={moment.title} onClose={() => setMoment(null)}>
