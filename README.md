@@ -1,19 +1,14 @@
-# React + Vite
+# TeenovateX frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Next.js and React application for the TeenovateX website, member app, and staff and partner surfaces. Production deploys from `main` to the Vercel project `teenovatex`.
 
-Currently, two official plugins are available:
+## Live infrastructure
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The frontend's production API base URL is `https://api.teenovatex.org/api/v1`. The API and PostgreSQL 18 run on the Oracle A1 VPS; Neon Storage holds offsite database dumps. See [infrastructure and recovery](docs/INFRASTRUCTURE.md) for DNS, server, backups, restore, and ownership. Keep secrets and SSH keys outside Git.
 
-## React Compiler
+## Development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Copy `.env.example` to a local environment file and set `NEXT_PUBLIC_API_URL` for the desired backend. Run `npm ci` and `npm run dev`. Before shipping, use `npm test`, `npm run typecheck`, and `npm run build`.
 
 ## Design system: buttons
 
