@@ -1,4 +1,5 @@
 import { alfredController } from "@/lib/alfred";
+import type { Role } from "@/lib/roles";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 const REFRESH_TOKEN_KEY = "tx_refresh_token";
@@ -41,7 +42,9 @@ export type UserProfile = {
   // False for a Google sign-up that hasn't picked a username yet (it has a placeholder).
   username_set: boolean;
   timezone: string | null;
-  role: "member" | "mentor" | "moderator" | "admin";
+  role: Role;
+  // Sent by login, refresh and /users/me; optional until every response includes it (roles.ts falls back).
+  permissions?: string[];
   membership_status?: "onboarding" | "active" | "on_leave" | "inactive" | "alumni" | "removed";
   onboarding_due_at?: string | null;
   suspended_until: string | null;

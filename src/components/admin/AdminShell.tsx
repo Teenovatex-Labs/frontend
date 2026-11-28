@@ -9,6 +9,7 @@ import { adminApi, admissionsAdminApi } from "@/lib/services";
 import { keys } from "@/lib/labs";
 import SigningIn from "@/components/auth/SigningIn";
 import AdminSignIn from "./AdminSignIn";
+import { isStaff as isStaffRole } from "@/lib/roles";
 
 const NAV = [
   { href: "/admin", label: "Overview" },
@@ -33,7 +34,7 @@ const NAV = [
 export default function AdminShell({ children }: { children: ReactNode }) {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
-  const isStaff = user?.role === "moderator" || user?.role === "admin";
+  const isStaff = isStaffRole(user?.role);
 
   const isAdmin = user?.role === "admin";
   const stats = useQuery({ queryKey: keys.admin("stats"), queryFn: adminApi.stats, enabled: isStaff, refetchInterval: 60_000 });
