@@ -3,6 +3,8 @@
 import { useMemo, useState, type ReactNode } from "react";
 import EmptyState from "./EmptyState";
 import Skeleton from "./Skeleton";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon, ArrowUp01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 
 // A dense data table in the flat brand style: 1px ink border, yellow header, line dividers.
 // Handles its own loading, error and empty states so screens don't repeat them.
@@ -23,7 +25,8 @@ import Skeleton from "./Skeleton";
 //   />
 //
 // Sorting is optional and client-side: give a column `sortValue` and its header becomes a
-// button cycling ascending, descending, then back to the order the rows came in.
+// button cycling ascending, descending, then back to the order the rows came in. An up-down
+// chevron marks a sortable column; a single chevron shows the active direction.
 
 export type Column<T> = {
   key: string;
@@ -93,9 +96,13 @@ export default function Table<T>({ columns, rows, rowKey, label, loading, error,
                   {c.sortValue ? (
                     <button type="button" onClick={() => cycle(c.key)} className="inline-flex items-center gap-1 uppercase tracking-wide hover:underline">
                       {c.header}
-                      <span aria-hidden="true" className={active ? "" : "opacity-30"}>
-                        {active === "desc" ? "↓" : "↑"}
-                      </span>
+                      <HugeiconsIcon
+                        aria-hidden="true"
+                        icon={active === "asc" ? ArrowUp01Icon : active === "desc" ? ArrowDown01Icon : UnfoldMoreIcon}
+                        size={14}
+                        strokeWidth={2.2}
+                        className={active ? "text-ink" : "text-ink/60"}
+                      />
                     </button>
                   ) : (
                     c.header
