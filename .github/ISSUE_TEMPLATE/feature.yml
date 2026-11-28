@@ -1,0 +1,100 @@
+name: Feature / task
+description: One unit of work that fits in one PR (size S or M).
+title: "[W?-FE-??] "
+labels: ["area:frontend"]
+body:
+  - type: dropdown
+    id: host
+    attributes:
+      label: Host (which subdomain this lives on)
+      description: Each audience has its own subdomain and sign-in. Do not add routes on another host.
+      options:
+        - all hosts (shared foundation)
+        - teenovatex.org (landing)
+        - app.teenovatex.org (members)
+        - admin.teenovatex.org (moderators and admins)
+        - tutors.teenovatex.org (tutors)
+        - partners.teenovatex.org (partners)
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this is needed. What exists today.
+    validations:
+      required: true
+  - type: textarea
+    id: scope-in
+    attributes:
+      label: Scope (in)
+      description: Exactly what to build.
+    validations:
+      required: true
+  - type: textarea
+    id: scope-out
+    attributes:
+      label: Out of scope
+  - type: textarea
+    id: files
+    attributes:
+      label: Files you may touch
+      placeholder: "- src/components/ui/Example.tsx (new file only)"
+    validations:
+      required: true
+  - type: textarea
+    id: shared-files
+    attributes:
+      label: Shared-file edits allowed (registry additions only)
+      value: None.
+  - type: textarea
+    id: depends
+    attributes:
+      label: Depends on
+      description: Issues (frontend or backend) that must be merged first.
+      value: None - can start immediately
+  - type: textarea
+    id: api
+    attributes:
+      label: API contract
+      description: Link the backend `docs/api/<domain>.md`. If the endpoint is not merged yet, mock it behind the same shape.
+  - type: input
+    id: design
+    attributes:
+      label: Design
+      description: Figma frame link. Follow docs/design-system.md and reuse src/components/ui/*.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: test-plan
+    attributes:
+      label: Test plan
+    validations:
+      required: true
+  - type: checkboxes
+    id: budget
+    attributes:
+      label: Budget check
+      options:
+        - label: Route first-load JS stays under its limit (`npm run build` + budget script); heavy libraries are dynamically imported.
+  - type: textarea
+    id: safeguarding
+    attributes:
+      label: Safeguarding check
+      description: Does this show or collect data about minors? If so, which rules in the safeguarding spec apply?
+      value: N/A for this issue.
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      options:
+        - S
+        - M
+    validations:
+      required: true
