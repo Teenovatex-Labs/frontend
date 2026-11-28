@@ -8,6 +8,7 @@ import { keys, timeAgo } from "@/lib/labs";
 import StatTile from "@/components/ui/StatTile";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
+import Pagination from "@/components/ui/Pagination";
 
 const STATUS_FILTERS: { value: ApplicationStatus | ""; label: string }[] = [
   { value: "", label: "All" },
@@ -110,13 +111,7 @@ export default function ApplicationsDashboard() {
                 ))}
               </tbody>
             </table>
-            {list.data.pages > 1 && (
-              <div className="flex items-center justify-between border-t border-ink px-4 py-3 text-sm">
-                <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="disabled:opacity-40">← Previous</button>
-                <span className="text-muted">Page {list.data.page} of {list.data.pages}</span>
-                <button disabled={page >= list.data.pages} onClick={() => setPage((p) => p + 1)} className="disabled:opacity-40">Next →</button>
-              </div>
-            )}
+            <Pagination page={list.data.page} pages={list.data.pages} onPageChange={setPage} className="border-t border-ink px-4 py-3" />
           </div>
         )}
       </div>
