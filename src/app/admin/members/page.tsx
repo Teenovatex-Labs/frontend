@@ -7,8 +7,7 @@ import { ApiError } from "@/lib/api";
 import { adminApi, type AdminUser } from "@/lib/services";
 import { keys, timeAgo } from "@/lib/labs";
 import Dialog from "@/components/ui/Dialog";
-import EmptyState from "@/components/ui/EmptyState";
-import Skeleton from "@/components/ui/Skeleton";
+import Table from "@/components/ui/Table";
 import { useToast } from "@/components/ui/Toast";
 
 const ROLES: AdminUser["role"][] = ["member", "mentor", "moderator", "admin"];
@@ -48,47 +47,56 @@ export default function MembersPage() {
       <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Search by username, name or email" aria-label="Search members" className="mt-5 w-full max-w-[420px] rounded-md border border-ink bg-white px-4 py-2.5 text-[15px] outline-none focus:ring-2 focus:ring-rose" />
 
       <div className="mt-6">
-        {users.isPending ? (
-          <Skeleton className="h-64 w-full" />
-        ) : users.isError ? (
-          <EmptyState title="That didn't load." />
-        ) : users.data.items.length === 0 ? (
-          <EmptyState title="No members match." />
-        ) : (
-          <div className="overflow-x-auto border border-ink bg-white">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="border-b border-ink bg-yellow text-xs uppercase tracking-wide">
-                <tr><th className="px-4 py-3">Member</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Reports</th><th className="px-4 py-3">Joined</th><th className="px-4 py-3" /></tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {users.data.items.map((u) => (
-                  <tr key={u.id}>
-                    <td className="px-4 py-3">
-                      <p className="font-medium">@{u.username} {paused(u) && <span className="ml-1 rounded-full bg-pink px-2 py-0.5 text-[11px]">paused</span>}</p>
-                      <p className="text-xs text-muted">{u.full_name} · {u.email}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      {me?.role === "admin" && u.id !== me.id ? (
-                        <select value={u.role} onChange={(e) => setRole.mutate({ id: u.id, role: e.target.value as AdminUser["role"] })} aria-label={`Role for @${u.username}`} className="rounded-md border border-ink bg-cream px-2 py-1">
-                          {ROLES.map((r) => <option key={r}>{r}</option>)}
-                        </select>
-                      ) : u.role}
-                    </td>
-                    <td className={`px-4 py-3 tabular-nums ${u.reports_against > 1 ? "font-semibold text-rose" : ""}`}>{u.reports_against}</td>
-                    <td className="px-4 py-3 text-muted">{timeAgo(u.created_at)}</td>
-                    <td className="px-4 py-3 text-right">
-                      {u.id === me?.id ? null : paused(u) ? (
-                        <button className="text-rose underline underline-offset-4" onClick={() => unsuspend.mutate(u.id)}>Unsuspend</button>
-                      ) : (
-                        <button className="text-rose underline underline-offset-4" onClick={() => setSuspending(u)}>Suspend</button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <Table
+          label="Members"
+          rows={users.data?.items}
+          rowKey={(u) => u.id}
+          loading={users.isPending}
+          error={users.isError}
+          empty="No members match."
+          minWidth={720}
+          columns={[
+            {
+              key: "member",
+              header: "Member",
+              cell: (u) => (
+                <>
+                  <p className="font-medium">@{u.username} {paused(u) && <span className="ml-1 rounded-full bg-pink px-2 py-0.5 text-[11px]">paused</span>}</p>
+                  <p className="text-xs text-muted">{u.full_name} · {u.email}</p>
+                </>
+              ),
+            },
+            {
+              key: "role",
+              header: "Role",
+              cell: (u) =>
+                me?.role === "admin" && u.id !== me.id ? (
+                  <select value={u.role} onChange={(e) => setRole.mutate({ id: u.id, role: e.target.value as AdminUser["role"] })} aria-label={`Role for @${u.username}`} className="rounded-md border border-ink bg-cream px-2 py-1">
+                    {ROLES.map((r) => <option key={r}>{r}</option>)}
+                  </select>
+                ) : u.role,
+            },
+            {
+              key: "reports",
+              header: "Reports",
+              cell: (u) => u.reports_against,
+              className: (u) => `tabular-nums ${u.reports_against > 1 ? "font-semibold text-rose" : ""}`,
+              sortValue: (u) => u.reports_against,
+            },
+            { key: "joined", header: "Joined", cell: (u) => timeAgo(u.created_at), className: "text-muted", sortValue: (u) => u.created_at },
+            {
+              key: "actions",
+              header: <span className="sr-only">Actions</span>,
+              align: "right",
+              cell: (u) =>
+                u.id === me?.id ? null : paused(u) ? (
+                  <button className="text-rose underline underline-offset-4" onClick={() => unsuspend.mutate(u.id)}>Unsuspend</button>
+                ) : (
+                  <button className="text-rose underline underline-offset-4" onClick={() => setSuspending(u)}>Suspend</button>
+                ),
+            },
+          ]}
+        />
       </div>
 
       <Dialog open={!!suspending} onClose={() => setSuspending(null)} title={`Suspend @${suspending?.username ?? ""}`}>
