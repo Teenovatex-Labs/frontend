@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/Toast";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
 import Dialog from "@/components/ui/Dialog";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 export default function JudgePage() {
   const { id } = useParams<{ id: string }>();
@@ -142,13 +143,17 @@ export default function JudgePage() {
         </div>
       </Dialog>
 
-      <Dialog open={publishing} onClose={() => setPublishing(false)} title="Publish results?">
-        <p className="text-sm text-muted">This closes the challenge, awards prize points to the top three and the badge to first place, and tells everyone who entered. It cannot be undone.</p>
-        <div className="mt-4 flex gap-3">
-          <button className="btn-secondary" onClick={() => setPublishing(false)}>Cancel</button>
-          <button className="btn disabled:opacity-60" disabled={publish.isPending} onClick={() => publish.mutate()}>{publish.isPending ? "Publishing…" : "Publish"}</button>
-        </div>
-      </Dialog>
+      <ConfirmDialog
+        open={publishing}
+        onClose={() => setPublishing(false)}
+        title="Publish results?"
+        confirmLabel="Publish"
+        pendingLabel="Publishing…"
+        pending={publish.isPending}
+        onConfirm={() => publish.mutate()}
+      >
+        This closes the challenge, awards prize points to the top three and the badge to first place, and tells everyone who entered. It cannot be undone.
+      </ConfirmDialog>
     </>
   );
 }
