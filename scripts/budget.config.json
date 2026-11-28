@@ -1,0 +1,8 @@
+{
+  "default": { "kb": 215, "why": "member app and admin pages" },
+  "routes": {
+    "/": { "kb": 280, "why": "the landing page carries the 3D and animation" },
+    "/auth": { "kb": 240, "why": "sign-in flow" },
+    "/contact": { "kb": 240, "why": "public page with interactive form, animations, and shared header/footer" }
+  }
+}
