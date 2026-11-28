@@ -8,6 +8,7 @@ import { keys, timeAgo } from "@/lib/labs";
 import EmptyState from "@/components/ui/EmptyState";
 import Skeleton from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
+import Button from "@/components/ui/Button";
 
 export default function AnnouncementsAdmin() {
   const qc = useQueryClient();
@@ -56,7 +57,7 @@ export default function AnnouncementsAdmin() {
           </label>
         </div>
         {error && <p role="alert" className="text-sm text-rose">{error}</p>}
-        <button type="submit" className="btn self-start disabled:opacity-60" disabled={create.isPending || title.trim().length < 3 || body.trim().length < 3}>{create.isPending ? "Posting…" : "Post announcement"}</button>
+        <Button type="submit" className="self-start" loading={create.isPending} loadingLabel="Posting…" disabled={title.trim().length < 3 || body.trim().length < 3}>Post announcement</Button>
       </form>
 
       <div className="mt-8">
