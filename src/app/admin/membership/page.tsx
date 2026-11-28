@@ -9,10 +9,7 @@ import { useToast } from "@/components/ui/Toast";
 import Skeleton from "@/components/ui/Skeleton";
 import Dialog from "@/components/ui/Dialog";
 import Tabs from "@/components/ui/Tabs";
-
-const STATUS_TONE: Record<string, string> = {
-  onboarding: "bg-cream", active: "bg-yellow", on_leave: "bg-pink/40", inactive: "bg-pink/30", alumni: "bg-line", removed: "bg-line",
-};
+import StatusPill from "@/components/ui/StatusPill";
 
 export default function MembershipAdminPage() {
   const [tab, setTab] = useState<"members" | "inactivity" | "reviews">("members");
@@ -73,7 +70,7 @@ export default function MembershipAdminPage() {
                   {members.data?.items.map((m) => (
                     <tr key={m.id}>
                       <td className="px-4 py-3 font-medium">@{m.username}</td>
-                      <td className="px-4 py-3"><span className={`rounded-full px-2 py-0.5 text-[11px] ${STATUS_TONE[m.membership_status]}`}>{m.membership_status.replace("_", " ")}</span></td>
+                      <td className="px-4 py-3"><StatusPill status={m.membership_status} /></td>
                       <td className="px-4 py-3 text-muted">{m.last_login_at ? timeAgo(m.last_login_at) : "never"}</td>
                       <td className="px-4 py-3 text-right"><button onClick={() => { setChanging(m.id); setNewStatus(m.membership_status); }} className="font-semibold underline underline-offset-4">Change</button></td>
                     </tr>
