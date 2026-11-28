@@ -6,9 +6,53 @@ Next.js and React application for the TeenovateX website, member app, and staff 
 
 The frontend's production API base URL is `https://api.teenovatex.org/api/v1`. The API and PostgreSQL 18 run on the Oracle A1 VPS; Neon Storage holds offsite database dumps. See [infrastructure and recovery](docs/INFRASTRUCTURE.md) for DNS, server, backups, restore, and ownership. Keep secrets and SSH keys outside Git.
 
+## Stack
+
+Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 3 and TanStack Query. Motion uses framer-motion, GSAP and Lottie. Tests are plain `node --test` files in `tests/`.
+
+## Hosts
+
+One Next.js project serves every audience. Each audience gets its own subdomain and its own sign-in, because tokens are stored per origin. The table lives in `src/lib/hosts.ts`; adding a surface means adding one row there.
+
+| Host | Who | Route folder | Status |
+| --- | --- | --- | --- |
+| `teenovatex.org` | Public landing, apply, consent | `/` | live |
+| `app.teenovatex.org` | Members and mentors | `/` | live |
+| `admin.teenovatex.org` | Moderators and admins | `/admin` | live |
+| `tutors.teenovatex.org` | Tutors | `/tutor` | planned |
+| `partners.teenovatex.org` | Partners | `/partner` | planned |
+
+Localhost and Vercel previews do not match a host, so everything is served from one origin by path (open `/admin` directly).
+
 ## Development
 
-Copy `.env.example` to a local environment file and set `NEXT_PUBLIC_API_URL` for the desired backend. Run `npm ci` and `npm run dev`. Before shipping, use `npm test`, `npm run typecheck`, and `npm run build`.
+1. `cp .env.example .env.local` and fill in the values below.
+2. `npm ci`
+3. `npm run dev` and open http://localhost:3000
+
+| Variable | Required | What it is |
+| --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | yes | Backend base URL. Local backend: `http://localhost:4000/api/v1`. Production: `https://api.teenovatex.org/api/v1`. |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | for Google sign-in | Same value as the backend `GOOGLE_CLIENT_ID`. |
+| `NEXT_PUBLIC_SENTRY_DSN` | no | Browser error alerts. |
+| `NEXT_PUBLIC_APP_ORIGIN`, `NEXT_PUBLIC_SITE_ORIGIN` | production only | Absolute origins for cross-host links. Leave empty locally. |
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Local dev server |
+| `npm test` | Unit tests (`tests/*.test.mjs`) |
+| `npm run typecheck` | TypeScript check (run after a build so route types exist) |
+| `npm run build` | Production build |
+| `node scripts/check-budget.mjs build.log` | Bundle budget: fails if a route's first-load JS is over its limit |
+| `npm run check:lottie` | Lottie file size budget |
+
+CI runs tests, build, the bundle budget and typecheck on every PR, plus the `No AI attribution` check. See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR.
+
+## Design system
+
+Tokens, fonts and component rules live in `docs/design-system.md` (being written in issue #15). Reuse `src/components/ui/*` and do not hard-code hex colors.
 
 ## Design system: buttons
 

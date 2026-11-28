@@ -1,0 +1,17 @@
+# Hotspot files: everyone edits these, so the owner reviews every change.
+# See CONTRIBUTING.md ("Shared files take registry additions only").
+
+/src/components/admin/AdminShell.tsx  @Anasabubakar
+/src/components/app/nav.ts            @Anasabubakar
+/src/components/app/Sidebar.tsx       @Anasabubakar
+/src/middleware.ts                    @Anasabubakar
+/src/lib/hosts.ts                     @Anasabubakar
+/src/lib/services.ts                  @Anasabubakar
+/src/lib/labs.ts                      @Anasabubakar
+/src/app/globals.css                  @Anasabubakar
+/tailwind.config.ts                   @Anasabubakar
+/scripts/check-budget.mjs             @Anasabubakar
+/scripts/budget.config.json           @Anasabubakar
+/package.json                         @Anasabubakar
+/package-lock.json                    @Anasabubakar
+/.github/                             @Anasabubakar
